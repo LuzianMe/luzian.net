@@ -3,7 +3,7 @@ body {
   line-height: 1.6;
   margin: 0;
   padding: 0;
-  background: rgba(18, 18, 18, 0.1);
+  background: rgba(18, 18, 18, 1);
   color: #e0e0e0; /* Light gray text for readability */
 
   background-image: url('/contact/bg_ouro.svg'); /* Path to your logo */
@@ -15,7 +15,7 @@ body {
 header {
   text-align: center;
   width: 100%;
-  background: rgba(31, 31, 31, 0.1); /* Dark background with 80% opacity */
+  background: rgba(31, 31, 31, 0.60); /* Dark background with 80% opacity */
   color: #e0e0e0; /* Light text */
   padding: 2rem 0;
 }
@@ -79,7 +79,7 @@ button:hover {
 footer {
   text-align: center;
   padding: 1rem 0;
-  background: rgba(31, 31, 31, 0.1); /* Dark background with 80% opacity */
+  background: rgba(31, 31, 31, 0.3); /* Dark background with 80% opacity */
   color: #e0e0e0; /* Light text */
 }
 
