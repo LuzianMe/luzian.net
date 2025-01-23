@@ -79,15 +79,17 @@ footer {
 }
 
 .logo {
+  fill: #e0e0e0; /* Very light gray */
   display: block;
   margin: 0 auto;
   width: 30%; /* Adjust size */
   height: auto; /* Maintain aspect ratio */
-  transition: transform 0.3s ease;
+  transition: transform 0.3s ease, fill 0.3s ease;
 }
 
 .logo:hover {
   transform: scale(1.05); /* Increases size by 5% */
+  fill: #ffffff; /* Change to white on hover */
 }
 
 /* Additions for better focus in dark themes */
