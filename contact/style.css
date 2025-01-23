@@ -80,7 +80,9 @@ main {
   color: #76c7ff; /* Bright accent blue for links */
   text-decoration: none;
   font-size: 1rem;
-  word-break: break-word;
+  word-break: break-word; /* Allow long words to break properly */
+  white-space: normal; /* Prevent text from staying on a single line */
+  text-align: center; /* Center-align multi-line text */
 }
 
 .contact-item a:hover {
