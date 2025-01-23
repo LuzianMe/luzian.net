@@ -70,3 +70,11 @@ footer {
   background: #333;
   color: white;
 }
+
+.logo {
+  display: block;
+  margin: 0 auto;
+  width: 150px; /* Adjust size */
+  height: auto; /* Maintain aspect ratio */
+}
+
