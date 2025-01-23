@@ -33,11 +33,11 @@ main {
 }
 
 #contact {
-  background: rgba(31, 31, 31, 0.3); /* Dark background with 80% opacity */
   padding: 1.5rem;
   margin: 2rem auto;
   border-radius: 8px;
-  max-width: 600px;
+  max-width: 800px;
+  background: rgba(31, 31, 31, 0.3); /* Dark background with 80% opacity */
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.5); /* Softer shadow for dark theme */
 }
 
@@ -46,34 +46,45 @@ main {
   color: #e0e0e0; /* Light text */
 }
 
-#contact p {
-  margin: 0.5rem 0;
+.contact-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr); /* Three items per row */
+  gap: 1.5rem; /* Space between grid items */
+  padding: 1rem;
 }
 
-#contact a {
+.contact-item {
+  display: flex;
+  align-items: center;
+  justify-content: start;
+  gap: 0.5rem; /* Space between icon and text */
+  background: rgba(50, 50, 50, 0.6); /* Dark background for items */
+  padding: 1rem;
+  border-radius: 8px;
+  text-align: left;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.5); /* Subtle shadow for items */
+  transition: transform 0.2s ease, background 0.2s ease;
+}
+
+.contact-item:hover {
+  transform: scale(1.05); /* Slight zoom effect on hover */
+  background: rgba(70, 70, 70, 0.8); /* Slightly lighter background on hover */
+}
+
+.contact-icon {
+  width: 32px; /* Icon size */
+  height: 32px;
+}
+
+.contact-item a {
   color: #76c7ff; /* Bright accent blue for links */
   text-decoration: none;
+  font-size: 1rem;
+  word-break: break-word;
 }
 
-#contact a:hover {
+.contact-item a:hover {
   text-decoration: underline;
-}
-
-button {
-  display: block;
-  margin: 1rem auto;
-  padding: 0.5rem 1.5rem;
-  background: #0073e6; /* Bright blue for buttons */
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  text-align: center;
-  transition: background 0.3s ease;
-}
-
-button:hover {
-  background: #005bb5; /* Slightly darker blue on hover */
 }
 
 footer {
