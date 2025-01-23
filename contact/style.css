@@ -5,6 +5,11 @@ body {
   padding: 0;
   background: #121212; /* Dark background */
   color: #e0e0e0; /* Light gray text for readability */
+
+  background-image: url('/contact/bg_ouro.svg'); /* Path to your logo */
+  background-repeat: no-repeat; /* Prevent tiling */
+  background-position: center; /* Center the logo */
+  background-size: contain; /* Make it as large as possible while keeping the aspect ratio */
 }
 
 header {
