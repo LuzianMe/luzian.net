@@ -3,15 +3,15 @@ body {
   line-height: 1.6;
   margin: 0;
   padding: 0;
-  background: #f4f4f4;
-  color: #333;
+  background: #121212; /* Dark background */
+  color: #e0e0e0; /* Light gray text for readability */
 }
 
 header {
   text-align: center;
   width: 100%;
-  background: #0073e6;
-  color: white;
+  background: #1f1f1f; /* Darker header for contrast */
+  color: #e0e0e0; /* Light text */
   padding: 2rem 0;
 }
 
@@ -28,16 +28,17 @@ main {
 }
 
 #contact {
-  background: white;
+  background: #1f1f1f; /* Dark card background */
   padding: 1.5rem;
   margin: 2rem auto;
   border-radius: 8px;
   max-width: 600px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5); /* Softer shadow for dark theme */
 }
 
 #contact h2 {
   text-align: center;
+  color: #e0e0e0; /* Light text */
 }
 
 #contact p {
@@ -45,41 +46,60 @@ main {
 }
 
 #contact a {
-  color: #0073e6;
+  color: #76c7ff; /* Bright accent blue for links */
   text-decoration: none;
+}
+
+#contact a:hover {
+  text-decoration: underline;
 }
 
 button {
   display: block;
   margin: 1rem auto;
   padding: 0.5rem 1.5rem;
-  background: #0073e6;
+  background: #0073e6; /* Bright blue for buttons */
   color: white;
   border: none;
   border-radius: 5px;
   cursor: pointer;
   text-align: center;
+  transition: background 0.3s ease;
 }
 
 button:hover {
-  background: #005bb5;
+  background: #005bb5; /* Slightly darker blue on hover */
 }
 
 footer {
   text-align: center;
   padding: 1rem 0;
-  background: #333;
-  color: white;
+  background: #1f1f1f; /* Footer matches the header */
+  color: #e0e0e0; /* Light text */
 }
 
 .logo {
   display: block;
   margin: 0 auto;
-  width: 20%; /* Adjust size */
+  width: 30%; /* Adjust size */
   height: auto; /* Maintain aspect ratio */
   transition: transform 0.3s ease;
 }
 
 .logo:hover {
   transform: scale(1.05); /* Increases size by 5% */
+}
+
+/* Additions for better focus in dark themes */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #2e2e2e; /* Darker scrollbar thumb */
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #505050; /* Slightly lighter on hover */
 }
