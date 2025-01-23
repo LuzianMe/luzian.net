@@ -74,7 +74,11 @@ footer {
 .logo {
   display: block;
   margin: 0 auto;
-  width: 150px; /* Adjust size */
+  width: 20%; /* Adjust size */
   height: auto; /* Maintain aspect ratio */
+  transition: transform 0.3s ease;
 }
 
+.logo:hover {
+  transform: scale(1.05); /* Increases size by 5% */
+}
