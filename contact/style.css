@@ -122,9 +122,18 @@ footer {
   background: #505050; /* Slightly lighter on hover */
 }
 
-/* Portrait mode: Switch grid to 2 columns and 3 rows */
+/* Portrait mode: Switch grid to 2x3 and stack icons on top of text */
 @media screen and (max-width: 600px) {
   .contact-grid {
     grid-template-columns: repeat(2, 1fr); /* Two items per row */
+  }
+
+  .contact-item {
+    flex-direction: column; /* Stack icon and text vertically */
+    text-align: center; /* Center align text and icon */
+  }
+
+  .contact-icon {
+    margin-bottom: 0.5rem; /* Add spacing between icon and text */
   }
 }
