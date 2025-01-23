@@ -121,3 +121,10 @@ footer {
 ::-webkit-scrollbar-thumb:hover {
   background: #505050; /* Slightly lighter on hover */
 }
+
+/* Portrait mode: Switch grid to 2 columns and 3 rows */
+@media screen and (max-width: 600px) {
+  .contact-grid {
+    grid-template-columns: repeat(2, 1fr); /* Two items per row */
+  }
+}
