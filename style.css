@@ -1,0 +1,72 @@
+body {
+  font-family: Arial, sans-serif;
+  line-height: 1.6;
+  margin: 0;
+  padding: 0;
+  background: #f4f4f4;
+  color: #333;
+}
+
+header {
+  text-align: center;
+  background: #0073e6;
+  color: white;
+  padding: 2rem 0;
+}
+
+header h1 {
+  margin: 0;
+}
+
+header p {
+  margin: 0.5rem 0 0;
+}
+
+main {
+  padding: 2rem;
+}
+
+#contact {
+  background: white;
+  padding: 1.5rem;
+  margin: 2rem auto;
+  border-radius: 8px;
+  max-width: 600px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+#contact h2 {
+  text-align: center;
+}
+
+#contact p {
+  margin: 0.5rem 0;
+}
+
+#contact a {
+  color: #0073e6;
+  text-decoration: none;
+}
+
+button {
+  display: block;
+  margin: 1rem auto;
+  padding: 0.5rem 1.5rem;
+  background: #0073e6;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  text-align: center;
+}
+
+button:hover {
+  background: #005bb5;
+}
+
+footer {
+  text-align: center;
+  padding: 1rem 0;
+  background: #333;
+  color: white;
+}
