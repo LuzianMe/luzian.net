@@ -103,17 +103,35 @@ main {
 }
 
 .payment-item a {
-  color: #76c7ff; /* Bright accent blue for links */
-  text-decoration: none;
+  color: #76c7ff; /* Default color for links */
+  text-decoration: none; /* No underline by default */
   font-size: 1rem;
-  word-break: break-word; /* Allow long words to break properly */
+  word-break: break-word; /* Handle long words */
   white-space: normal; /* Prevent text from staying on a single line */
   text-align: center; /* Center-align multi-line text */
+  transition: color 0.2s ease, box-shadow 0.2s ease; /* Smooth transitions */
+}
+
+.payment-item a:link,
+.payment-item a:visited {
+  color: #76c7ff; /* Unvisited and visited links share the same base color */
+}
+
+.payment-item a:visited {
+  color: #ffcc00; /* Bright gold for visited links */
+  border: 2px solid #ffcc00; /* Highlight visited with a border */
+  box-shadow: 0 0 5px #ffcc00; /* Glow effect for visited links */
 }
 
 .payment-item a:hover {
-  text-decoration: underline;
+  color: #ffffff; /* White on hover */
+  text-decoration: underline; /* Underline on hover */
 }
+
+.payment-item a:active {
+  color: #ff9900; /* Bright orange for active clicks */
+}
+
 
 footer {
   text-align: center;
@@ -164,30 +182,8 @@ footer {
   .payment-item p {
     display: none; /* Hide the text in portrait mode */
   }
-  
-  .payment-item a:link {
-    color: #76c7ff; /* Bright blue for unvisited links */
-  }
-
-  .payment-item a:visited {
-    color: #ffff88; /* Bright yellow for visited links */
-  }
-
-  .payment-item a:hover {
-    text-decoration: underline;
-    color: #ffffff; /* White on hover */
-  }
-
-  .payment-item a:active {
-    color: #ffcc00; /* Bright gold for active clicks */
-  }
 
   /* Override any inherited styles */
-  .payment-item a {
-    color: inherit;
-    text-decoration: none;
-  }
-  
   .payment-icon {
     margin-bottom: 0.5rem; /* Add spacing between icon and text */
   }
