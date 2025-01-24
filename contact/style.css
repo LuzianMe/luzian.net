@@ -15,7 +15,7 @@ body {
 header {
   text-align: center;
   width: 100%;
-  background: rgba(31, 31, 31, 0.3); /* Dark background with 80% opacity */
+  background: rgba(31, 31, 31, 0.5); /* Dark background with 80% opacity */
   color: #e0e0e0; /* Light text */
   padding: 2rem 0;
 }
@@ -37,7 +37,7 @@ main {
   margin: 2rem auto;
   border-radius: 8px;
   max-width: 800px;
-  background: rgba(31, 31, 31, 0.3); /* Dark background with 80% opacity */
+  background: rgba(31, 31, 31, 0.5); /* Dark background with 80% opacity */
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.5); /* Softer shadow for dark theme */
 }
 
@@ -118,7 +118,7 @@ main {
 footer {
   text-align: center;
   padding: 1rem 0;
-  background: rgba(31, 31, 31, 0.3); /* Dark background with 80% opacity */
+  background: rgba(31, 31, 31, 0.5); /* Dark background with 80% opacity */
   color: #e0e0e0; /* Light text */
 }
 
