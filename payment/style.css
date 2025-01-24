@@ -1,0 +1,171 @@
+body {
+  font-family: "Orbitron", serif;
+  line-height: 1.6;
+  margin: 0;
+  padding: 0;
+  background: rgba(18, 18, 18, 0.93);
+  color: #e0e0e0; /* Light gray text for readability */
+
+  background-image: url('bg_ouro.svg'); /* Path to your logo */
+  background-repeat: no-repeat; /* Prevent tiling */
+  background-position: center; /* Center the logo */
+  background-size: contain; /* Make it as large as possible while keeping the aspect ratio */
+}
+
+header {
+  text-align: center;
+  width: 100%;
+  background: rgba(31, 31, 31, 0.3); /* Dark background with 80% opacity */
+  color: #e0e0e0; /* Light text */
+  padding: 2rem 0;
+}
+
+header h1 {
+  margin: 0;
+}
+
+header p {
+  margin: 0.5rem 0 0;
+}
+
+main {
+  padding: 2rem;
+}
+
+#payment {
+  padding: 1.5rem;
+  margin: 2rem auto;
+  border-radius: 8px;
+  max-width: 800px;
+  background: rgba(31, 31, 31, 0.3); /* Dark background with 80% opacity */
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5); /* Softer shadow for dark theme */
+}
+
+#payment h2 {
+  text-align: center;
+  color: #e0e0e0; /* Light text */
+}
+
+.payment-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); /* Adjusts to fit 2 items per row */
+  gap: 1.5rem; /* Space between grid items */
+  padding: 1rem;
+}
+
+.payment-item {
+  display: flex;
+  align-items: center;
+  justify-content: start;
+  gap: 0.5rem; /* Space between icon and text */
+  background: rgba(50, 50, 50, 0.6); /* Dark background for items */
+  padding: 1rem;
+  border-radius: 8px;
+  text-align: left;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.5); /* Subtle shadow for items */
+  transition: transform 0.2s ease, background 0.2s ease;
+  position: relative; /* Needed for tooltips */
+}
+
+.payment-item:hover {
+  transform: scale(1.05); /* Slight zoom effect on hover */
+  background: rgba(70, 70, 70, 0.8); /* Slightly lighter background on hover */
+}
+
+/* Tooltip styling */
+.payment-item::after {
+  content: attr(title); /* Display the title attribute */
+  position: absolute;
+  bottom: 100%; /* Position above the icon */
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(31, 31, 31, 0.8); /* Dark background */
+  color: #fff; /* White text */
+  padding: 0.5rem;
+  border-radius: 5px;
+  font-size: 0.85rem;
+  white-space: nowrap; /* Prevent wrapping */
+  display: none; /* Hidden by default */
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  z-index: 10;
+}
+
+.payment-item:hover::after,
+.payment-item:focus::after {
+  display: block; /* Show tooltip */
+  opacity: 1;
+}
+
+.payment-icon {
+  width: 32px; /* Icon size */
+  height: 32px;
+}
+
+.payment-item a {
+  color: #76c7ff; /* Bright accent blue for links */
+  text-decoration: none;
+  font-size: 1rem;
+  word-break: break-word; /* Allow long words to break properly */
+  white-space: normal; /* Prevent text from staying on a single line */
+  text-align: center; /* Center-align multi-line text */
+}
+
+.payment-item a:hover {
+  text-decoration: underline;
+}
+
+footer {
+  text-align: center;
+  padding: 1rem 0;
+  background: rgba(31, 31, 31, 0.3); /* Dark background with 80% opacity */
+  color: #e0e0e0; /* Light text */
+}
+
+.logo {
+  fill: #e0e0e0; /* Very light gray */
+  display: block;
+  margin: 0 auto;
+  width: 30%; /* Adjust size */
+  height: auto; /* Maintain aspect ratio */
+  transition: transform 0.3s ease, fill 0.3s ease;
+}
+
+.logo:hover {
+  transform: scale(1.05); /* Increases size by 5% */
+  fill: #ffffff; /* Change to white on hover */
+}
+
+/* Additions for better focus in dark themes */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #2e2e2e; /* Darker scrollbar thumb */
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #505050; /* Slightly lighter on hover */
+}
+
+/* Portrait mode: Switch grid to 2x3 and stack icons on top of text */
+@media screen and (max-width: 600px) {
+  .payment-grid {
+    grid-template-columns: repeat(1, 1fr); /* Force 1 items per row in smaller screens */
+  }
+
+  .payment-item {
+    flex-direction: column; /* Stack icon and text vertically */
+    text-align: center; /* Center align text and icon */
+  }
+
+  .payment-icon {
+    margin-bottom: 0.5rem; /* Add spacing between icon and text */
+  }
+
+  .payment-item p {
+    display: none; /* Hide the text in portrait mode */
+  }
+}
