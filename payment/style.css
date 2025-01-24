@@ -56,12 +56,12 @@ main {
 .payment-item {
   display: flex;
   align-items: center;
-  justify-content: start;
+  justify-content: center;
   gap: 0.5rem; /* Space between icon and text */
   background: rgba(50, 50, 50, 0.6); /* Dark background for items */
   padding: 1rem;
   border-radius: 8px;
-  text-align: left;
+  text-align: center;
   box-shadow: 0 0 5px rgba(0, 0, 0, 0.5); /* Subtle shadow for items */
   transition: transform 0.2s ease, background 0.2s ease;
   position: relative; /* Needed for tooltips */
@@ -171,7 +171,7 @@ footer {
 /* Portrait mode: Switch grid to 2x3 and stack icons on top of text */
 @media screen and (max-width: 600px) {
   .payment-grid {
-    grid-template-columns: repeat(1, 1fr); /* Force 1 items per row in smaller screens */
+    grid-template-columns: repeat(2, 1fr); /* Force 1 items per row in smaller screens */
   }
 
   .payment-item {

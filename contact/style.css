@@ -56,12 +56,12 @@ main {
 .contact-item {
   display: flex;
   align-items: center;
-  justify-content: start;
+  justify-content: center;
   gap: 0.5rem; /* Space between icon and text */
   background: rgba(50, 50, 50, 0.6); /* Dark background for items */
   padding: 1rem;
   border-radius: 8px;
-  text-align: left;
+  text-align: center;
   box-shadow: 0 0 5px rgba(0, 0, 0, 0.5); /* Subtle shadow for items */
   transition: transform 0.2s ease, background 0.2s ease;
   position: relative; /* Needed for tooltips */
@@ -160,7 +160,7 @@ footer {
     flex-direction: column; /* Stack icon and text vertically */
     text-align: center; /* Center align text and icon */
   }
-
+  
   .contact-icon {
     margin-bottom: 0.5rem; /* Add spacing between icon and text */
   }
