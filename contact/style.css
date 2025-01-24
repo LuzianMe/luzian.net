@@ -6,7 +6,7 @@ body {
   background: rgba(18, 18, 18, 0.93);
   color: #e0e0e0; /* Light gray text for readability */
 
-  background-image: url('/contact/bg_ouro.svg'); /* Path to your logo */
+  background-image: url('bg_ouro.svg'); /* Path to your logo */
   background-repeat: no-repeat; /* Prevent tiling */
   background-position: center; /* Center the logo */
   background-size: contain; /* Make it as large as possible while keeping the aspect ratio */
@@ -64,11 +64,37 @@ main {
   text-align: left;
   box-shadow: 0 0 5px rgba(0, 0, 0, 0.5); /* Subtle shadow for items */
   transition: transform 0.2s ease, background 0.2s ease;
+  position: relative; /* Needed for tooltips */
 }
 
 .contact-item:hover {
   transform: scale(1.05); /* Slight zoom effect on hover */
   background: rgba(70, 70, 70, 0.8); /* Slightly lighter background on hover */
+}
+
+/* Tooltip styling */
+.contact-item::after {
+  content: attr(title); /* Display the title attribute */
+  position: absolute;
+  bottom: 100%; /* Position above the icon */
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(31, 31, 31, 0.8); /* Dark background */
+  color: #fff; /* White text */
+  padding: 0.5rem;
+  border-radius: 5px;
+  font-size: 0.85rem;
+  white-space: nowrap; /* Prevent wrapping */
+  display: none; /* Hidden by default */
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  z-index: 10;
+}
+
+.contact-item:hover::after,
+.contact-item:focus::after {
+  display: block; /* Show tooltip */
+  opacity: 1;
 }
 
 .contact-icon {
