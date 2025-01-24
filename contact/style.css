@@ -138,4 +138,8 @@ footer {
   .contact-icon {
     margin-bottom: 0.5rem; /* Add spacing between icon and text */
   }
+
+  .contact-item p {
+    display: none; /* Hide the text in portrait mode */
+  }
 }
