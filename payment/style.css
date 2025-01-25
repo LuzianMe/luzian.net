@@ -65,6 +65,20 @@ main {
   box-shadow: 0 0 5px rgba(0, 0, 0, 0.5); /* Subtle shadow for items */
   transition: transform 0.2s ease, background 0.2s ease;
   position: relative; /* Needed for tooltips */
+  display: inline-block; /* Ensure proper spacing behavior */
+  color: inherit; /* Inherit the parent color */
+  text-decoration: none; /* Ensure no underline */
+  word-break: break-word; /* Allow long words to break properly */
+  white-space: normal; /* Prevent text from staying on a single line */
+  text-align: center; /* Center-align multi-line text */
+  font-size: 1rem;  
+}
+
+.payment-item:visited,
+.payment-item:link,
+.payment-item:active {
+  color: inherit; /* Maintain the same color for all states */
+  text-decoration: none; /* Remove underline on all states */
 }
 
 .payment-item:hover {
@@ -101,37 +115,6 @@ main {
   width: 32px; /* Icon size */
   height: 32px;
 }
-
-.payment-item a {
-  color: #76c7ff; /* Default color for links */
-  text-decoration: none; /* No underline by default */
-  font-size: 1rem;
-  word-break: break-word; /* Handle long words */
-  white-space: normal; /* Prevent text from staying on a single line */
-  text-align: center; /* Center-align multi-line text */
-  transition: color 0.2s ease, box-shadow 0.2s ease; /* Smooth transitions */
-}
-
-.payment-item a:link,
-.payment-item a:visited {
-  color: #76c7ff; /* Unvisited and visited links share the same base color */
-}
-
-.payment-item a:visited {
-  color: #ffcc00; /* Bright gold for visited links */
-  border: 2px solid #ffcc00; /* Highlight visited with a border */
-  box-shadow: 0 0 5px #ffcc00; /* Glow effect for visited links */
-}
-
-.payment-item a:hover {
-  color: #ffffff; /* White on hover */
-  text-decoration: underline; /* Underline on hover */
-}
-
-.payment-item a:active {
-  color: #ff9900; /* Bright orange for active clicks */
-}
-
 
 footer {
   text-align: center;
