@@ -57,29 +57,15 @@ main {
   background: rgba(50, 50, 50, 0.6);
   padding: 1.5rem;
   border-radius: 8px;
+  color: #76c7ff;
   font-size: 1.2rem;
   text-decoration: none;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
   transition: transform 0.3s ease, background 0.3s ease;
-  color: #76c7ff;
-  text-align: center;
-  position: relative; /* Needed for tooltips */
-  display: inline-block; /* Ensure proper spacing behavior */
-  color: inherit; /* Inherit the parent color */
-  text-decoration: none; /* Ensure no underline */
-  word-break: break-word; /* Allow long words to break properly */
-  white-space: normal; /* Prevent text from staying on a single line */
-}
-
-.grid-item:visited,
-.grid-item:link,
-.grid-item:active {
-  color: inherit; /* Maintain the same color for all states */
-  text-decoration: none; /* Remove underline on all states */
 }
 
 .grid-item:hover {
-  transform: scale(1.1);
+  transform: scale(1.05);
   background: rgba(70, 70, 70, 0.8);
   color: #ffffff;
 }
@@ -96,7 +82,6 @@ main p {
   font-size: 1.2rem;
   margin-bottom: 2rem;
 }
-
 
 .message-box {
   background: rgba(50, 50, 50, 0.6); /* Slightly darker background */

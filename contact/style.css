@@ -67,18 +67,10 @@ main {
   color: #76c7ff;
   position: relative; /* Needed for tooltips */
   display: inline-block; /* Ensure proper spacing behavior */
-  color: inherit; /* Inherit the parent color */
   text-decoration: none; /* Ensure no underline */
   word-break: break-word; /* Allow long words to break properly */
   white-space: normal; /* Prevent text from staying on a single line */
   font-size: 1rem;  
-}
-
-.contact-item:visited,
-.contact-item:link,
-.contact-item:active {
-  color: inherit; /* Maintain the same color for all states */
-  text-decoration: none; /* Remove underline on all states */
 }
 
 .contact-item:hover {
