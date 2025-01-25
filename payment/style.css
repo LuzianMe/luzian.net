@@ -64,13 +64,13 @@ main {
   text-align: center;
   box-shadow: 0 0 5px rgba(0, 0, 0, 0.5); /* Subtle shadow for items */
   transition: transform 0.2s ease, background 0.2s ease;
+  color: #76c7ff;
   position: relative; /* Needed for tooltips */
   display: inline-block; /* Ensure proper spacing behavior */
   color: inherit; /* Inherit the parent color */
   text-decoration: none; /* Ensure no underline */
   word-break: break-word; /* Allow long words to break properly */
   white-space: normal; /* Prevent text from staying on a single line */
-  text-align: center; /* Center-align multi-line text */
   font-size: 1rem;  
 }
 
@@ -82,8 +82,9 @@ main {
 }
 
 .payment-item:hover {
-  transform: scale(1.05); /* Slight zoom effect on hover */
-  background: rgba(70, 70, 70, 0.8); /* Slightly lighter background on hover */
+  transform: scale(1.1);
+  background: rgba(70, 70, 70, 0.8);
+  color: #ffffff;
 }
 
 /* Tooltip styling */
