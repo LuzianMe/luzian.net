@@ -42,6 +42,14 @@ main {
   padding: 2rem;
 }
 
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+  justify-content: center;
+  padding: 2rem;
+}
+
 .grid-item {
   display: flex;
   align-items: center;
@@ -67,4 +75,41 @@ footer {
   padding: 1rem 0;
   background: rgba(31, 31, 31, 0.5);
   color: #e0e0e0;
+}
+
+/* Additional Styles for the 404 Page */
+main p {
+  font-size: 1.2rem;
+  margin-bottom: 2rem;
+}
+
+.grid-item:hover {
+  transform: scale(1.1);
+  background: rgba(70, 70, 70, 0.8);
+  color: #ffffff;
+}
+
+.grid-item {
+  color: #76c7ff;
+  font-size: 1.2rem;
+  text-align: center;
+  text-decoration: none;
+  padding: 1.5rem;
+}
+
+.message-box {
+  background: rgba(50, 50, 50, 0.6); /* Slightly darker background */
+  color: #e0e0e0; /* Light text for readability */
+  padding: 1.5rem;
+  margin: 2rem auto;
+  max-width: 600px; /* Limit the width for better readability */
+  border-radius: 8px; /* Smooth corners */
+  text-align: center;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5); /* Subtle shadow for emphasis */
+}
+
+.message-box p {
+  margin: 0;
+  font-size: 1.2rem; /* Adjust font size */
+  line-height: 1.6;
 }
