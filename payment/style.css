@@ -144,7 +144,7 @@ footer {
   fill: #e0e0e0; /* Very light gray */
   display: block;
   margin: 0 auto;
-  width: 30%; /* Adjust size */
+  width: clamp(10%, 25vw, 100%); /* Dynamically adjusts size without an upper limit */
   height: auto; /* Maintain aspect ratio */
   transition: transform 0.3s ease, fill 0.3s ease;
 }
@@ -170,8 +170,13 @@ footer {
 
 /* Portrait mode: Switch grid to 2x3 and stack icons on top of text */
 @media screen and (max-width: 600px) {
+  .logo {
+    width: 50%; /* Set logo width to 80% of screen width */
+    max-width: 100%; /* Remove max-width constraint for smaller screens */
+  }
+
   .payment-grid {
-    grid-template-columns: repeat(2, 1fr); /* Force 1 items per row in smaller screens */
+    grid-template-columns: repeat(2, 1fr); /* Force 2 items per row in smaller screens */
   }
 
   .payment-item {
@@ -183,11 +188,7 @@ footer {
     display: none; /* Hide the text in portrait mode */
   }
 
-  /* Override any inherited styles */
   .payment-icon {
     margin-bottom: 0.5rem; /* Add spacing between icon and text */
   }
-
-
-  
 }

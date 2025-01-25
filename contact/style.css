@@ -126,7 +126,7 @@ footer {
   fill: #e0e0e0; /* Very light gray */
   display: block;
   margin: 0 auto;
-  width: 30%; /* Adjust size */
+  width: clamp(10%, 25vw, 100%); /* Dynamically adjusts size without an upper limit */
   height: auto; /* Maintain aspect ratio */
   transition: transform 0.3s ease, fill 0.3s ease;
 }
@@ -152,6 +152,11 @@ footer {
 
 /* Portrait mode: Switch grid to 2x3 and stack icons on top of text */
 @media screen and (max-width: 600px) {
+  .logo {
+    width: 50%; /* Set logo width to 80% of screen width */
+    max-width: 100%; /* Remove max-width constraint for smaller screens */
+  }
+  
   .contact-grid {
     grid-template-columns: repeat(2, 1fr); /* Two items per row */
   }
