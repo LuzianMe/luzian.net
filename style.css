@@ -34,6 +34,20 @@ main {
   text-align: center;
 }
 
+#links {
+  padding: 1.5rem;
+  margin: 2rem auto;
+  border-radius: 8px;
+  max-width: 800px;
+  background: rgba(31, 31, 31, 0.5); /* Dark background with 80% opacity */
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5); /* Softer shadow for dark theme */
+}
+
+#links h2 {
+  text-align: center;
+  color: #e0e0e0; /* Light text */
+}
+
 #links .grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -44,7 +58,7 @@ main {
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); /* Adjusts to fit 2 items per row */
   gap: 1.5rem;
   justify-content: center;
   padding: 2rem;
@@ -54,14 +68,20 @@ main {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(50, 50, 50, 0.6);
-  padding: 1.5rem;
+  gap: 0.5rem; /* Space between icon and text */
+  background: rgba(50, 50, 50, 0.6); /* Dark background for items */
+  padding: 1rem;
   border-radius: 8px;
+  text-align: center;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.5); /* Subtle shadow for items */
+  transition: transform 0.2s ease, background 0.2s ease;
   color: #76c7ff;
-  font-size: 1.2rem;
-  text-decoration: none;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-  transition: transform 0.3s ease, background 0.3s ease;
+  position: relative; /* Needed for tooltips */
+  display: inline-block; /* Ensure proper spacing behavior */
+  text-decoration: none; /* Ensure no underline */
+  word-break: break-word; /* Allow long words to break properly */
+  white-space: normal; /* Prevent text from staying on a single line */
+  font-size: 1rem;  
 }
 
 .grid-item:hover {
@@ -75,6 +95,20 @@ footer {
   padding: 1rem 0;
   background: rgba(31, 31, 31, 0.5);
   color: #e0e0e0;
+}
+
+.logo {
+  fill: #e0e0e0; /* Very light gray */
+  display: block;
+  margin: 0 auto;
+  width: clamp(10%, 25vw, 100%); /* Dynamically adjusts size without an upper limit */
+  height: auto; /* Maintain aspect ratio */
+  transition: transform 0.3s ease, fill 0.3s ease;
+}
+
+.logo:hover {
+  transform: scale(1.05); /* Increases size by 5% */
+  fill: #ffffff; /* Change to white on hover */
 }
 
 /* Additional Styles for the 404 Page */
@@ -98,4 +132,25 @@ main p {
   margin: 0;
   font-size: 1.2rem; /* Adjust font size */
   line-height: 1.6;
+}
+
+@media screen and (max-width: 600px) {
+  .logo {
+    width: 50%; /* Set logo width to 80% of screen width */
+    max-width: 100%; /* Remove max-width constraint for smaller screens */
+  }
+
+  .grid {
+    grid-template-columns: repeat(2, 1fr); /* Force 2 items per row in smaller screens */
+  }
+
+  .grid-item {
+    flex-direction: column; /* Stack icon and text vertically */
+    text-align: center; /* Center align text and icon */
+  }
+
+  .grid-item p {
+    display: none; /* Hide the text in portrait mode */
+  }
+
 }
