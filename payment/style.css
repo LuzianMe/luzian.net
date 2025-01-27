@@ -186,6 +186,32 @@ footer {
   background: #505050; /* Slightly lighter on hover */
 }
 
+.qr-container {
+  text-align: center; /* Center-align the content */
+}
+
+.qr-image {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 0 auto; /* Center the QR code */
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+}
+
+.qr-legend {
+  margin-top: 1rem; /* Add space between the QR code and the legend */
+  color: #ffffff; /* White text for readability */
+  font-size: 1.2rem;
+  text-align: center;
+  background: rgba(0, 0, 0, 0.6); /* Semi-transparent background for better contrast */
+  padding: 0.5rem 1rem; /* Add padding around the text */
+  border-radius: 5px; /* Smooth corners */
+  display: inline-block; /* Ensures proper spacing */
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.5); /* Subtle shadow for emphasis */
+}
+
+
 /* Portrait mode: Switch grid to 2x3 and stack icons on top of text */
 @media screen and (max-width: 600px) {
   .logo {
