@@ -86,13 +86,37 @@ main {
   font-size: 1rem;  
 }
 
-
-
 .grid-item:hover {
   transform: scale(1.05);
   background: rgba(70, 70, 70, 0.8);
   color: #ffffff;
 }
+
+/* Tooltip styling for grid items */
+.grid-item::after {
+  content: attr(title); /* Use the title attribute for the tooltip */
+  position: absolute;
+  bottom: 100%; /* Position above the item */
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(31, 31, 31, 0.8); /* Dark background */
+  color: #fff; /* White text */
+  padding: 0.5rem;
+  border-radius: 5px;
+  font-size: 0.85rem;
+  white-space: nowrap; /* Prevent wrapping */
+  display: none; /* Hidden by default */
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  z-index: 10;
+}
+
+.grid-item:hover::after,
+.grid-item:focus::after {
+  display: block; /* Show tooltip */
+  opacity: 1;
+}
+
 
 footer {
   text-align: center;
