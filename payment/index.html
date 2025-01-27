@@ -30,10 +30,18 @@
     <section id="payment">
       <h2>Pay Me</h2>
       <div class="payment-grid">
-        <a href="https://www.zellepay.com/" class="payment-item" target="_blank" title="Send payment via Zelle">
-          <img src="zelle-icon.svg" alt="Zelle Icon" class="payment-icon"> <!-- Adjusted path -->
-          <p>Zelle not available</p>
-        </a>
+        <!-- Replace the existing Zelle payment link -->
+	  <div class="payment-item" id="zelle-trigger" title="Click to view Zelle QR">
+  	    <img src="zelle-icon.svg" alt="Zelle Icon" class="payment-icon">
+	    <p>Pay via Zelless</p>
+	  </div>
+	  <!-- Add the modal for the Zelle QR -->
+	  <div id="zelle-modal" class="modal">
+	    <div class="modal-content">
+		  <span id="close-modal" class="close">&times;</span>
+		  <img src="zelle-qr.svg" alt="Zelle QR Code" class="qr-image">
+	    </div>
+	  </div>
         <a href="https://account.venmo.com/u/LuzianMe" class="payment-item" target="_blank" title="Send payment via Venmo">
           <img src="venmo-icon.svg" alt="Venmo Icon" class="payment-icon"> <!-- Adjusted path -->
           <p>@LuzianMe</p>
@@ -54,5 +62,6 @@
     <p>&copy; 2025 Luzian. All rights reserved.</p>
   </footer>
   </header>
+  <script src="script.js"></script>
 </body>
 </html>
