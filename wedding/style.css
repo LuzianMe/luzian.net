@@ -9,7 +9,7 @@ body {
   position: relative;
 }
 
-/* Blurred background image with a pastel overlay */
+/* Blurred background image with a pastel gradient overlay */
 body::before {
   content: "";
   position: fixed;
@@ -17,16 +17,16 @@ body::before {
   left: 0;
   width: 100%;
   height: 100%;
-  /* Combine your photo with a soft pastel gradient overlay */
   background: 
-    linear-gradient(
-      to bottom right, 
-      rgba(255, 214, 231, 0.5),  /* pastel pink */
-      rgba(214, 238, 255, 0.5)   /* pastel blue */
-    ),
-    url('bg_us.jpg') center center / cover no-repeat;
-  filter: blur(4px);
-  opacity: 0.9; /* Adjust to taste */
+    url('bg_us.jpg') center center / cover no-repeat,
+	linear-gradient(
+      to bottom left, 
+      rgba(255, 214, 231, 0.5) 0%, /* softer pastel pink */
+      rgba(214, 238, 255, 0.5) 100% /* softer pastel blue */
+    );
+  background-blend-mode: multiply; /* Blend the gradient with the image */
+  filter: blur(3px);
+  opacity: 0.3;
   z-index: -1;
 }
 
