@@ -1,0 +1,144 @@
+/* Body defaults */
+body {
+  font-family: 'Montserrat', sans-serif;
+  line-height: 1.6;
+  margin: 0;
+  padding: 0;
+  color: #444; /* Darker text for contrast */
+  background-color: #fef7f9; /* Subtle light pink background as a fallback */
+  position: relative;
+}
+
+/* Blurred background image with a pastel overlay */
+body::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  /* Combine your photo with a soft pastel gradient overlay */
+  background: 
+    linear-gradient(
+      to bottom right, 
+      rgba(255, 214, 231, 0.5),  /* pastel pink */
+      rgba(214, 238, 255, 0.5)   /* pastel blue */
+    ),
+    url('bg_us.jpg') center center / cover no-repeat;
+  filter: blur(4px);
+  opacity: 0.9; /* Adjust to taste */
+  z-index: -1;
+}
+
+/* Header */
+header {
+  text-align: center;
+  padding: 2rem 0;
+  /* Transparent background so the pastel overlay shows behind it */
+  background: none;
+}
+
+header h1 {
+  margin: 0;
+  font-family: 'Playfair Display', serif;
+  font-size: 3rem;
+}
+
+header h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.5rem;
+  margin: 0.5rem 0 0;
+}
+
+header p {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.2rem;
+  margin: 0.5rem 0 0;
+}
+
+/* Main container or sections */
+main {
+  padding: 2rem;
+}
+
+#itinerary {
+  padding: 1.5rem;
+  margin: 2rem auto;
+  max-width: 800px;
+  /* Light, translucent background for the itinerary container */
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(255, 182, 193, 0.3); /* Soft pink shadow */
+}
+
+#itinerary h2 {
+  font-family: 'Playfair Display', serif;
+  text-align: center;
+  color: #444;
+}
+
+.event {
+  background: rgba(255, 255, 255, 0.5);
+  padding: 1rem;
+  margin: 1rem 0;
+  border-radius: 8px;
+  /* Slight shadow for separation */
+  box-shadow: 0 0 5px rgba(200, 200, 200, 0.4);
+}
+
+.event h3 {
+  margin-top: 0;
+  font-family: 'Playfair Display', serif;
+  color: #444;
+}
+
+/* Buttons */
+button {
+  font-family: 'Montserrat', sans-serif;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  /* Soft pastel pink as the default button color */
+  background-color: #ffd6e7;
+  color: #444;
+  transition: background 0.2s ease, color 0.2s ease;
+  margin-right: 0.5rem; /* small space between ICS and Google Calendar buttons */
+}
+
+button:hover {
+  background-color: #ffc2da; /* Slightly more saturated pink */
+  color: #000;
+}
+
+/* Modal for the password lock */
+.modal {
+  display: block; /* Visible until access granted */
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  /* Soft pastel overlay behind the modal */
+  background-color: rgba(255, 214, 231, 0.5);
+}
+
+.modal-content {
+  background-color: rgba(255, 255, 255, 0.95);
+  margin: 15% auto;
+  padding: 20px;
+  border-radius: 8px;
+  max-width: 400px;
+  text-align: center;
+  box-shadow: 0 0 20px rgba(200, 200, 200, 0.5);
+}
+
+/* Footer */
+footer {
+  text-align: center;
+  padding: 1rem 0;
+  background: none; /* Keep it transparent to show background overlay */
+  color: #444;
+}

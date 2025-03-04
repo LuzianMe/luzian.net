@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" href="/ouro.ico" type="image/x-icon">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Montserrat:wght@400;500&display=swap" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Wedding Itinerary">
+  <title>Luzian | Wedding</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+  <!-- Access Lock Modal -->
+  <div id="access-lock" class="modal">
+    <div class="modal-content">
+      <h2>Enter Access Password</h2>
+      <input type="password" id="access-password" placeholder="Enter access password">
+      <button id="access-submit">Submit</button>
+      <p id="access-error" style="color:red;"></p>
+    </div>
+  </div>
+
+<header>
+  <h1>Our Wedding day</h1>
+  <h2>The Plan</h2>
+  <p>Mariko Ito and Lucian Melendrez</p>
+</header>
+
+
+<main id="main-content" style="display:none;">
+  <!-- Wedding Itinerary Section -->
+  <section id="itinerary">
+    <h2>Wedding Itinerary</h2>
+    <div class="event" id="event1">
+      <h3>Pre Wedding Lunch at 8 East</h3>
+      <p><strong>Address:</strong> 8 Fremont St, Las Vegas, NV (Floor 1, Circa Resort & Casino)</p>
+      <p><strong>Website:</strong> 
+        <a href="https://8eastlv.com/" target="_blank" rel="noopener">8eastlv.com</a>
+      </p>
+      <p><strong>Time:</strong> 1:30pm, Saturday March 8th, 2025</p>
+      <button class="add-calendar-btn"
+        data-title="Pre Wedding Lunch at 8 East"
+        data-location="8 Fremont St, Las Vegas, NV (Floor 1, Circa Resort & Casino)"
+        data-start="20250308T133000"
+        data-end="20250308T143000"
+        data-description="Pre Wedding Lunch at 8 East at 8 Fremont St, Las Vegas, NV"
+        data-reservation="https://resy.com/i/Gbihz0b9Lbw">
+        Add to Calendar (ICS)
+      </button>
+      <button class="google-calendar-btn"
+        data-title="Pre Wedding Lunch at 8 East"
+        data-location="8 Fremont St, Las Vegas, NV (Floor 1, Circa Resort & Casino)"
+        data-start="20250308T133000"
+        data-end="20250308T143000"
+        data-description="Pre Wedding Lunch at 8 East at 8 Fremont St, Las Vegas, NV"
+        data-reservation="https://resy.com/i/Gbihz0b9Lbw">
+        Add to Google Calendar
+      </button>
+    </div>
+    <div class="event" id="event2">
+      <h3>Sunset Toast at Legacy Club</h3>
+      <p><strong>Location:</strong> Within the same floor as the lunch location</p>
+      <p><strong>Website:</strong> 
+        <a href="https://www.circalasvegas.com/drink-dine/legacy-club/" target="_blank" rel="noopener">Legacy Club Site</a>
+      </p>
+      <p><strong>Time:</strong> 5:13pm, Saturday March 8th, 2025</p>
+      <button class="add-calendar-btn"
+        data-title="Sunset Toast at Legacy Club"
+        data-location="8 Fremont St, Las Vegas, NV (Floor 1, Circa Resort & Casino)"
+        data-start="20250308T171300"
+        data-end="20250308T181300"
+        data-description="Sunset Toast at Legacy Club">
+        Add to Calendar (ICS)
+      </button>
+      <button class="google-calendar-btn"
+        data-title="Sunset Toast at Legacy Club"
+        data-location="8 Fremont St, Las Vegas, NV (Floor 1, Circa Resort & Casino)"
+        data-start="20250308T171300"
+        data-end="20250308T181300"
+        data-description="Sunset Toast at Legacy Club">
+        Add to Google Calendar
+      </button>
+    </div>
+    <div class="event" id="event3">
+      <h3>Wedding Ceremony at Lucky Little Chapel</h3>
+      <p><strong>Address:</strong> 321 S Casino Center Blvd #110, Las Vegas, NV</p>
+      <p><strong>Website:</strong> 
+        <a href="https://www.luckylittlechapel.com/" target="_blank" rel="noopener">luckylittlechapel.com</a>
+      </p>
+      <p><strong>Time:</strong> 8:00pm, Saturday March 8th, 2025</p>
+      <button class="add-calendar-btn"
+        data-title="Wedding Ceremony at Lucky Little Chapel"
+        data-location="321 S Casino Center Blvd #110, Las Vegas, NV"
+        data-start="20250308T200000"
+        data-end="20250308T210000"
+        data-description="Wedding Ceremony at Lucky Little Chapel">
+        Add to Calendar (ICS)
+      </button>
+      <button class="google-calendar-btn"
+        data-title="Wedding Ceremony at Lucky Little Chapel"
+        data-location="321 S Casino Center Blvd #110, Las Vegas, NV"
+        data-start="20250308T200000"
+        data-end="20250308T210000"
+        data-description="Wedding Ceremony at Lucky Little Chapel">
+        Add to Google Calendar
+      </button>
+    </div>
+    <div class="event" id="event4">
+      <h3>D&D (Dinner and Drinks) at Barry's Downtown Prime</h3>
+      <p><strong>Location:</strong> Within the same floor as the lunch location</p>
+      <p><strong>Website:</strong> 
+        <a href="https://www.barrysdowntownprime.com/" target="_blank" rel="noopener">barrysdowntownprime.com</a>
+      </p>
+      <p><strong>Time:</strong> 9:00pm, Saturday March 8th, 2025</p>
+      <button class="add-calendar-btn"
+        data-title="D&D at Barry's Downtown Prime"
+        data-location="8 Fremont St, Las Vegas, NV (Floor 1, Circa Resort & Casino)"
+        data-start="20250308T210000"
+        data-end="20250308T220000"
+        data-description="Dinner and Drinks at Barry's Downtown Prime"
+        data-reservation="https://resy.com/i/pSomtTuYXdw">
+        Add to Calendar (ICS)
+      </button>
+      <button class="google-calendar-btn"
+        data-title="D&D at Barry's Downtown Prime"
+        data-location="8 Fremont St, Las Vegas, NV (Floor 1, Circa Resort & Casino)"
+        data-start="20250308T210000"
+        data-end="20250308T220000"
+        data-description="Dinner and Drinks at Barry's Downtown Prime"
+        data-reservation="https://resy.com/i/pSomtTuYXdw">
+        Add to Google Calendar
+      </button>
+    </div>
+  </section>
+</main>
+
+
+  <footer>
+    <p>&copy; 2025 Luzian. All rights reserved.</p>
+  </footer>
+  <script src="script.js"></script>
+</body>
+</html>
