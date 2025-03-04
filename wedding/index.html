@@ -24,13 +24,25 @@
     <div class="modal-content">
       <h2>Enter Access Password</h2>
       <form id="access-form" autocomplete="on">
-        <input type="password" id="access-password" name="access-password" autocomplete="current-password" placeholder="Enter access password">
+        <!-- Hidden username field (positioned offscreen) -->
+        <input 
+          type="text" 
+          id="username" 
+          name="username" 
+          value="guest" 
+          autocomplete="username" 
+          style="position: absolute; left: -10000px; top: 0;">
+        <input 
+          type="password" 
+          id="access-password" 
+          name="access-password" 
+          autocomplete="current-password" 
+          placeholder="Enter access password">
         <button type="submit" id="access-submit">Submit</button>
       </form>
       <p id="access-error" style="color:red;"></p>
     </div>
   </div>
-
 
 <header>
   <h1>Our Wedding day</h1>
