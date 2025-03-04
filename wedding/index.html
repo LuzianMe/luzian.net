@@ -23,11 +23,14 @@
   <div id="access-lock" class="modal">
     <div class="modal-content">
       <h2>Enter Access Password</h2>
-      <input type="password" id="access-password" placeholder="Enter access password">
-      <button id="access-submit">Submit</button>
+      <form id="access-form" autocomplete="on">
+        <input type="password" id="access-password" name="access-password" autocomplete="current-password" placeholder="Enter access password">
+        <button type="submit" id="access-submit">Submit</button>
+      </form>
       <p id="access-error" style="color:red;"></p>
     </div>
   </div>
+
 
 <header>
   <h1>Our Wedding day</h1>

@@ -1,9 +1,9 @@
 document.addEventListener('DOMContentLoaded', function() {
+  const accessForm = document.getElementById('access-form');
   const accessPasswordInput = document.getElementById('access-password');
-  const accessSubmitBtn = document.getElementById('access-submit');
   const accessError = document.getElementById('access-error');
 
-  // Shared function for submitting the password
+  // Shared function to process password submission
   function handleAccessSubmit() {
     const enteredPassword = accessPasswordInput.value.trim();
     if (enteredPassword === 'lasvegas2025') {
@@ -14,17 +14,10 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }
 
-  // Click event for the "Submit" button
-  accessSubmitBtn.addEventListener('click', function() {
+  // Listen for form submission (triggers on Enter or button click)
+  accessForm.addEventListener('submit', function(e) {
+    e.preventDefault();
     handleAccessSubmit();
-  });
-
-  // Keydown event for the input field (check if Enter was pressed)
-  accessPasswordInput.addEventListener('keydown', function(e) {
-    if (e.key === 'Enter') {
-      e.preventDefault(); // Prevent form submission if there's a form wrapper
-      handleAccessSubmit();
-    }
   });
 
   // ICS Calendar button functionality
