@@ -279,7 +279,7 @@ footer p {
 }
 
 /* Square-ish: width and height are similar */
-@media screen and (aspect-ratio >=21/32) and (aspect-ratio <=4/3) {
+@media screen and (aspect-ratio >=9/16) and (aspect-ratio <=4/3) {
   .grid {
     grid-template-columns: repeat(2, 1fr);
   }
@@ -292,7 +292,7 @@ footer p {
 }
 
 /* Portrait: height is much greater than width */
-@media screen and (aspect-ratio < 21/32) {
+@media screen and (aspect-ratio < 9/16) {
   .grid {
     grid-template-columns: 1fr;
   }
