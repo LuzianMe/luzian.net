@@ -50,3 +50,9 @@ function fallbackCopyTextToClipboard(text, textElement, originalText) {
   }
   document.body.removeChild(textArea);
 }
+
+// Update copyright year
+const yearEl = document.getElementById('current-year');
+if (yearEl) {
+  yearEl.textContent = new Date().getFullYear();
+}

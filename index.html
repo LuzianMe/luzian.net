@@ -6,11 +6,10 @@
   <link rel="icon" href="./assets/ouro.ico" type="image/x-icon">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400..900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
   <meta property="og:title" content="Personal Site - Luzian">
   <meta property="og:description" content="Main Page of my Personal website">
-  <meta property="og:image"
-    content="https://luzian.net/assets/ouro-512x512.png">
+  <meta property="og:image" content="https://luzian.net/assets/ouro-512x512.png">
   <meta property="og:url" content="https://luzian.net/">
   <meta property="og:type" content="website">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -21,6 +20,13 @@
 
 <body>
   <div class="page-bg">
+    <nav class="nav-container" aria-label="Main Navigation">
+      <ul class="nav-pills">
+        <li><a href="./index.html" class="nav-pill active">Home</a></li>
+        <li><a href="./contact/index.html" class="nav-pill">Contact</a></li>
+        <li><a href="./payment/index.html" class="nav-pill">Payments</a></li>
+      </ul>
+    </nav>
     <header>
       <img src="./assets/logo.svg" alt="Logo" class="logo">
       <p>Computer Science Engineer | Technology Enthusiast</p>
@@ -42,8 +48,12 @@
       </section>
     </main>
     <footer>
-      <p>&copy; 2025 Luzian. All rights reserved.</p>
+      <p>&copy; <span id="current-year">2026</span> Luzian. All rights reserved.</p>
     </footer>
+    <script>
+      const yearEl = document.getElementById('current-year');
+      if (yearEl) yearEl.textContent = new Date().getFullYear();
+    </script>
   </div>
 </body>
 
