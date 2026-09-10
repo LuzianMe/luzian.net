@@ -51,8 +51,6 @@ main {
   padding-bottom: 2vh;
   padding-top: 0;
   text-align: center;
-  max-height: 100vh;
-  overflow-y: auto;
 }
 
 /* Link Section Styles */
@@ -251,55 +249,77 @@ footer p {
   background: #505050;
 }
 
-/* Media Queries */
-/* Extra-wide Landscape: width is much greater than height */
-@media screen and (aspect-ratio > 2/1) {
+/* Action Links (Nav Buttons between pages) */
+.action-links {
+  margin: 1.5rem auto 0.5rem auto;
+  text-align: center;
+}
+
+.action-button {
+  display: inline-block;
+  background: rgba(50, 50, 50, 0.7);
+  color: #76c7ff;
+  text-decoration: none;
+  padding: 0.6rem 1.4rem;
+  border-radius: 8px;
+  font-size: clamp(0.85rem, 1.5vw, 1.05rem);
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.5);
+  transition: transform 0.2s ease, background 0.2s ease, color 0.2s ease;
+}
+
+.action-button:hover {
+  transform: scale(1.05);
+  background: rgba(70, 70, 70, 0.9);
+  color: #ffffff;
+}
+
+/* Responsive Media Queries (Based on standard width breakpoints) */
+/* Mobile Portrait default (< 520px) */
+.grid {
+  grid-template-columns: 1fr;
+}
+
+.logo {
+  width: 65vw;
+  max-width: 320px;
+  max-height: 20vh;
+}
+
+/* Small Tablets & Large Phones (>= 520px) */
+@media (min-width: 520px) {
+  .grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .logo {
+    width: 45vw;
+    max-width: 380px;
+    max-height: 20vh;
+  }
+}
+
+/* Tablets & Small Laptops (>= 768px) */
+@media (min-width: 768px) {
+  .grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .logo {
+    width: 35vw;
+    max-width: 420px;
+    max-height: 18vh;
+  }
+}
+
+/* Wide Desktops (>= 1200px) */
+@media (min-width: 1200px) {
   .grid {
     grid-template-columns: repeat(6, 1fr);
   }
 
   .logo {
     width: 25vw;
-    max-width: 100%;
+    max-width: 460px;
     max-height: 16vh;
-  }
-}
-
-/* Landscape: width is greater than height, but not ultra-wide */
-@media screen and (aspect-ratio > 4/3) and (aspect-ratio <=2/1) {
-  .grid {
-    grid-template-columns: repeat(3, 1fr);
-  }
-
-  .logo {
-    width: 30vw;
-    max-width: 100%;
-    max-height: 18vh;
-  }
-}
-
-/* Square-ish: width and height are similar */
-@media screen and (aspect-ratio >=1/2) and (aspect-ratio <=4/3) {
-  .grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .logo {
-    width: 40vw;
-    max-width: 100%;
-    max-height: 20vh;
-  }
-}
-
-/* Portrait: height is much greater than width */
-@media screen and (aspect-ratio < 1/2) {
-  .grid {
-    grid-template-columns: 1fr;
-  }
-
-  .logo {
-    width: 60vw;
-    max-width: 100%;
-    max-height: 20vh;
   }
 }

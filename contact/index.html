@@ -13,7 +13,7 @@
 	<meta property="og:title" content="Contact Me - Luzian">
 	<meta property="og:description" content="Connect with Luzian through Discord, LinkedIn, GitHub, and more.">
 	<meta property="og:image"
-		content="https://raw.githubusercontent.com/LuzianMe/luzian.net/refs/heads/main/ouro-512x512.png">
+		content="https://luzian.net/assets/ouro-512x512.png">
 	<!-- Thumbnail URL -->
 	<meta property="og:url" content="https://luzian.net/contact/index.html"> <!-- Page URL -->
 	<meta property="og:type" content="website">
@@ -31,8 +31,12 @@
 			<section id="links">
 				<h2>Contact Me</h2>
 				<div class="grid">
+					<div class="grid-item" id="copyEmail" title="Copy Email to Clipboard" style="cursor: pointer;">
+						<img src="../assets/email-icon.svg" alt="Email Icon" class="grid-icon">
+						<p>me@luzian.net</p>
+					</div>
 					<a href="https://discordapp.com/users/490539308147671051" class="grid-item" target="_blank"
-						title="Connect with me on Discord">
+						rel="noopener noreferrer" title="Connect with me on Discord">
 						<img src="../assets/discord-icon.svg" alt="Discord Icon" class="grid-icon">
 						<p>Luzian</p>
 					</a>
@@ -41,16 +45,17 @@
 						<p>+1 623 226 4417</p>
 					</a>
 					<a href="https://www.linkedin.com/in/luciano-melendrez-3a9b1682/" class="grid-item" target="_blank"
-						title="Visit my LinkedIn profile">
+						rel="noopener noreferrer" title="Visit my LinkedIn profile">
 						<img src="../assets/linkedin-icon.svg" alt="LinkedIn Icon" class="grid-icon">
 						<p>LinkedIn Profile</p>
 					</a>
-					<a href="https://github.com/LuzianMe" class="grid-item" target="_blank" title="Check out my GitHub">
+					<a href="https://github.com/LuzianMe" class="grid-item" target="_blank"
+						rel="noopener noreferrer" title="Check out my GitHub">
 						<img src="../assets/github-icon.svg" alt="GitHub Icon" class="grid-icon">
 						<p>GitHub</p>
 					</a>
 					<a href="https://bsky.app/profile/luzian.net" class="grid-item" target="_blank"
-						title="Find me on Bluesky">
+						rel="noopener noreferrer" title="Find me on Bluesky">
 						<img src="../assets/bluesky-icon.svg" alt="Bluesky Icon" class="grid-icon">
 						<p>Bluesky</p>
 					</a>
@@ -59,7 +64,9 @@
 						<p>Personal Website</p>
 					</a>
 				</div>
-				<a href="../payment/index.html" class="grid-item">Go to Payment</a>
+				<div class="action-links">
+					<a href="../payment/index.html" class="action-button">Go to Payment</a>
+				</div>
 			</section>
 		</main>
 		<footer>
