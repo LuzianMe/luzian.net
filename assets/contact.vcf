@@ -1,7 +1,12 @@
 BEGIN:VCARD
 VERSION:3.0
+N:;Luzian;;;
 FN:Luzian
-EMAIL:me@luzian.net
-TEL:+16232264417
-URL:https://www.luzian.net
+EMAIL;TYPE=INTERNET:me@luzian.net
+TEL;TYPE=VOICE:+16232264417
+URL:https://luzian.net
+X-SOCIALPROFILE;TYPE=github:https://github.com/LuzianMe
+X-SOCIALPROFILE;TYPE=linkedin:https://www.linkedin.com/in/luciano-melendrez-3a9b1682/
+X-SOCIALPROFILE;TYPE=bluesky:https://bsky.app/profile/luzian.net
+NOTE:GitHub: https://github.com/LuzianMe\nLinkedIn: https://www.linkedin.com/in/luciano-melendrez-3a9b1682/\nBluesky: https://bsky.app/profile/luzian.net
 END:VCARD

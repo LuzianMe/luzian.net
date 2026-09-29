@@ -337,7 +337,9 @@ html {
     scroll-behavior: auto;
   }
 
-  .scroll-cue span {
+  .scroll-cue span,
+  .ouro-bg-rotator,
+  .shimmer-text {
     animation: none;
   }
 }
