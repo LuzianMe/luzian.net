@@ -601,16 +601,20 @@ a[href*="contact.vcf"]:hover .grid-icon {
   margin-top: 0.1rem;
   font-size: 0.8rem;
   color: #94a3b8;
-  word-break: break-all;
+  overflow-wrap: anywhere;
 }
 
 .pay-actions {
   display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
   gap: 0.4rem;
   margin-top: 0.75rem;
 }
 
 .pay-btn {
+  /* Never break "Open"/"Copy" mid-word; if a card is too narrow, the buttons stack instead */
+  white-space: nowrap;
   padding: 0.3rem 0.8rem;
   font: inherit;
   font-size: 0.78rem;
@@ -711,6 +715,10 @@ footer p {
 
   #links .grid-item {
     padding: 1rem 0.5rem;
+  }
+
+  .pay-btn {
+    padding: 0.3rem 0.6rem;
   }
 }
 
