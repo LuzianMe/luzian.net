@@ -247,7 +247,68 @@ main {
   text-shadow: 0 0 14px rgba(118, 199, 255, 0.35);
 }
 
+/* Homepage hero: logo and tagline fill the first screen so the ouroboros stays visible */
+.hero {
+  min-height: calc(100svh - 4.5rem);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0 1rem;
+  box-sizing: border-box;
+}
+
+.hero .logo {
+  width: min(70vw, 520px);
+  max-width: none;
+  max-height: 32vh;
+}
+
+.scroll-cue {
+  margin-top: 2.5rem;
+  color: #94a3b8;
+  text-decoration: none;
+  font-size: 0.85rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  transition: color 0.25s ease;
+}
+
+.scroll-cue:hover {
+  color: #76c7ff;
+}
+
+.scroll-cue span {
+  display: block;
+  font-size: 1.2rem;
+  animation: cue-bob 2.4s ease-in-out infinite;
+}
+
+@keyframes cue-bob {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(6px);
+  }
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  .scroll-cue span {
+    animation: none;
+  }
+}
+
 #about {
+  scroll-margin-top: 5rem;
   text-align: left;
   color: #cbd5e1;
 }
