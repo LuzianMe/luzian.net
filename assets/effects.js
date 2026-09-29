@@ -13,6 +13,10 @@ if (location.pathname.endsWith('/index.html')) {
 (function () {
   'use strict';
 
+  // Respect the OS "reduce motion" setting; skip mouse-only effects on touch screens
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const hasMouse = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+
   // 0. Synchronize Background Ouroboros Rotation Across Page Navigation
   function syncRotator() {
     const ROTATION_DURATION = 120; // matches 120s in CSS
@@ -42,10 +46,11 @@ if (location.pathname.endsWith('/index.html')) {
 
     requestAnimationFrame(updateSpotlight);
   }
-  requestAnimationFrame(updateSpotlight);
+  if (hasMouse && !reduceMotion) requestAnimationFrame(updateSpotlight);
 
   // 2. 3D Interactive Card Tilt on Hover
   function initCardTilt() {
+    if (!hasMouse || reduceMotion) return;
     const cards = document.querySelectorAll('.grid-item');
     cards.forEach((card) => {
       card.addEventListener('mousemove', (e) => {
@@ -84,7 +89,10 @@ if (location.pathname.endsWith('/index.html')) {
       height = canvas.height = window.innerHeight;
     }
     resize();
-    window.addEventListener('resize', resize);
+    window.addEventListener('resize', () => {
+      resize();
+      if (reduceMotion) requestAnimationFrame(animate); // resizing clears the still canvas
+    });
 
     class Particle {
       constructor() {
@@ -131,10 +139,11 @@ if (location.pathname.endsWith('/index.html')) {
     function animate() {
       ctx.clearRect(0, 0, width, height);
       particles.forEach((p) => {
-        p.update();
+        if (!reduceMotion) p.update();
         p.draw();
       });
-      requestAnimationFrame(animate);
+      // With reduced motion, draw the particles once as a still starfield
+      if (!reduceMotion) requestAnimationFrame(animate);
     }
     requestAnimationFrame(animate);
   }
