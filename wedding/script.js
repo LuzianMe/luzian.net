@@ -1,3 +1,10 @@
+/*
+ * ARCHIVED PAGE: kept as a memento of our March 2025 wedding, not in active use.
+ *
+ * Note on the password: it's hardcoded here on purpose. It was only a light
+ * "guests only" gate, never real security, and the event is long over, so
+ * having it visible in this public repo is not an issue.
+ */
 document.addEventListener('DOMContentLoaded', function() {
   const accessForm = document.getElementById('access-form');
   const accessPasswordInput = document.getElementById('access-password');
@@ -6,6 +13,7 @@ document.addEventListener('DOMContentLoaded', function() {
   // Shared function to process password submission
   function handleAccessSubmit() {
     const enteredPassword = accessPasswordInput.value.trim();
+    // Intentionally public: see note at the top of this file
     if (enteredPassword === 'lasvegas2025') {
       document.getElementById('access-lock').style.display = 'none';
       document.getElementById('main-content').style.display = 'block';
