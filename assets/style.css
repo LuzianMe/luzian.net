@@ -5,8 +5,10 @@
   --mouse-x: 50vw;
   --mouse-y: 30vh;
 
-  /* Font roles: Orbitron for headings/nav, Chakra Petch for short UI labels, Inter for reading */
-  --font-ui: 'Chakra Petch', 'Inter', sans-serif;
+  /* Font roles: Orbitron for headings/nav, Chakra Petch for short UI labels,
+     Saira for reading, Inter only for handles/emails where @ and $ must be crisp */
+  --font-ui: 'Chakra Petch', 'Saira', sans-serif;
+  --font-body: 'Saira', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 
   /* Type scale: use these instead of one-off font sizes */
   --fs-sm: 0.8125rem;                        /* 13px: handles, tags, small buttons, nav, footer */
@@ -23,7 +25,7 @@
 }
 
 body {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: var(--font-body);
   line-height: 1.6;
   margin: 0;
   padding: 0;
@@ -343,7 +345,12 @@ html {
 #about {
   scroll-margin-top: 5rem;
   text-align: left;
-  color: #cbd5e1;
+  color: #d5dde8;
+}
+
+#about p strong {
+  color: #7dd3fc;
+  font-weight: 500;
 }
 
 #about p {
@@ -362,15 +369,25 @@ html {
 .now-list {
   max-width: 680px;
   margin: 0 auto 1.25rem;
-  padding-left: 1.25rem;
+  padding-left: 0;
+  list-style: none;
 }
 
 .now-list li {
+  position: relative;
   margin-bottom: 0.35rem;
+  padding-left: 1.4rem;
 }
 
-.now-list li::marker {
-  color: #76c7ff;
+/* Glowing chevron bullets */
+.now-list li::before {
+  content: '\203A';
+  position: absolute;
+  left: 0.2rem;
+  top: -0.1rem;
+  color: #38bdf8;
+  font: 700 1.3rem/1.4 'Orbitron', sans-serif;
+  text-shadow: 0 0 8px rgba(56, 189, 248, 0.6);
 }
 
 .tags {
