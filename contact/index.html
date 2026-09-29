@@ -51,10 +51,10 @@
 			<section id="links">
 				<h2>Contact Me</h2>
 				<div class="grid">
-					<div class="grid-item" id="copyEmail" title="Copy Email (me@luzian.net)" style="cursor: pointer;">
+					<button type="button" class="grid-item" id="copyEmail" title="Copy Email (me@luzian.net)">
 						<img src="../assets/email-icon.svg" alt="Email Icon" class="grid-icon">
 						<p>Email</p>
-					</div>
+					</button>
 					<a href="https://discordapp.com/users/490539308147671051" class="grid-item" target="_blank"
 						rel="noopener noreferrer" title="Connect with me on Discord">
 						<img src="../assets/discord-icon.svg" alt="Discord Icon" class="grid-icon">
@@ -84,16 +84,29 @@
 						<img src="../assets/bluesky-icon.svg" alt="Bluesky Icon" class="grid-icon">
 						<p>Bluesky</p>
 					</a>
-					<a href="/" class="grid-item" title="Visit my personal website">
-						<img src="../assets/website-icon.svg" alt="Website Icon" class="grid-icon">
-						<p>Personal Website</p>
-					</a>
+					<button type="button" class="grid-item" id="share-trigger" title="Show a QR code of this page">
+						<img src="../assets/qr-icon.svg" alt="" class="grid-icon">
+						<p>Share</p>
+					</button>
 				</div>
 			</section>
 		</main>
+		<!-- Modals live outside #links: its backdrop-filter would trap position:fixed inside the card -->
+		<!-- Modal: QR code of this page, for sharing in person -->
+		<div id="share-modal" class="modal" role="dialog" aria-modal="true" aria-label="Share my contact page">
+			<div class="modal-content">
+				<button type="button" class="close" data-close aria-label="Close">&times;</button>
+				<div class="qr-container">
+					<img src="../assets/contact-qr.svg" alt="QR code linking to luzian.net/contact" class="qr-image qr-share">
+					<p class="qr-legend">Scan to open <b>luzian.net/contact</b></p>
+				</div>
+				<button type="button" class="modal-action" id="share-link">Copy link</button>
+			</div>
+		</div>
 		<footer>
 			<p>&copy; <span id="current-year">2026</span> Luzian. All rights reserved.</p>
 		</footer>
+		<script src="../assets/copy.js"></script>
 		<script src="script.js"></script>
 		<script src="../assets/effects.js"></script>
 	</div>

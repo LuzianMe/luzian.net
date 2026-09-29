@@ -31,6 +31,16 @@ if (zelleTrigger && modal) {
   });
 }
 
+// Copy buttons on each payment card
+document.querySelectorAll('.pay-btn[data-copy]').forEach((btn) => {
+  btn.addEventListener('click', () => {
+    const text = btn.dataset.copy;
+    copyText(text)
+      .then(() => flashLabel(btn, 'Copied!'))
+      .catch(() => prompt('Copy this:', text));
+  });
+});
+
 // Update copyright year
 const yearEl = document.getElementById('current-year');
 if (yearEl) {
