@@ -587,6 +587,12 @@ html {
   border: 1px solid rgba(56, 189, 248, 0.35);
 }
 
+.setup-card-intro {
+  margin: -0.5rem 0 1rem;
+  text-align: center;
+  color: #94a3b8;
+}
+
 .setup-updated {
   margin: 0.25rem 0 0;
   text-align: center;
