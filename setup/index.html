@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" href="/assets/ouro.ico" type="image/x-icon">
+  <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+  <meta name="theme-color" content="#0d111b">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600&family=Inter:wght@500&family=Orbitron:wght@500;700&family=Saira:wght@400;500;600&display=swap" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Luzian's VR and PC setup: Quest Pro, 11-point full-body tracking, face tracking and a Ryzen 7 9800X3D + RX 7900 XTX rig.">
+  <meta property="og:title" content="My Setup - Luzian">
+  <meta property="og:description" content="Quest Pro, 11-point full-body tracking, face tracking and a Ryzen 7 9800X3D + RX 7900 XTX rig.">
+  <meta property="og:image" content="https://luzian.net/assets/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Luzian logo over a glowing ouroboros">
+  <meta property="og:site_name" content="Luzian">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta property="og:url" content="https://luzian.net/setup/">
+  <link rel="canonical" href="https://luzian.net/setup/">
+  <meta property="og:type" content="website">
+  <title>Luzian | My Setup</title>
+  <link rel="stylesheet" href="/assets/style.css?v=20260929j">
+  <script>
+    document.documentElement.style.setProperty('--rotator-delay', `-${(Date.now() / 1000 % 120).toFixed(3)}s`);
+  </script>
+</head>
+
+<body>
+  <!-- Ambient Visual Background Layers -->
+  <div class="ouro-bg-rotator" aria-hidden="true"></div>
+  <canvas id="ambient-canvas" aria-hidden="true"></canvas>
+  <div class="spotlight-overlay" aria-hidden="true"></div>
+
+  <div class="page-bg">
+    <nav class="nav-container" aria-label="Main Navigation">
+      <ul class="nav-pills">
+        <li><a href="/" class="nav-pill">Home</a></li>
+        <li><a href="/contact/" class="nav-pill">Contact</a></li>
+        <li><a href="/payment/" class="nav-pill">Payments</a></li>
+      </ul>
+    </nav>
+    <header>
+      <h1>My Setup</h1>
+      <p>What I use for social VR, full&#8209;body tracking and local AI.</p>
+      <ul class="setup-chips" aria-label="Highlights">
+        <li>Quest Pro</li>
+        <li>11-point FBT</li>
+        <li>Face tracking</li>
+        <li>RX 7900 XTX</li>
+      </ul>
+    </header>
+    <main class="setup-grid">
+      <section class="setup-card">
+        <h2>Headset</h2>
+        <ul class="gear-list">
+          <li>
+            <div><span class="gear-name">Meta Quest Pro</span><span class="gear-note">Built-in face and eye tracking</span></div>
+            <span class="status status-main">Main</span>
+          </li>
+          <li>
+            <div><span class="gear-name">Meta Quest 3</span></div>
+            <span class="status status-backup">Backup</span>
+          </li>
+          <li>
+            <div><span class="gear-name">Visor by Immersed</span></div>
+            <span class="status status-preorder">Preordered</span>
+          </li>
+        </ul>
+      </section>
+
+      <section class="setup-card">
+        <h2>Full-Body Tracking</h2>
+        <ul class="gear-list">
+          <li>
+            <div><span class="gear-name">HaritoraX2 (11 trackers)</span><span class="gear-note">2&times; GX6 dongles &middot; SlimeTora</span></div>
+            <span class="status status-inuse">In use</span>
+          </li>
+          <li>
+            <div><span class="gear-name">SlimeVR Butterflies</span></div>
+            <span class="status status-preorder">Preordered</span>
+          </li>
+          <li>
+            <div><span class="gear-name">Flux Pose</span></div>
+            <span class="status status-preorder">Preordered</span>
+          </li>
+        </ul>
+      </section>
+
+      <section class="setup-card setup-card-wide">
+        <h2>Locomotion</h2>
+        <ul class="gear-list">
+          <li>
+            <div><span class="gear-name">Sunny treadmill + Reality Runner</span><span class="gear-note">Walk in real life, move in VR</span></div>
+            <span class="status status-inuse">In use</span>
+          </li>
+        </ul>
+      </section>
+
+      <section class="setup-card setup-card-wide">
+        <h2>PC</h2>
+        <dl class="spec-list">
+          <div><dt>CPU</dt><dd>AMD Ryzen 7 9800X3D <span class="spec-hl">3D V-Cache</span></dd></div>
+          <div><dt>GPU</dt><dd>XFX Radeon RX 7900 XTX <span class="spec-hl">24 GB VRAM</span></dd></div>
+          <div><dt>RAM</dt><dd>32 GB Kingston Fury Beast DDR5-6000 (1 &times; 32 GB)</dd></div>
+          <div><dt>Storage</dt><dd>1 TB Kingston NV3 PCIe 4.0 NVMe M.2 SSD</dd></div>
+          <div><dt>Motherboard</dt><dd>ASUS TUF Gaming X870-Plus WiFi</dd></div>
+          <div><dt>PSU</dt><dd>Meta PCs 1000W ATX 3.0 / PCIe 5.0</dd></div>
+          <div><dt>CPU cooler</dt><dd>Meta PCs 360mm AIO liquid cooler</dd></div>
+          <div><dt>Case</dt><dd>Corsair 3500X (Black)</dd></div>
+          <div><dt>Fans</dt><dd>8 &times; Meta PCs RGB 120mm</dd></div>
+          <div><dt>OS</dt><dd>Windows 11 Pro (64-bit)</dd></div>
+        </dl>
+      </section>
+
+      <p class="setup-updated">Last updated: September 2026</p>
+    </main>
+    <footer>
+      <p>&copy; <span id="current-year">2026</span> Luzian. All rights reserved.</p>
+    </footer>
+    <script>
+      const yearEl = document.getElementById('current-year');
+      if (yearEl) yearEl.textContent = new Date().getFullYear();
+    </script>
+    <script src="/assets/effects.js?v=20260929j"></script>
+  </div>
+</body>
+
+</html>

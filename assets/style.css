@@ -172,6 +172,7 @@ header {
   background: none;
   padding-top: 1.5rem;
   padding-bottom: 0.5rem;
+  padding-inline: 1rem;
   color: #e0e0e0;
 }
 
@@ -235,7 +236,8 @@ main {
 }
 
 #about,
-#links {
+#links,
+.setup-card {
   padding: 1.75rem;
   margin: 1rem auto;
   border-radius: 18px;
@@ -251,7 +253,8 @@ main {
 }
 
 #about h2,
-#links h2 {
+#links h2,
+.setup-card h2 {
   text-align: center;
   color: #f8fafc;
   font-size: var(--fs-section);
@@ -412,6 +415,183 @@ html {
   color: #e2e8f0;
   background: rgba(118, 199, 255, 0.08);
   border: 1px solid rgba(118, 199, 255, 0.25);
+}
+
+.tags li.tag-link {
+  padding: 0;
+  background: linear-gradient(135deg, rgba(56, 189, 248, 0.35) 0%, rgba(14, 116, 144, 0.35) 100%);
+  border-color: rgba(118, 199, 255, 0.6);
+  box-shadow: 0 0 12px rgba(56, 189, 248, 0.35);
+  transition: box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.tags li.tag-link:hover {
+  background: linear-gradient(135deg, rgba(56, 189, 248, 0.5) 0%, rgba(14, 116, 144, 0.5) 100%);
+  box-shadow: 0 0 18px rgba(56, 189, 248, 0.55);
+}
+
+.tags li.tag-link a {
+  display: block;
+  padding: 0.25rem 0.85rem;
+  font-weight: 600;
+  color: #ffffff;
+  text-decoration: none;
+}
+
+/* ==========================================================================
+   Setup Page
+   ========================================================================== */
+.setup-chips {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0 1rem;
+  margin: 1rem auto 0.5rem;
+}
+
+.setup-chips li {
+  padding: 0.3rem 0.85rem;
+  border-radius: 999px;
+  font-family: var(--font-ui);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: #e0f2fe;
+  background: rgba(56, 189, 248, 0.15);
+  border: 1px solid rgba(118, 199, 255, 0.4);
+}
+
+.setup-grid {
+  display: grid;
+  gap: 1rem;
+  width: 90%;
+  max-width: 920px;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+
+.setup-grid .setup-card {
+  width: auto;
+  margin: 0;
+  text-align: left;
+}
+
+.gear-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.gear-list li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 0;
+  border-top: 1px solid rgba(118, 199, 255, 0.12);
+}
+
+.gear-list li:first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+
+.gear-name {
+  display: block;
+  font-weight: 500;
+  color: #f1f5f9;
+}
+
+.gear-note {
+  display: block;
+  font-size: var(--fs-sm);
+  color: #94a3b8;
+}
+
+/* Status pills: Main / In use / Backup / Preordered */
+.status {
+  flex-shrink: 0;
+  padding: 0.2rem 0.7rem;
+  border-radius: 999px;
+  border: 1px solid;
+  font-family: var(--font-ui);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.status-main {
+  color: #e0f2fe;
+  background: rgba(56, 189, 248, 0.25);
+  border-color: rgba(56, 189, 248, 0.6);
+}
+
+.status-inuse {
+  color: #bbf7d0;
+  background: rgba(34, 197, 94, 0.15);
+  border-color: rgba(34, 197, 94, 0.45);
+}
+
+.status-backup {
+  color: #cbd5e1;
+  background: rgba(148, 163, 184, 0.12);
+  border-color: rgba(148, 163, 184, 0.35);
+}
+
+.status-preorder {
+  color: #fde68a;
+  background: rgba(245, 158, 11, 0.14);
+  border-color: rgba(245, 158, 11, 0.45);
+}
+
+.spec-list {
+  display: grid;
+  margin: 0;
+  column-gap: 2rem;
+}
+
+/* Phones: label above value; wider screens: label beside value */
+.spec-list div {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  padding: 0.6rem 0;
+  border-top: 1px solid rgba(118, 199, 255, 0.12);
+}
+
+.spec-list dt {
+  flex: none;
+  font-family: var(--font-ui);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: #76c7ff;
+  padding-top: 0.1rem;
+}
+
+.spec-list dd {
+  margin: 0;
+  color: #e2e8f0;
+}
+
+.spec-hl {
+  display: inline-block;
+  margin-left: 0.3rem;
+  padding: 0 0.5rem;
+  border-radius: 999px;
+  font-family: var(--font-ui);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: #7dd3fc;
+  background: rgba(56, 189, 248, 0.12);
+  border: 1px solid rgba(56, 189, 248, 0.35);
+}
+
+.setup-updated {
+  margin: 0.25rem 0 0;
+  text-align: center;
+  font-size: var(--fs-sm);
+  color: #64748b;
 }
 
 /* ==========================================================================
@@ -786,6 +966,15 @@ footer p {
 }
 
 @media (min-width: 520px) {
+  .spec-list div {
+    flex-direction: row;
+    gap: 1rem;
+  }
+
+  .spec-list dt {
+    flex: 0 0 6.5rem;
+  }
+
   .grid {
     grid-template-columns: repeat(2, 1fr);
   }
@@ -806,6 +995,20 @@ footer p {
   /* Contact (8 tiles) and Payments (4 cards) fill even rows of four */
   #links .grid {
     grid-template-columns: repeat(4, 1fr);
+  }
+
+  /* Setup: Headset | FBT side by side, Locomotion and PC full width */
+  .setup-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .setup-card-wide,
+  .setup-updated {
+    grid-column: 1 / -1;
+  }
+
+  .spec-list {
+    grid-template-columns: repeat(2, 1fr);
   }
 
   .logo {
