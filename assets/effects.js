@@ -1,3 +1,8 @@
+// Show clean URLs: turn an old "/contact/index.html" link into "/contact/" in the address bar
+if (location.pathname.endsWith('/index.html')) {
+  history.replaceState(null, '', location.pathname.slice(0, -'index.html'.length) + location.search + location.hash);
+}
+
 /* ==========================================================================
    Antigravity Visual Effects Engine: luzian.net
    - Spotlight Cursor Glow
