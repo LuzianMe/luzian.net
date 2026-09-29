@@ -5,6 +5,9 @@
   --mouse-x: 50vw;
   --mouse-y: 30vh;
 
+  /* Font roles: Orbitron for headings/nav, Chakra Petch for short UI labels, Inter for reading */
+  --font-ui: 'Chakra Petch', 'Inter', sans-serif;
+
   /* Type scale: use these instead of one-off font sizes */
   --fs-sm: 0.8125rem;                        /* 13px: handles, tags, small buttons, nav, footer */
   --fs-label: clamp(0.875rem, 1.1vw, 1rem);  /* 14px on phones: tile labels */
@@ -384,7 +387,9 @@ html {
 .tags li {
   padding: 0.25rem 0.75rem;
   border-radius: 999px;
+  font-family: var(--font-ui);
   font-size: var(--fs-sm);
+  font-weight: 500;
   color: #e2e8f0;
   background: rgba(118, 199, 255, 0.08);
   border: 1px solid rgba(118, 199, 255, 0.25);
@@ -440,6 +445,7 @@ button.grid-item {
 }
 
 .grid-item p {
+  font-family: var(--font-ui);
   margin: 0.65rem 0 0 0;
   font-size: var(--fs-label);
   font-weight: 500;
@@ -610,6 +616,7 @@ a[href*="contact.vcf"]:hover .grid-icon {
   margin: 1rem auto 0;
   padding: 0.55rem 1.4rem;
   font: inherit;
+  font-family: var(--font-ui);
   font-weight: 600;
   color: #e0f2fe;
   background: rgba(56, 189, 248, 0.18);
@@ -633,6 +640,7 @@ a[href*="contact.vcf"]:hover .grid-icon {
 }
 
 .grid-item p.pay-handle {
+  font-family: 'Inter', sans-serif;
   margin-top: 0.1rem;
   font-size: var(--fs-sm);
   color: #94a3b8;
@@ -652,6 +660,7 @@ a[href*="contact.vcf"]:hover .grid-icon {
   white-space: nowrap;
   padding: 0.3rem 0.8rem;
   font: inherit;
+  font-family: var(--font-ui);
   font-size: var(--fs-sm);
   font-weight: 600;
   color: #e0f2fe;
