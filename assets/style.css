@@ -221,6 +221,7 @@ main {
   text-align: center;
 }
 
+#about,
 #links {
   padding: 1.75rem;
   margin: 1rem auto;
@@ -236,6 +237,7 @@ main {
   transform-style: preserve-3d;
 }
 
+#about h2,
 #links h2 {
   text-align: center;
   color: #f8fafc;
@@ -243,6 +245,58 @@ main {
   margin-top: 0;
   margin-bottom: 1.25rem;
   text-shadow: 0 0 14px rgba(118, 199, 255, 0.35);
+}
+
+#about {
+  text-align: left;
+  color: #cbd5e1;
+}
+
+#about p {
+  max-width: 680px;
+  margin: 0 auto 1.25rem;
+}
+
+#about h3 {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 1rem;
+  color: #76c7ff;
+  max-width: 680px;
+  margin: 0 auto 0.5rem;
+}
+
+.now-list {
+  max-width: 680px;
+  margin: 0 auto 1.25rem;
+  padding-left: 1.25rem;
+}
+
+.now-list li {
+  margin-bottom: 0.35rem;
+}
+
+.now-list li::marker {
+  color: #76c7ff;
+}
+
+.tags {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0;
+  margin: 0 auto;
+  max-width: 680px;
+}
+
+.tags li {
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  color: #e2e8f0;
+  background: rgba(118, 199, 255, 0.08);
+  border: 1px solid rgba(118, 199, 255, 0.25);
 }
 
 /* ==========================================================================
