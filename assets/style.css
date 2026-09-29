@@ -601,7 +601,7 @@ a[href*="contact.vcf"]:hover .grid-icon {
 
 .qr-share {
   display: block;
-  width: min(100%, 260px);
+  width: min(100%, 300px);
   margin: 0 auto;
 }
 
