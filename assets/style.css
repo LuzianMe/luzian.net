@@ -402,6 +402,13 @@ main > .grid {
   will-change: transform;
 }
 
+button.grid-item {
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  width: 100%;
+}
+
 .grid-item p {
   margin: 0.65rem 0 0 0;
   font-size: clamp(0.85rem, 1.1vw, 1rem);
@@ -458,24 +465,28 @@ a[href^="tel"]:hover .grid-icon {
 #copyEmail:hover .grid-icon {
   filter: drop-shadow(0 0 12px rgba(56, 189, 248, 0.9));
 }
+/* Share (QR) */
+#share-trigger:hover .grid-icon {
+  filter: drop-shadow(0 0 12px rgba(168, 85, 247, 0.9));
+}
 /* Save Contact Card (.vcf) */
 a[href*="contact.vcf"]:hover .grid-icon {
   filter: drop-shadow(0 0 12px rgba(245, 158, 11, 0.9));
 }
 /* Venmo */
-a[href*="venmo"]:hover .grid-icon {
+.pay-item[data-brand="venmo"]:hover .grid-icon {
   filter: drop-shadow(0 0 12px rgba(0, 140, 255, 0.9));
 }
 /* Cash App */
-a[href*="cash.app"]:hover .grid-icon {
+.pay-item[data-brand="cashapp"]:hover .grid-icon {
   filter: drop-shadow(0 0 12px rgba(0, 214, 79, 0.9));
 }
 /* PayPal */
-a[href*="paypal"]:hover .grid-icon {
+.pay-item[data-brand="paypal"]:hover .grid-icon {
   filter: drop-shadow(0 0 12px rgba(0, 112, 186, 0.9));
 }
 /* Zelle */
-#zelle-trigger:hover .grid-icon {
+.pay-item[data-brand="zelle"]:hover .grid-icon {
   filter: drop-shadow(0 0 12px rgba(138, 43, 226, 0.9));
 }
 
@@ -512,6 +523,9 @@ a[href*="paypal"]:hover .grid-icon {
 }
 
 .close {
+  background: none;
+  border: 0;
+  padding: 0;
   color: #94a3b8;
   float: right;
   font-size: 28px;
@@ -548,6 +562,71 @@ a[href*="paypal"]:hover .grid-icon {
   border-radius: 8px;
   display: inline-block;
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+}
+
+.qr-share {
+  display: block;
+  width: min(100%, 260px);
+  margin: 0 auto;
+}
+
+.modal-action {
+  display: block;
+  margin: 1rem auto 0;
+  padding: 0.55rem 1.4rem;
+  font: inherit;
+  font-weight: 600;
+  color: #e0f2fe;
+  background: rgba(56, 189, 248, 0.18);
+  border: 1px solid rgba(118, 199, 255, 0.45);
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.modal-action:hover {
+  background: rgba(56, 189, 248, 0.32);
+}
+
+/* ==========================================================================
+   Payment Cards
+   ========================================================================== */
+.grid-item p.pay-name {
+  margin-top: 0.5rem;
+  font-weight: 600;
+  color: #f8fafc;
+}
+
+.grid-item p.pay-handle {
+  margin-top: 0.1rem;
+  font-size: 0.8rem;
+  color: #94a3b8;
+  word-break: break-all;
+}
+
+.pay-actions {
+  display: flex;
+  gap: 0.4rem;
+  margin-top: 0.75rem;
+}
+
+.pay-btn {
+  padding: 0.3rem 0.8rem;
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #e0f2fe;
+  text-decoration: none;
+  background: rgba(118, 199, 255, 0.1);
+  border: 1px solid rgba(118, 199, 255, 0.3);
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.pay-btn:hover {
+  background: rgba(56, 189, 248, 0.28);
+  border-color: rgba(118, 199, 255, 0.6);
 }
 
 /* ==========================================================================
@@ -620,6 +699,21 @@ footer p {
 }
 
 /* Small Tablets & Large Phones (>= 520px) */
+@media (max-width: 519px) {
+  #links {
+    padding: 1.25rem 0.9rem;
+  }
+
+  #links .grid {
+    grid-template-columns: repeat(2, 1fr);
+    padding: 0;
+  }
+
+  #links .grid-item {
+    padding: 1rem 0.5rem;
+  }
+}
+
 @media (min-width: 520px) {
   .grid {
     grid-template-columns: repeat(2, 1fr);
@@ -636,6 +730,11 @@ footer p {
 @media (min-width: 768px) {
   .grid {
     grid-template-columns: repeat(3, 1fr);
+  }
+
+  /* Contact (8 tiles) and Payments (4 cards) fill even rows of four */
+  #links .grid {
+    grid-template-columns: repeat(4, 1fr);
   }
 
   .logo {

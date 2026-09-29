@@ -51,43 +51,59 @@
       <section id="links">
         <h2>Pay Me</h2>
         <div class="grid">
-          <!-- Replace the existing Zelle payment link -->
-          <div class="grid-item" id="zelle-trigger" title="Click to view Zelle QR" style="cursor: pointer;">
-            <img src="../assets/zelle-icon.svg" alt="Zelle Icon" class="grid-icon">
-            <p>me@luzian.net</p>
+          <div class="grid-item pay-item" data-brand="zelle">
+            <img src="../assets/zelle-icon.svg" alt="" class="grid-icon">
+            <p class="pay-name">Zelle</p>
+            <p class="pay-handle">me@luzian.net</p>
+            <div class="pay-actions">
+              <button type="button" class="pay-btn" id="zelle-trigger" aria-label="Show Zelle QR code">QR</button>
+              <button type="button" class="pay-btn" data-copy="me@luzian.net" aria-label="Copy Zelle me@luzian.net">Copy</button>
+            </div>
           </div>
-          <a href="https://account.venmo.com/u/LuzianMe" class="grid-item" target="_blank"
-            rel="noopener noreferrer" title="Send payment via Venmo">
-            <img src="../assets/venmo-icon.svg" alt="Venmo Icon" class="grid-icon">
-            <p>@LuzianMe</p>
-          </a>
-          <a href="https://cash.app/LuzianMe" class="grid-item" target="_blank"
-            rel="noopener noreferrer" title="Send payment via CashApp">
-            <img src="../assets/cashapp-icon.svg" alt="Cash App Icon" class="grid-icon">
-            <p>$LuzianMe</p>
-          </a>
-          <a href="https://paypal.me/LuzianMe" class="grid-item" target="_blank"
-            rel="noopener noreferrer" title="Send payment via PayPal">
-            <img src="../assets/paypal-icon.svg" alt="PayPal Icon" class="grid-icon">
-            <p>@LuzianMe</p>
-          </a>
-        </div>
-
-        <!-- Modal for the Zelle QR -->
-        <div id="zelle-modal" class="modal" role="dialog" aria-modal="true" aria-label="Zelle QR Code">
-          <div class="modal-content">
-            <span id="close-modal" class="close" aria-label="Close modal">&times;</span>
-            <div class="qr-container">
-              <img src="../assets/zelle-qr.svg" alt="Zelle QR Code" class="qr-image">
-              <p class="qr-legend">Scan this with your Zelle app to pay <b>ME@Luzian.net</b></p>
+          <div class="grid-item pay-item" data-brand="venmo">
+            <img src="../assets/venmo-icon.svg" alt="" class="grid-icon">
+            <p class="pay-name">Venmo</p>
+            <p class="pay-handle">@LuzianMe</p>
+            <div class="pay-actions">
+              <a href="https://venmo.com/u/LuzianMe" class="pay-btn" target="_blank" rel="noopener noreferrer" aria-label="Open Venmo">Open</a>
+              <button type="button" class="pay-btn" data-copy="@LuzianMe" aria-label="Copy Venmo @LuzianMe">Copy</button>
+            </div>
+          </div>
+          <div class="grid-item pay-item" data-brand="cashapp">
+            <img src="../assets/cashapp-icon.svg" alt="" class="grid-icon">
+            <p class="pay-name">Cash App</p>
+            <p class="pay-handle">$LuzianMe</p>
+            <div class="pay-actions">
+              <a href="https://cash.app/$LuzianMe" class="pay-btn" target="_blank" rel="noopener noreferrer" aria-label="Open Cash App">Open</a>
+              <button type="button" class="pay-btn" data-copy="$LuzianMe" aria-label="Copy Cash App $LuzianMe">Copy</button>
+            </div>
+          </div>
+          <div class="grid-item pay-item" data-brand="paypal">
+            <img src="../assets/paypal-icon.svg" alt="" class="grid-icon">
+            <p class="pay-name">PayPal</p>
+            <p class="pay-handle">@LuzianMe</p>
+            <div class="pay-actions">
+              <a href="https://paypal.me/LuzianMe" class="pay-btn" target="_blank" rel="noopener noreferrer" aria-label="Open PayPal">Open</a>
+              <button type="button" class="pay-btn" data-copy="paypal.me/LuzianMe" aria-label="Copy PayPal link">Copy</button>
             </div>
           </div>
         </div>
       </section>
     </main>
+    <!-- Modals live outside #links: its backdrop-filter would trap position:fixed inside the card -->
+    <div id="zelle-modal" class="modal" role="dialog" aria-modal="true" aria-label="Zelle QR Code">
+      <div class="modal-content">
+        <button type="button" id="close-modal" class="close" aria-label="Close">&times;</button>
+        <div class="qr-container">
+          <img src="../assets/zelle-qr.svg" alt="Zelle QR Code" class="qr-image">
+          <p class="qr-legend">Scan this with your Zelle app to pay <b>ME@Luzian.net</b></p>
+        </div>
+      </div>
+    </div>
     <footer>
       <p>&copy; <span id="current-year">2026</span> Luzian. All rights reserved.</p>
     </footer>
+    <script src="../assets/copy.js"></script>
     <script src="script.js"></script>
     <script src="../assets/effects.js"></script>
   </div>
