@@ -360,6 +360,27 @@ html {
   border: 1px solid rgba(118, 199, 255, 0.25);
 }
 
+.ouro-link {
+  display: block;
+  width: fit-content;
+  margin: 1.25rem auto 0;
+  padding: 0.5rem 1.2rem;
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: #e0f2fe;
+  text-decoration: none;
+  background: linear-gradient(135deg, rgba(56, 189, 248, 0.25) 0%, rgba(14, 116, 144, 0.25) 100%);
+  border: 1px solid rgba(118, 199, 255, 0.45);
+  border-radius: 999px;
+  box-shadow: 0 0 14px rgba(56, 189, 248, 0.25);
+  transition: background 0.2s ease, box-shadow 0.2s ease;
+}
+
+.ouro-link:hover {
+  background: linear-gradient(135deg, rgba(56, 189, 248, 0.4) 0%, rgba(14, 116, 144, 0.4) 100%);
+  box-shadow: 0 0 20px rgba(56, 189, 248, 0.45);
+}
+
 /* ==========================================================================
    Grid & 3D Interactive Tiles
    ========================================================================== */

@@ -1,0 +1,85 @@
+/* 3D ouroboros page: the canvas fills the screen, UI floats on top */
+.ouro-page {
+  overflow: hidden;
+}
+
+#ouro-canvas {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  touch-action: none;
+  cursor: grab;
+  z-index: 1;
+}
+
+#ouro-canvas:active {
+  cursor: grabbing;
+}
+
+/* Let drags reach the canvas everywhere except the nav and the panel */
+.ouro-page .page-bg {
+  pointer-events: none;
+  justify-content: space-between;
+}
+
+.ouro-page .nav-container,
+.ouro-panel {
+  pointer-events: auto;
+}
+
+.ouro-panel {
+  margin: 0 auto 1.5rem;
+  padding: 1rem 1.5rem;
+  width: min(90%, 420px);
+  box-sizing: border-box;
+  text-align: center;
+  background: rgba(16, 22, 36, 0.65);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(118, 199, 255, 0.2);
+  border-radius: 16px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+}
+
+.ouro-panel h1 {
+  margin: 0;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 1.3rem;
+  color: #f8fafc;
+  text-shadow: 0 0 14px rgba(118, 199, 255, 0.35);
+}
+
+.ouro-panel p {
+  margin: 0.35rem 0 0;
+  font-size: 0.85rem;
+  color: #94a3b8;
+}
+
+.xr-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.xr-buttons:has(.xr-btn:not([hidden])) {
+  margin-top: 0.8rem;
+}
+
+.xr-btn {
+  padding: 0.5rem 1.2rem;
+  font: inherit;
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: #e0f2fe;
+  background: linear-gradient(135deg, rgba(56, 189, 248, 0.35) 0%, rgba(14, 116, 144, 0.35) 100%);
+  border: 1px solid rgba(118, 199, 255, 0.5);
+  border-radius: 999px;
+  cursor: pointer;
+  box-shadow: 0 0 14px rgba(56, 189, 248, 0.3);
+}
+
+.xr-btn:hover {
+  background: linear-gradient(135deg, rgba(56, 189, 248, 0.5) 0%, rgba(14, 116, 144, 0.5) 100%);
+}

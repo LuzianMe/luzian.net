@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" href="/assets/ouro.ico" type="image/x-icon">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Luzian's ouroboros in 3D. Rotate it, or step into it in VR or AR.">
+  <meta property="og:title" content="Ouroboros in 3D - Luzian">
+  <meta property="og:description" content="Rotate it in your browser, or view it in VR or AR on a headset.">
+  <meta property="og:image" content="https://luzian.net/assets/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Luzian logo over a glowing ouroboros">
+  <meta property="og:site_name" content="Luzian">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta property="og:url" content="https://luzian.net/ouro/">
+  <link rel="canonical" href="https://luzian.net/ouro/">
+  <meta property="og:type" content="website">
+  <title>Luzian | Ouroboros 3D</title>
+  <link rel="stylesheet" href="/assets/style.css">
+  <link rel="stylesheet" href="style.css">
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+      }
+    }
+  </script>
+</head>
+
+<body class="ouro-page">
+  <canvas id="ouro-canvas" aria-label="3D ouroboros you can rotate"></canvas>
+
+  <div class="page-bg">
+    <nav class="nav-container" aria-label="Main Navigation">
+      <ul class="nav-pills">
+        <li><a href="/" class="nav-pill">Home</a></li>
+        <li><a href="/contact/" class="nav-pill">Contact</a></li>
+        <li><a href="/payment/" class="nav-pill">Payments</a></li>
+      </ul>
+    </nav>
+
+    <div class="ouro-panel">
+      <h1>Ouroboros</h1>
+      <p id="ouro-hint">Loading…</p>
+      <div class="xr-buttons">
+        <button type="button" class="xr-btn" id="enter-vr" hidden>View in VR</button>
+        <button type="button" class="xr-btn" id="enter-ar" hidden>View in AR</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="script.js"></script>
+</body>
+
+</html>
