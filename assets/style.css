@@ -288,9 +288,10 @@ main {
   margin-top: 2.5rem;
   color: #94a3b8;
   text-decoration: none;
-  font-size: 0.85rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 1rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
   transition: color 0.25s ease;
 }
 
@@ -300,6 +301,7 @@ main {
 
 .scroll-cue span {
   display: block;
+  font-family: 'Inter', sans-serif;
   font-size: 1.2rem;
   animation: cue-bob 2.4s ease-in-out infinite;
 }
