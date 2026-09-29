@@ -4,6 +4,13 @@
 :root {
   --mouse-x: 50vw;
   --mouse-y: 30vh;
+
+  /* Type scale: use these instead of one-off font sizes */
+  --fs-sm: 0.8125rem;                        /* 13px: handles, tags, small buttons, nav, footer */
+  --fs-label: clamp(0.875rem, 1.1vw, 1rem);  /* 14px on phones: tile labels */
+  --fs-body: 1rem;                           /* 16px: body text */
+  --fs-section: clamp(1.25rem, 2.5vw, 1.8rem); /* 20px on phones: section headings */
+  --fs-title: clamp(1.75rem, 4vw, 2.6rem);   /* 28px on phones: page titles */
 }
 
 ::selection {
@@ -134,8 +141,8 @@ h1, h2, h3, .nav-pill {
   padding: 0.45rem 1.15rem;
   color: #94a3b8;
   text-decoration: none;
-  font-size: 0.82rem;
-  font-weight: 600;
+  font-size: var(--fs-sm);
+  font-weight: 700;
   border-radius: 9999px;
   transition: all 0.25s ease;
 }
@@ -164,14 +171,15 @@ header {
 }
 
 header h1 {
-  font-size: clamp(1.8rem, 4vw, 2.6rem);
+  font-size: var(--fs-title);
   margin-bottom: 0.5rem;
   color: #ffffff;
   text-shadow: 0 0 24px rgba(118, 199, 255, 0.35);
 }
 
 header p {
-  font-size: clamp(0.85rem, 1.4vw, 1.15rem);
+  font-size: clamp(var(--fs-body), 1.4vw, 1.15rem);
+  text-wrap: balance;
   color: #94a3b8;
   margin: 0.25rem 0;
 }
@@ -241,7 +249,7 @@ main {
 #links h2 {
   text-align: center;
   color: #f8fafc;
-  font-size: clamp(1.2rem, 2.5vw, 1.8rem);
+  font-size: var(--fs-section);
   margin-top: 0;
   margin-bottom: 1.25rem;
   text-shadow: 0 0 14px rgba(118, 199, 255, 0.35);
@@ -289,7 +297,7 @@ main {
   color: #94a3b8;
   text-decoration: none;
   font-family: 'Orbitron', sans-serif;
-  font-size: 1rem;
+  font-size: var(--fs-body);
   font-weight: 500;
   letter-spacing: 0.04em;
   transition: color 0.25s ease;
@@ -342,7 +350,7 @@ html {
 
 #about h3 {
   font-family: 'Orbitron', sans-serif;
-  font-size: 1rem;
+  font-size: var(--fs-body);
   color: #76c7ff;
   max-width: 680px;
   margin: 0 auto 0.5rem;
@@ -376,7 +384,7 @@ html {
 .tags li {
   padding: 0.25rem 0.75rem;
   border-radius: 999px;
-  font-size: 0.85rem;
+  font-size: var(--fs-sm);
   color: #e2e8f0;
   background: rgba(118, 199, 255, 0.08);
   border: 1px solid rgba(118, 199, 255, 0.25);
@@ -433,7 +441,7 @@ button.grid-item {
 
 .grid-item p {
   margin: 0.65rem 0 0 0;
-  font-size: clamp(0.85rem, 1.1vw, 1rem);
+  font-size: var(--fs-label);
   font-weight: 500;
   color: #e2e8f0;
   transition: color 0.2s ease;
@@ -550,8 +558,9 @@ a[href*="contact.vcf"]:hover .grid-icon {
   padding: 0;
   color: #94a3b8;
   float: right;
-  font-size: 28px;
-  font-weight: bold;
+  font-family: inherit;
+  font-size: 1.75rem;
+  font-weight: 400;
   cursor: pointer;
   line-height: 1;
   transition: color 0.2s ease;
@@ -559,6 +568,10 @@ a[href*="contact.vcf"]:hover .grid-icon {
 
 .close:hover {
   color: #ffffff;
+}
+
+.qr-legend b {
+  font-weight: 600;
 }
 
 .qr-image {
@@ -576,7 +589,7 @@ a[href*="contact.vcf"]:hover .grid-icon {
 .qr-legend {
   margin-top: 1.25rem;
   color: #f8fafc;
-  font-size: 1rem;
+  font-size: var(--fs-body);
   text-align: center;
   background: rgba(10, 14, 24, 0.8);
   border: 1px solid rgba(118, 199, 255, 0.25);
@@ -621,7 +634,7 @@ a[href*="contact.vcf"]:hover .grid-icon {
 
 .grid-item p.pay-handle {
   margin-top: 0.1rem;
-  font-size: 0.8rem;
+  font-size: var(--fs-sm);
   color: #94a3b8;
   overflow-wrap: anywhere;
 }
@@ -639,7 +652,7 @@ a[href*="contact.vcf"]:hover .grid-icon {
   white-space: nowrap;
   padding: 0.3rem 0.8rem;
   font: inherit;
-  font-size: 0.78rem;
+  font-size: var(--fs-sm);
   font-weight: 600;
   color: #e0f2fe;
   text-decoration: none;
@@ -676,7 +689,7 @@ a[href*="contact.vcf"]:hover .grid-icon {
 
 .message-box p {
   margin: 0;
-  font-size: 1.15rem;
+  font-size: var(--fs-body);
 }
 
 /* ==========================================================================
@@ -687,7 +700,7 @@ footer {
   padding: 1.25rem 0;
   background: none;
   color: #64748b;
-  font-size: 0.9rem;
+  font-size: var(--fs-sm);
 }
 
 footer p {
