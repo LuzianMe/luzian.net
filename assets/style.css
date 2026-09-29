@@ -256,6 +256,13 @@ main {
   box-sizing: border-box;
 }
 
+/* Grids placed directly in <main> (e.g. 404 page) get the same side gutters as .message-box */
+main > .grid {
+  width: 90%;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
 .grid-item {
   display: flex;
   align-items: center;
@@ -441,6 +448,7 @@ a[href*="paypal"]:hover .grid-icon {
   margin: 2rem auto;
   max-width: 600px;
   width: 90%;
+  box-sizing: border-box;
   border-radius: 14px;
   text-align: center;
   box-shadow: 0 8px 28px rgba(0, 0, 0, 0.45);
