@@ -248,14 +248,34 @@ main {
 }
 
 /* Homepage hero: logo and tagline fill the first screen so the ouroboros stays visible */
+/* The homepage nav floats over the hero, so the hero spans the whole screen
+   and the logo can sit at the exact center, like the fixed ouroboros behind it */
+.home .nav-container {
+  position: fixed;
+  left: 0;
+  right: 0;
+}
+
 .hero {
-  min-height: calc(100svh - 4.5rem);
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: grid;
+  grid-template-rows: 1fr auto 1fr;
+  justify-items: center;
+  padding: 0 1rem;
+  box-sizing: border-box;
+}
+
+.hero .logo {
+  grid-row: 2;
+}
+
+.hero-sub {
+  grid-row: 3;
+  align-self: start;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  padding: 0 1rem;
-  box-sizing: border-box;
 }
 
 .hero .logo {
