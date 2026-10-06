@@ -12,7 +12,7 @@
 
   const KEY = 'luzian-theme';
   const root = document.documentElement;
-  const BROWSER_COLORS = { water: '#0d111b', fire: '#140806' };   // the phone's address bar
+  const BROWSER_COLORS = { water: '#0d111b', fire: '#0a0403' };   // the phone's address bar
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   function save(theme) {

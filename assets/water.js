@@ -53,7 +53,7 @@
   //   body   : a tint on the snake's body    letters/halo/hi/shade : the logo's letters, halo, highlights, shadow
   const THEMES = {
     water: { glow: 'rgba(56, 189, 248, 0.35)', tint: [0.40, 0.72, 1.0], absorb: [0.44, 0.34, 0.22], body: [1.0, 1.0, 1.0], letters: [1.0, 1.0, 1.0], halo: [0.463, 0.780, 1.0], hi: [0.10, 0.28, 0.40], shade: [0.005, 0.02, 0.06] },
-    fire: { glow: 'rgba(255, 92, 28, 0.42)', tint: [1.0, 0.42, 0.12], absorb: [0.16, 0.38, 0.52], body: [1.0, 0.68, 0.46], letters: [1.0, 0.93, 0.80], halo: [1.0, 0.44, 0.12], hi: [0.42, 0.20, 0.05], shade: [0.07, 0.012, 0.0] },
+    fire: { glow: 'rgba(255, 70, 10, 0.5)', tint: [1.0, 0.34, 0.04], absorb: [0.12, 0.42, 0.58], body: [1.0, 0.44, 0.20], letters: [1.0, 0.84, 0.58], halo: [1.0, 0.34, 0.05], hi: [0.55, 0.20, 0.0], shade: [0.08, 0.01, 0.0] },
   };
   let palette = THEMES[document.documentElement.getAttribute('data-theme') === 'fire' ? 'fire' : 'water'];
 

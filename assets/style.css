@@ -97,33 +97,33 @@
   --fs-title: clamp(1.75rem, 4vw, 2.6rem);   /* 28px on phones: page titles */
 }
 
-/* Fire: ember orange and amber on a warm near-black, with warm whites */
+/* Fire: saturated flame orange and amber on a very dark ember-black, with warm whites */
 html[data-theme="fire"] {
-  --accent: 255 122 46;
-  --accent-soft: 255 176 107;
-  --accent-deep: 176 38 16;
-  --accent-2: 249 115 22;
-  --accent-light: 255 194 122;
-  --accent-pale: 255 238 220;
-  --white: 255 248 240;
-  --text-strong: 255 244 234;
-  --text-strong-2: 252 238 226;
-  --text: 240 226 214;
-  --text-soft: 222 203 188;
-  --text-soft-2: 230 212 198;
-  --neutral: 238 228 220;
-  --muted: 176 160 148;
-  --muted-2: 128 112 100;
-  --surface-00: 12 5 4;
-  --surface-0: 20 8 6;
-  --surface-1: 30 14 10;
-  --surface-2: 33 15 11;
-  --surface-3: 48 23 16;
-  --surface-4: 70 34 22;
-  --bg-center: 54 19 11;
-  --bg-edge: 12 5 4;
-  --scroll: 74 38 26;
-  --particle: 255 140 60;
+  --accent: 255 94 10;
+  --accent-soft: 255 150 40;
+  --accent-deep: 190 28 4;
+  --accent-2: 255 80 0;
+  --accent-light: 255 196 80;
+  --accent-pale: 255 232 196;
+  --white: 255 246 236;
+  --text-strong: 255 242 228;
+  --text-strong-2: 252 236 220;
+  --text: 240 224 208;
+  --text-soft: 222 200 180;
+  --text-soft-2: 230 210 190;
+  --neutral: 238 226 214;
+  --muted: 178 158 142;
+  --muted-2: 128 108 94;
+  --surface-00: 6 2 2;
+  --surface-0: 11 4 3;
+  --surface-1: 18 7 5;
+  --surface-2: 20 8 5;
+  --surface-3: 32 13 8;
+  --surface-4: 52 22 12;
+  --bg-center: 34 9 4;
+  --bg-edge: 5 2 2;
+  --scroll: 60 26 14;
+  --particle: 255 100 20;
 }
 
 
