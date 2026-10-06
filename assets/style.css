@@ -141,6 +141,23 @@ h1, h2, h3, .nav-pill {
   }
 }
 
+/* Water effect (assets/water.js): a canvas the size of the layer plus room for the glow */
+.ouro-bg-rotator .ouro-water {
+  position: absolute;
+  left: -12%;
+  top: -12%;
+  width: 124%;
+  height: 124%;
+  display: block;
+}
+
+/* Once the canvas is drawing it takes over the picture, the spin and the glow */
+.ouro-bg-rotator.water-on {
+  background-image: none;
+  animation: none;
+  filter: none;
+}
+
 /* 3. Floating Dust / Particle Canvas */
 #ambient-canvas {
   position: fixed;
