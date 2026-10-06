@@ -50,13 +50,16 @@
   const SNAKE_FEEL = { size: 1.25, line: 0.08, gain: 2.3, rate: 1.25 };
   const BG_FEEL = { size: 0.6, line: 0.32, gain: 1.7, rate: 0.5 };   // softer lines: the void is out of focus
   // The logo is a rotational ambigram: turned half way round, in the plane of the page, it reads the
-  // same. Now and then it does that, slowly, as if turning on the water: it lifts a little, its
-  // shadow falls further and softens, and one soft ring spreads under it.
-  // It stays as it lands (the next turn takes it back), so nothing ever snaps.
-  //   duration : seconds for the half turn           firstDelay : seconds of calm before the first turn
-  //   interval : seconds between turns while calm   lift/scale : how far it rises (px) and grows
-  //   shadowExtra : extra fall of the shadow (px)     ripple : strength of the ring it sends out
-  const SPIN = { duration: 2.5, firstDelay: 4, interval: 30, lift: 10, scale: 0.04, shadowExtra: 6, ripple: 1 };
+  // same. While the page is calm it does that, slowly, as if turning on the water: it lifts a little,
+  // its shadow falls further and softens, and one soft ring spreads under it.
+  // The clock decides when: every `interval` seconds of the wall clock (:00 and :30 for 30), so every
+  // window or device showing the page turns its logo at the same moment, with nothing to talk to.
+  // The orientation after the n-th tick is n mod 2, so they also all agree on which way up it is.
+  // A click or tap makes it spin a full turn (it lands as it was, so it stays in step with the rest).
+  //   duration : seconds for the half turn            interval : seconds between turns (on the clock)
+  //   lift/scale : how far it rises (px) and grows      shadowExtra : extra fall of the shadow (px)
+  //   ripple : strength of the ring it sends out      clickDuration : seconds for the full turn on a click
+  const SPIN = { duration: 2.5, interval: 30, lift: 10, scale: 0.04, shadowExtra: 6, ripple: 1, clickDuration: 3.5 };
   // The logo floats above the water:
   //   shadow : how dark its shadow on the water is        shadowX/Y : how far the shadow falls (px)
   //   light  : caustic light reflected up onto the letters   bob     : how far it rises and falls on the swell (px)
@@ -358,7 +361,9 @@
   const logoTextures = logo ? [0, 1, 2].map(() => logo.gl.createTexture()) : [];
   const logoBox = { padX: LOGO_PAD, padTop: LOGO_PAD, padBottom: LOGO_PAD, center: [0.5, 0.5], left: 0, top: 0, width: 0, height: 0, built: 0, builtAt: 0, ready: false };
   const canSpin = document.body.classList.contains('home');   // the half turn is for the home page
-  const spin = { on: false, start: 0, lastEnd: -1e9, calmSince: null, hold: null, half: 0 };   // half: 0 as drawn, 1 turned round
+  // half: 0 as drawn, 1 turned round. tick: the last clock tick seen. flip: the tick being turned for.
+  // click: when a click turn began. shift/hold: only for tests.
+  const spin = { half: 0, tick: null, flip: null, click: null, shift: 0, hold: null };
   let logoOn = !!logo;        // switched off alone if the device struggles
   let logoHover = 0;          // 0..1, eased
   let logoHoverGoal = 0;
@@ -550,25 +555,7 @@
     const t = swellClock;
     const bob = L.bob * (0.62 * Math.sin(t * 0.70162) + 0.38 * Math.sin(t * 1.09956 + 1.3));
 
-    // The half turn: on its own while the page is calm, or when the logo is clicked or tapped
-    const now = performance.now();
-    if (canSpin) {
-      if (document.body.classList.contains('calm')) {
-        if (spin.calmSince === null) spin.calmSince = now;
-        if (!spin.on && now - spin.calmSince > SPIN.firstDelay * 1000 && now - spin.lastEnd > SPIN.interval * 1000) startSpin(now);
-      } else {
-        spin.calmSince = null;
-      }
-    }
-    let turn = 0;                                      // 0..1 through the half turn
-    if (spin.hold !== null) {
-      turn = spin.hold;
-    } else if (spin.on) {
-      turn = (now - spin.start) / (SPIN.duration * 1000);
-      if (turn >= 1) { spin.on = false; spin.lastEnd = now; spin.half = 1 - spin.half; turn = 0; }   // it stays as it landed; the next turn takes it back
-    }
-    const eased = turn < 0.5 ? 4 * turn * turn * turn : 1 - Math.pow(-2 * turn + 2, 3) / 2;   // slow, then slow again
-    const raised = Math.sin(Math.PI * turn);           // 0 at rest, 1 half way round
+    const turning = spinState(performance.now());
 
     const g = logo.gl;
     const u = logo.uniforms;
@@ -577,10 +564,10 @@
     g.uniform2f(u.u_origin, (left - snakeRect.left) / snakeRect.width, (top - snakeRect.top) / snakeRect.height);
     g.uniform2f(u.u_span, logoBox.width / snakeRect.width, logoBox.height / snakeRect.height);
     g.uniform2f(u.u_px, 1 / logoBox.width, 1 / logoBox.height);
-    g.uniform2f(u.u_lift, bob + SPIN.lift * raised, L.dip);
+    g.uniform2f(u.u_lift, bob + SPIN.lift * turning.raised, L.dip);
     g.uniform2f(u.u_canvasPx, logoBox.width, logoBox.height);
     g.uniform2f(u.u_center, logoBox.center[0], logoBox.center[1]);
-    g.uniform3f(u.u_turn, Math.PI * (spin.half + eased), 1 + SPIN.scale * raised, raised);
+    g.uniform3f(u.u_turn, turning.angle, 1 + SPIN.scale * turning.raised, turning.raised);
     g.uniform2f(u.u_live, (logoBox.padTop - LOGO_PAD) / logoBox.height, 1 - (logoBox.padBottom - LOGO_PAD - Math.max(0, L.shadowY)) / logoBox.height);
     g.uniform1f(u.u_hoverFall, SPIN.shadowExtra);
     g.uniform3f(u.u_shadowSet, L.shadow, L.shadowX, L.shadowY);
@@ -600,16 +587,63 @@
     g.drawArrays(g.TRIANGLE_STRIP, 0, 4);
   }
 
-  function startSpin(now) {
-    if (!canSpin || !logoOn || spin.on) return;
-    spin.on = true;
-    spin.start = now;
-    // One soft ring spreads under the logo as it lifts off
+  const ease = (x) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);   // slow, then slow again
+
+  // One soft ring spreads under the logo as it lifts off
+  function pulseUnderLogo() {
     const r = logoImg.getBoundingClientRect();
     addRipple(r.left + r.width / 2, r.top + r.height / 2, SPIN.ripple);
   }
 
-  function onLogoPress() { startSpin(performance.now()); }
+  // Where the logo is in its turning right now: its angle, and how far it is lifted (0..1)
+  function spinState(perfNow) {
+    const wall = Date.now() + spin.shift;
+    const intervalMs = SPIN.interval * 1000;
+    const durationMs = SPIN.duration * 1000;
+    const k = Math.floor(wall / intervalMs);           // which tick of the clock we are in
+    const visible = document.visibilityState === 'visible';
+    const calm = canSpin && visible && document.body.classList.contains('calm');
+
+    if (spin.tick === null) {
+      spin.half = k % 2;                               // every window starts the way the clock says
+      spin.tick = k;
+    } else if (spin.tick !== k) {
+      spin.tick = k;
+      if (!visible) {
+        spin.half = k % 2;                             // nobody is looking: catch up quietly
+        spin.flip = null;
+      } else if (calm && wall - k * intervalMs < durationMs && spin.half !== k % 2) {
+        spin.flip = k;                                 // calm: turn, together with every other window
+        pulseUnderLogo();
+      }                                                // otherwise it sits this one out, and is in step again after
+    }
+
+    let p = 0;                                         // 0..1 through the half turn
+    if (spin.flip !== null) {
+      p = (wall - spin.flip * intervalMs) / durationMs;
+      if (p >= 1) { spin.half = spin.flip % 2; spin.flip = null; p = 0; }
+    }
+    if (spin.hold !== null) p = spin.hold;
+
+    let c = 0;                                         // 0..1 through a full turn started by a click
+    if (spin.click !== null) {
+      c = (perfNow - spin.click) / (SPIN.clickDuration * 1000);
+      if (c >= 1) { spin.click = null; c = 0; }
+    }
+    return {
+      angle: Math.PI * (spin.half + ease(p)) + 2 * Math.PI * ease(c),
+      raised: Math.max(Math.sin(Math.PI * p), Math.sin(Math.PI * c)),
+    };
+  }
+
+  // A click or tap on the logo: one full turn, landing as it was, so it stays in step with the clock
+  function startClickSpin() {
+    if (!canSpin || !logoOn || spin.click !== null) return;
+    spin.click = performance.now();
+    pulseUnderLogo();
+  }
+
+  function onLogoPress() { startClickSpin(); }
 
   // Gives the plain logo image back (used when the logo layer fails or the device is slow)
   function dropLogo() {
@@ -870,7 +904,9 @@
       },
       // hold the half turn at a point (0..1) for tests; null lets it run normally
       spinAt: (turn) => { spin.hold = turn; },
-      spinNow: () => startSpin(performance.now()),
+      spinNow: () => startClickSpin(),
+      // pretend the clock is this many milliseconds ahead (for tests)
+      spinShift: (ms) => { spin.shift = ms; },
       // how far the logo is from looking the same after a half turn (share of its pixels that differ)
       ambigramError: () => {
         const W = logoCanvas.width; const H = logoCanvas.height;
@@ -898,7 +934,7 @@
         }
         return total ? diff / total : 0;
       },
-      logoInfo: () => (logo ? { ready: logoBox.ready, canvas: [logoCanvas.width, logoCanvas.height], box: Object.assign({}, logoBox), over: logoImg.classList.contains('water-over'), spinning: spin.on, half: spin.half } : null),
+      logoInfo: () => (logo ? { ready: logoBox.ready, canvas: [logoCanvas.width, logoCanvas.height], box: Object.assign({}, logoBox), over: logoImg.classList.contains('water-over'), spinning: spin.flip !== null || spin.click !== null, flip: spin.flip, click: spin.click !== null, half: spin.half } : null),
       size: () => snakeCanvas.width,
       backgroundSize: () => (bg ? [bgCanvas.width, bgCanvas.height] : null),
       // largest background opacity currently drawn, read back from the GPU
