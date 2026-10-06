@@ -3,33 +3,39 @@
 
 <head>
   <meta charset="UTF-8">
+  <!-- shared:head -->
   <link rel="icon" href="/assets/ouro.ico" type="image/x-icon">
   <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
   <meta name="theme-color" content="#0d111b">
-  <meta property="og:title" content="Luzian">
-  <meta property="og:description" content="Computer science engineer exploring VR, spatial computing and local AI.">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta property="og:image" content="https://luzian.net/assets/og-image.png">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta property="og:image:alt" content="Luzian logo over a glowing ouroboros">
   <meta property="og:site_name" content="Luzian">
+  <meta property="og:type" content="website">
   <meta name="twitter:card" content="summary_large_image">
   <meta property="og:url" content="https://luzian.net/">
-  <meta property="og:type" content="website">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="/assets/style.css?v=20261007o">
+  <script src="/assets/theme.js?v=20261007o"></script>
+  <!-- /shared:head -->
+  <meta property="og:title" content="Luzian">
+  <meta property="og:description" content="Computer science engineer exploring VR, spatial computing and local AI.">
   <meta name="description" content="404 - Page Not Found">
   <title>404 - Page Not Found</title>
-  <link rel="stylesheet" href="/assets/style.css?v=20261007n">
-  <script src="/assets/theme.js?v=20261007n"></script>
 </head>
 
 <body>
+  <!-- shared:layers -->
   <!-- Ambient Visual Background Layers -->
   <div class="ouro-bg-rotator" aria-hidden="true"></div>
   <canvas id="ambient-canvas" aria-hidden="true"></canvas>
   <div class="spotlight-overlay" aria-hidden="true"></div>
+  <!-- /shared:layers -->
 
   <div class="page-bg">
+    <!-- shared:nav -->
+    <a class="skip-link" href="#main">Skip to content</a>
     <nav class="nav-container" aria-label="Main Navigation">
       <ul class="nav-pills">
         <li><a href="/" class="nav-pill" data-es="Inicio" data-es-href="/es/">Home</a></li>
@@ -37,10 +43,11 @@
         <li><a href="/contact/" class="nav-pill" data-es="Contacto" data-es-href="/es/contact/">Contact</a></li>
       </ul>
     </nav>
+    <!-- /shared:nav -->
     <header>
       <h1 data-es="¡Ups! Página no encontrada">Oops! Page Not Found</h1>
     </header>
-    <main>
+    <main id="main" tabindex="-1">
       <div class="message-box">
         <p data-es="La página que buscas no existe o pudo haberse movido.">The page you're looking for doesn’t exist or might have been moved.</p>
       </div>
@@ -50,9 +57,12 @@
         <a href="/contact/" class="grid-item" data-es-href="/es/contact/"><p data-es="Página de contacto">Contact Page</p></a>
       </div>
     </main>
+    <!-- shared:footer -->
     <footer>
-      <p>&copy; <span id="current-year">2026</span> Luzian. All rights reserved. <span class="footer-links"><span class="footer-sep" aria-hidden="true">&middot;</span> <a href="/payment/">Payments</a> <span class="footer-sep" aria-hidden="true">&middot;</span> <a href="/?calm">Calm mode</a></span></p>
+      <p data-footer="en">&copy; <span class="current-year">2026</span> Luzian. All rights reserved. <span class="footer-links"><span class="footer-sep" aria-hidden="true">&middot;</span> <a href="/payment/">Payments</a> <span class="footer-sep" aria-hidden="true">&middot;</span> <a href="/?calm">Calm mode</a></span></p>
+      <p data-footer="es" lang="es" hidden>&copy; <span class="current-year">2026</span> Luzian. Todos los derechos reservados. <span class="footer-links"><span class="footer-sep" aria-hidden="true">&middot;</span> <a href="/es/payment/">Pagos</a> <span class="footer-sep" aria-hidden="true">&middot;</span> <a href="/es/?calm">Modo tranquilo</a></span></p>
     </footer>
+    <!-- /shared:footer -->
     <script>
       // GitHub Pages serves one 404 page for the whole site: show Spanish when the broken address is under /es/
       if (location.pathname.indexOf('/es/') === 0) {
@@ -61,13 +71,15 @@
         document.querySelector('meta[name="description"]').setAttribute('content', '404 - Página no encontrada');
         document.querySelectorAll('[data-es]').forEach((el) => { el.textContent = el.dataset.es; });
         document.querySelectorAll('[data-es-href]').forEach((el) => { el.setAttribute('href', el.dataset.esHref); });
-        document.querySelector('footer p').innerHTML = '&copy; <span id="current-year">2026</span> Luzian. Todos los derechos reservados. <span class="footer-links"><span class="footer-sep" aria-hidden="true">&middot;</span> <a href="/es/payment/">Pagos</a> <span class="footer-sep" aria-hidden="true">&middot;</span> <a href="/es/?calm">Modo tranquilo</a></span>';
+        document.querySelector('[data-footer="en"]').hidden = true;
+        document.querySelector('[data-footer="es"]').hidden = false;
       }
-      const yearEl = document.getElementById('current-year');
-      if (yearEl) yearEl.textContent = new Date().getFullYear();
     </script>
-    <script src="/assets/effects.js?v=20261007n"></script>
-    <script src="/assets/water.js?v=20261007n"></script>
+    <!-- shared:scripts -->
+    <script src="/assets/effects.js?v=20261007o"></script>
+    <script src="/assets/water.js?v=20261007o"></script>
+    <script src="/assets/lang.js?v=20261007o"></script>
+    <!-- /shared:scripts -->
   </div>
 </body>
 

@@ -3,16 +3,17 @@
 
 <head>
   <meta charset="UTF-8">
-  <link rel="icon" href="./assets/ouro.ico" type="image/x-icon">
+  <!-- shared:head -->
+  <link rel="icon" href="/assets/ouro.ico" type="image/x-icon">
   <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
   <meta name="theme-color" content="#0d111b">
-  <meta property="og:title" content="Luzian">
-  <meta property="og:description" content="Computer science engineer exploring VR, spatial computing and local AI.">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta property="og:image" content="https://luzian.net/assets/og-image.png">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta property="og:image:alt" content="Luzian logo over a glowing ouroboros">
   <meta property="og:site_name" content="Luzian">
+  <meta property="og:type" content="website">
   <meta name="twitter:card" content="summary_large_image">
   <meta property="og:url" content="https://luzian.net/">
   <link rel="canonical" href="https://luzian.net/">
@@ -21,21 +22,26 @@
   <link rel="alternate" hreflang="en" href="https://luzian.net/">
   <link rel="alternate" hreflang="es" href="https://luzian.net/es/">
   <link rel="alternate" hreflang="x-default" href="https://luzian.net/">
-  <meta property="og:type" content="website">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="/assets/style.css?v=20261007o">
+  <script src="/assets/theme.js?v=20261007o"></script>
+  <!-- /shared:head -->
+  <meta property="og:title" content="Luzian">
+  <meta property="og:description" content="Computer science engineer exploring VR, spatial computing and local AI.">
   <meta name="description" content="Computer science engineer exploring VR, spatial computing and local AI.">
   <title>Luzian | Engineer exploring VR &amp; AI</title>
-  <link rel="stylesheet" href="./assets/style.css?v=20261007n">
-  <script src="/assets/theme.js?v=20261007n"></script>
 </head>
 
 <body class="home">
+  <!-- shared:layers -->
   <!-- Ambient Visual Background Layers -->
   <div class="ouro-bg-rotator" aria-hidden="true"></div>
   <canvas id="ambient-canvas" aria-hidden="true"></canvas>
   <div class="spotlight-overlay" aria-hidden="true"></div>
+  <!-- /shared:layers -->
 
   <div class="page-bg">
+    <!-- shared:nav -->
+    <a class="skip-link" href="#main">Skip to content</a>
     <nav class="nav-container" aria-label="Main Navigation">
       <ul class="nav-pills">
         <li><a href="/" class="nav-pill active">Home</a></li>
@@ -44,14 +50,16 @@
       </ul>
     </nav>
     <div class="lang-switch" role="group" aria-label="Language"><span class="lang-current" aria-current="true">EN</span><a href="/es/" hreflang="es" lang="es" title="Ver en español" data-lang="es">ES</a></div>
+    <!-- /shared:nav -->
     <header class="hero">
+      <h1 class="sr-only">Luzian</h1>
       <img src="./assets/logo.svg" alt="Luzian" class="logo">
       <div class="hero-sub">
         <p class="shimmer-text">Computer Science Engineer&nbsp;| Technology Enthusiast</p>
         <a href="#about" class="scroll-cue">About Me <span aria-hidden="true">&darr;</span></a>
       </div>
     </header>
-    <main>
+    <main id="main" tabindex="-1">
       <section id="about">
         <h2>About Me</h2>
         <p>I'm a computer science engineer who tinkers at home: in my homelab, on my PC, with whatever's new. Lately that's
@@ -77,16 +85,16 @@
         </ul>
       </section>
     </main>
+    <!-- shared:footer -->
     <footer>
-      <p>&copy; <span id="current-year">2026</span> Luzian. All rights reserved. <span class="footer-links"><span class="footer-sep" aria-hidden="true">&middot;</span> <a href="/payment/">Payments</a> <span class="footer-sep" aria-hidden="true">&middot;</span> <a href="/?calm">Calm mode</a></span></p>
+      <p>&copy; <span class="current-year">2026</span> Luzian. All rights reserved. <span class="footer-links"><span class="footer-sep" aria-hidden="true">&middot;</span> <a href="/payment/">Payments</a> <span class="footer-sep" aria-hidden="true">&middot;</span> <a href="/?calm">Calm mode</a></span></p>
     </footer>
-    <script>
-      const yearEl = document.getElementById('current-year');
-      if (yearEl) yearEl.textContent = new Date().getFullYear();
-    </script>
-    <script src="./assets/effects.js?v=20261007n"></script>
-    <script src="/assets/water.js?v=20261007n"></script>
-    <script src="/assets/lang.js?v=20261007n"></script>
+    <!-- /shared:footer -->
+    <!-- shared:scripts -->
+    <script src="/assets/effects.js?v=20261007o"></script>
+    <script src="/assets/water.js?v=20261007o"></script>
+    <script src="/assets/lang.js?v=20261007o"></script>
+    <!-- /shared:scripts -->
   </div>
 </body>
 

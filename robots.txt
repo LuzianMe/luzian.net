@@ -1,0 +1,6 @@
+# Everything is open to search engines. The wedding page keeps itself out with a noindex tag
+# (blocking it here would stop crawlers from seeing that tag).
+User-agent: *
+Allow: /
+
+Sitemap: https://luzian.net/sitemap.xml

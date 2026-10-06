@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Written by scripts/sync_pages.py: every page in both languages, with its twin -->
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  <url>
+    <loc>https://luzian.net/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://luzian.net/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://luzian.net/es/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://luzian.net/"/>
+  </url>
+  <url>
+    <loc>https://luzian.net/es/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://luzian.net/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://luzian.net/es/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://luzian.net/"/>
+  </url>
+  <url>
+    <loc>https://luzian.net/career/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://luzian.net/career/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://luzian.net/es/career/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://luzian.net/career/"/>
+  </url>
+  <url>
+    <loc>https://luzian.net/es/career/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://luzian.net/career/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://luzian.net/es/career/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://luzian.net/career/"/>
+  </url>
+  <url>
+    <loc>https://luzian.net/setup/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://luzian.net/setup/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://luzian.net/es/setup/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://luzian.net/setup/"/>
+  </url>
+  <url>
+    <loc>https://luzian.net/es/setup/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://luzian.net/setup/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://luzian.net/es/setup/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://luzian.net/setup/"/>
+  </url>
+  <url>
+    <loc>https://luzian.net/contact/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://luzian.net/contact/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://luzian.net/es/contact/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://luzian.net/contact/"/>
+  </url>
+  <url>
+    <loc>https://luzian.net/es/contact/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://luzian.net/contact/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://luzian.net/es/contact/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://luzian.net/contact/"/>
+  </url>
+  <url>
+    <loc>https://luzian.net/payment/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://luzian.net/payment/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://luzian.net/es/payment/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://luzian.net/payment/"/>
+  </url>
+  <url>
+    <loc>https://luzian.net/es/payment/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://luzian.net/payment/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://luzian.net/es/payment/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://luzian.net/payment/"/>
+  </url>
+</urlset>

@@ -3,6 +3,9 @@ if (location.pathname.endsWith('/index.html')) {
   history.replaceState(null, '', location.pathname.slice(0, -'index.html'.length) + location.search + location.hash);
 }
 
+// The copyright year in the footer (pages are written with a fixed year; this keeps it current)
+document.querySelectorAll('.current-year').forEach((el) => { el.textContent = new Date().getFullYear(); });
+
 /* ==========================================================================
    Antigravity Visual Effects Engine: luzian.net
    - Spotlight Cursor Glow
@@ -24,9 +27,16 @@ if (location.pathname.endsWith('/index.html')) {
   let currentX = mouseX;
   let currentY = mouseY;
 
+  let spotlightRunning = false;
+
   document.addEventListener('mousemove', (e) => {
     mouseX = e.clientX;
     mouseY = e.clientY;
+    // Only run while the glow is still catching up with the mouse (an idle page does no work)
+    if (hasMouse && !reduceMotion && !spotlightRunning) {
+      spotlightRunning = true;
+      requestAnimationFrame(updateSpotlight);
+    }
   });
 
   function updateSpotlight() {
@@ -37,6 +47,10 @@ if (location.pathname.endsWith('/index.html')) {
     document.documentElement.style.setProperty('--mouse-x', `${currentX.toFixed(1)}px`);
     document.documentElement.style.setProperty('--mouse-y', `${currentY.toFixed(1)}px`);
 
+    if (Math.abs(mouseX - currentX) < 0.3 && Math.abs(mouseY - currentY) < 0.3) {
+      spotlightRunning = false;   // arrived: stop until the mouse moves again
+      return;
+    }
     requestAnimationFrame(updateSpotlight);
   }
   if (hasMouse && !reduceMotion) requestAnimationFrame(updateSpotlight);
@@ -273,9 +287,15 @@ if (location.pathname.endsWith('/index.html')) {
       if (reduceMotion) requestAnimationFrame(animate);
     });
 
+    // Thirty frames a second is plenty for drifting specks (and half the work of sixty)
+    const FRAME_MS = 1000 / 30;
     let last = 0;
     function animate(timestamp) {
       const now = timestamp || performance.now();
+      if (!reduceMotion && last && now - last < FRAME_MS - 2) {
+        requestAnimationFrame(animate);
+        return;
+      }
       const dt = last ? Math.min((now - last) / 1000, 0.1) : 1 / 60;
       last = now;
       ctx.clearRect(0, 0, width, height);
