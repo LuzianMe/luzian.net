@@ -1333,3 +1333,22 @@ footer a:hover {
   opacity: 0;
   filter: none;
 }
+
+/* Calm mode (home page, assets/effects.js): when nothing has moved for a few seconds the menu, the
+   language switch and the labels fade away, leaving the water, the snake and the logo. Anything
+   that moves brings them back, a little faster than they left. */
+body.home .nav-container,
+body.home .lang-switch,
+body.home .hero-sub,
+body.home .lang-banner {
+  transition: opacity 0.5s ease;
+}
+
+body.home.calm .nav-container,
+body.home.calm .lang-switch,
+body.home.calm .hero-sub,
+body.home.calm .lang-banner {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 1.6s ease;
+}

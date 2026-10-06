@@ -49,6 +49,14 @@
   // into bigger, softer, slower, bluer light.
   const SNAKE_FEEL = { size: 1.25, line: 0.08, gain: 2.3, rate: 1.25 };
   const BG_FEEL = { size: 0.6, line: 0.32, gain: 1.7, rate: 0.5 };   // softer lines: the void is out of focus
+  // The logo is a rotational ambigram: turned half way round, in the plane of the page, it reads the
+  // same. Now and then it does that, slowly, as if turning on the water: it lifts a little, its
+  // shadow falls further and softens, and one soft ring spreads under it.
+  // It stays as it lands (the next turn takes it back), so nothing ever snaps.
+  //   duration : seconds for the half turn           firstDelay : seconds of calm before the first turn
+  //   interval : seconds between turns while calm   lift/scale : how far it rises (px) and grows
+  //   shadowExtra : extra fall of the shadow (px)     ripple : strength of the ring it sends out
+  const SPIN = { duration: 2.5, firstDelay: 4, interval: 30, lift: 10, scale: 0.04, shadowExtra: 6, ripple: 1 };
   // The logo floats above the water:
   //   shadow : how dark its shadow on the water is        shadowX/Y : how far the shadow falls (px)
   //   light  : caustic light reflected up onto the letters   bob     : how far it rises and falls on the swell (px)
@@ -210,8 +218,28 @@
     uniform float u_glow;
     uniform float u_cScale;
     uniform float u_cLine;
+    uniform vec2 u_canvasPx;      // this canvas, in CSS pixels
+    uniform vec2 u_center;        // the middle of the artwork, in this canvas's 0..1 units (what it turns about)
+    uniform vec3 u_turn;          // how far it has turned (radians), how much bigger it is, how high it is lifted (0..1)
+    uniform vec2 u_live;          // top and bottom of the part of the canvas that is used while it is not turning
+    uniform float u_hoverFall;    // how much further the shadow falls when it is lifted (px)
+
+    // Where in the artwork this spot comes from, once the artwork has been turned about its middle
+    vec2 turned(vec2 uv) {
+      vec2 p = (uv - u_center) * u_canvasPx;
+      float c = cos(u_turn.x);
+      float s = sin(u_turn.x);
+      p = mat2(c, -s, s, c) * p / u_turn.y;
+      return u_center + p / u_canvasPx;
+    }
 
     void main() {
+      // The canvas is tall enough for the logo to stand on its end; when it is not turning, the
+      // extra room is empty, so skip it
+      if (u_turn.z == 0.0 && (v_uv.y < u_live.x || v_uv.y > u_live.y)) {
+        gl_FragColor = vec4(0.0);
+        return;
+      }
       vec2 w = u_origin + v_uv * u_span;               // this spot on the water
 
       // The water under the logo
@@ -223,22 +251,24 @@
       // A ring passing under the middle of the logo lowers it a little
       vec2 d0 = vec2(0.0);
       float l0 = 0.0;
-      rings(u_origin + 0.5 * u_span, d0, l0);
+      rings(u_origin + u_center * u_span, d0, l0);
       float lift = u_lift.x - u_lift.y * l0;
 
       // Shadow: falls further the higher the logo rises, and is bent by the water it lands on
-      vec2 fall = vec2(u_shadowSet.y, u_shadowSet.z + 0.5 * lift) * u_px;
-      float sh = texture2D(u_soft, v_uv - fall + 1.5 * disp / u_span).a * u_shadowSet.x;
+      vec2 fall = vec2(u_shadowSet.y, u_shadowSet.z + 0.5 * lift + u_hoverFall * u_turn.z) * u_px;
+      vec2 sc = turned(v_uv - fall + 1.5 * disp / u_span);
+      // Lifted higher, the shadow is softer and wider
+      float sh = mix(texture2D(u_soft, sc).a, min(texture2D(u_halo, sc).a * 1.8, 1.0), 0.6 * u_turn.z) * u_shadowSet.x;
       vec4 col = vec4(vec3(0.005, 0.02, 0.06) * sh, sh);
 
       // Halo
-      float g = texture2D(u_halo, v_uv).a * 0.25 * u_glow;
+      float g = texture2D(u_halo, turned(v_uv)).a * 0.25 * u_glow;
       col = vec4(vec3(0.463, 0.780, 1.0) * g, g) + col * (1.0 - g);
 
       // Letters, raised by the swell. Caustic light from the water below plays across them: the
       // same light web as under the snake, so it lines up, with the same dim-between-lines look,
       // plus a cool highlight on the lines.
-      vec4 L = texture2D(u_tex, v_uv + vec2(0.0, lift) * u_px);
+      vec4 L = texture2D(u_tex, turned(v_uv + vec2(0.0, lift) * u_px));
       if (L.a > 0.004) {                               // only where there are letters
         float web = caustic(w + disp * 2.0, u_cScale, u_cLine, ${SNAKE_FEEL.gain.toFixed(2)});
         vec3 absorb = vec3(0.44, 0.34, 0.22);
@@ -318,14 +348,17 @@
   logoCanvas.setAttribute('aria-hidden', 'true');
   const logo = logoImg && logoImg.offsetParent ? makeRenderer(logoCanvas, LOGO_FRAGMENT,
     ['u_time', 'u_ripples', 'u_tex', 'u_soft', 'u_halo', 'u_origin', 'u_span', 'u_px', 'u_lift', 'u_shadowSet', 'u_light', 'u_glow',
-      'u_cScale', 'u_cLine', 'u_causticTime', 'u_swellAmp', 'u_swellTime', 'u_shimmer', ...RING_UNIFORMS]) : null;
+      'u_cScale', 'u_cLine', 'u_causticTime', 'u_swellAmp', 'u_swellTime', 'u_shimmer', 'u_canvasPx', 'u_center', 'u_turn', 'u_live',
+      'u_hoverFall', ...RING_UNIFORMS]) : null;
   if (logo) {
     logo.gl.uniform1i(logo.uniforms.u_tex, 0);
     logo.gl.uniform1i(logo.uniforms.u_soft, 1);
     logo.gl.uniform1i(logo.uniforms.u_halo, 2);
   }
   const logoTextures = logo ? [0, 1, 2].map(() => logo.gl.createTexture()) : [];
-  const logoBox = { padX: LOGO_PAD, left: 0, top: 0, width: 0, height: 0, built: 0, builtAt: 0, ready: false };
+  const logoBox = { padX: LOGO_PAD, padTop: LOGO_PAD, padBottom: LOGO_PAD, center: [0.5, 0.5], left: 0, top: 0, width: 0, height: 0, built: 0, builtAt: 0, ready: false };
+  const canSpin = document.body.classList.contains('home');   // the half turn is for the home page
+  const spin = { on: false, start: 0, lastEnd: -1e9, calmSince: null, hold: null, half: 0 };   // half: 0 as drawn, 1 turned round
   let logoOn = !!logo;        // switched off alone if the device struggles
   let logoHover = 0;          // 0..1, eased
   let logoHoverGoal = 0;
@@ -390,17 +423,12 @@
   // ---------------------------------------------------------------------------------------------
   // The logo: sits where the logo image is, and takes over its picture
   // ---------------------------------------------------------------------------------------------
-  // More room below than above: the shadow falls down onto the water
-  function logoPadBottom() {
-    return LOGO_PAD + Math.max(0, LOGO.shadowY);
-  }
-
   // Draws the logo art three ways (crisp, and two blurred silhouettes) into textures
-  function buildLogoTextures(cssW, cssH, padX) {
+  function buildLogoTextures(cssW, cssH, padX, padTop, padBottom) {
     const gl = logo.gl;
     const dpr = Math.min(window.devicePixelRatio || 1, MAX_DPR);
     const cssFullW = cssW + 2 * padX;
-    const cssFullH = cssH + LOGO_PAD + logoPadBottom();
+    const cssFullH = cssH + padTop + padBottom;
     const W = Math.min(MAX_TEXTURE, Math.max(32, Math.round(cssFullW * dpr)));
     const H = Math.min(MAX_TEXTURE, Math.max(32, Math.round(cssFullH * dpr)));
     const sx = W / cssFullW;
@@ -412,7 +440,7 @@
     const artW = Math.min(cssW, cssH * ratio);
     const artH = artW / ratio;
     const artX = padX + (cssW - artW) / 2;
-    const artY = LOGO_PAD + (cssH - artH) / 2;
+    const artY = padTop + (cssH - artH) / 2;
 
     const make = (blurCss) => {
       const flat = document.createElement('canvas');
@@ -432,6 +460,22 @@
     };
     const sources = [make(0), make(LOGO_SHADOW_BLUR), make(LOGO_GLOW_BLUR)];
 
+    // The middle of the artwork (the box round its letters), which is what it turns about. For an
+    // ambigram this is its point of symmetry, so a half turn lands exactly on the starting picture.
+    const px = sources[0].getContext('2d').getImageData(0, 0, W, H).data;
+    let x0 = W, x1 = -1, y0 = H, y1 = -1;
+    for (let y = 0; y < H; y++) {
+      for (let x = 0; x < W; x++) {
+        if (px[(y * W + x) * 4 + 3] > 40) {
+          if (x < x0) x0 = x;
+          if (x > x1) x1 = x;
+          if (y < y0) y0 = y;
+          if (y > y1) y1 = y;
+        }
+      }
+    }
+    logoBox.center = x1 >= 0 ? [(x0 + x1 + 1) / 2 / W, (y0 + y1 + 1) / 2 / H] : [0.5, 0.5];
+
     logoCanvas.width = W;
     logoCanvas.height = H;
     gl.viewport(0, 0, W, H);
@@ -446,6 +490,7 @@
       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
     });
     logoBox.built = padX * 100000000 + cssW * 10000 + cssH;
+    logoBox.builtPads = padTop * 10000 + padBottom;
     logoBox.builtAt = performance.now();
   }
 
@@ -463,18 +508,27 @@
     // the canvas never sticks out past the page
     const host = logoCanvas.parentNode;
     const padX = Math.max(24, Math.min(LOGO_PAD, logoImg.offsetLeft, host.clientWidth - logoImg.offsetLeft - w));
-    if (padX * 100000000 + w * 10000 + h !== logoBox.built && (force || !logoBox.ready || performance.now() - logoBox.builtAt > 150)) {
-      buildLogoTextures(w, h, padX);
+    // Above and below: room for the glow, and (on the home page) for the logo to stand on its end
+    // while it turns; below also the shadow, which falls downward
+    const turnRoom = canSpin ? Math.ceil(Math.max(0, (w * (1 + SPIN.scale) - h) / 2) + SPIN.lift + 4) : 0;
+    const padTop = LOGO_PAD + turnRoom;
+    const padBottom = LOGO_PAD + turnRoom + Math.max(0, LOGO.shadowY);
+    if ((padX * 100000000 + w * 10000 + h !== logoBox.built || padTop * 10000 + padBottom !== logoBox.builtPads) &&
+        (force || !logoBox.ready || performance.now() - logoBox.builtAt > 150)) {
+      buildLogoTextures(w, h, padX, padTop, padBottom);
       logoBox.padX = padX;
+      logoBox.padTop = padTop;
+      logoBox.padBottom = padBottom;
     }
     logoBox.left = logoImg.offsetLeft - logoBox.padX;
-    logoBox.top = logoImg.offsetTop - LOGO_PAD;
+    logoBox.top = logoImg.offsetTop - logoBox.padTop;
     logoBox.width = w + 2 * logoBox.padX;
-    logoBox.height = h + LOGO_PAD + logoPadBottom();
+    logoBox.height = h + logoBox.padTop + logoBox.padBottom;
     logoCanvas.style.left = logoBox.left + 'px';
     logoCanvas.style.top = logoBox.top + 'px';
     logoCanvas.style.width = logoBox.width + 'px';
     logoCanvas.style.height = logoBox.height + 'px';
+    logoCanvas.style.transformOrigin = '50% ' + (logoBox.padTop + h / 2) + 'px';   // the hover growth is about the logo, not the canvas
     logoCanvas.hidden = false;
     logoBox.ready = true;
     return true;
@@ -496,6 +550,26 @@
     const t = swellClock;
     const bob = L.bob * (0.62 * Math.sin(t * 0.70162) + 0.38 * Math.sin(t * 1.09956 + 1.3));
 
+    // The half turn: on its own while the page is calm, or when the logo is clicked or tapped
+    const now = performance.now();
+    if (canSpin) {
+      if (document.body.classList.contains('calm')) {
+        if (spin.calmSince === null) spin.calmSince = now;
+        if (!spin.on && now - spin.calmSince > SPIN.firstDelay * 1000 && now - spin.lastEnd > SPIN.interval * 1000) startSpin(now);
+      } else {
+        spin.calmSince = null;
+      }
+    }
+    let turn = 0;                                      // 0..1 through the half turn
+    if (spin.hold !== null) {
+      turn = spin.hold;
+    } else if (spin.on) {
+      turn = (now - spin.start) / (SPIN.duration * 1000);
+      if (turn >= 1) { spin.on = false; spin.lastEnd = now; spin.half = 1 - spin.half; turn = 0; }   // it stays as it landed; the next turn takes it back
+    }
+    const eased = turn < 0.5 ? 4 * turn * turn * turn : 1 - Math.pow(-2 * turn + 2, 3) / 2;   // slow, then slow again
+    const raised = Math.sin(Math.PI * turn);           // 0 at rest, 1 half way round
+
     const g = logo.gl;
     const u = logo.uniforms;
     g.clear(g.COLOR_BUFFER_BIT);
@@ -503,7 +577,12 @@
     g.uniform2f(u.u_origin, (left - snakeRect.left) / snakeRect.width, (top - snakeRect.top) / snakeRect.height);
     g.uniform2f(u.u_span, logoBox.width / snakeRect.width, logoBox.height / snakeRect.height);
     g.uniform2f(u.u_px, 1 / logoBox.width, 1 / logoBox.height);
-    g.uniform2f(u.u_lift, bob, L.dip);
+    g.uniform2f(u.u_lift, bob + SPIN.lift * raised, L.dip);
+    g.uniform2f(u.u_canvasPx, logoBox.width, logoBox.height);
+    g.uniform2f(u.u_center, logoBox.center[0], logoBox.center[1]);
+    g.uniform3f(u.u_turn, Math.PI * (spin.half + eased), 1 + SPIN.scale * raised, raised);
+    g.uniform2f(u.u_live, (logoBox.padTop - LOGO_PAD) / logoBox.height, 1 - (logoBox.padBottom - LOGO_PAD - Math.max(0, L.shadowY)) / logoBox.height);
+    g.uniform1f(u.u_hoverFall, SPIN.shadowExtra);
     g.uniform3f(u.u_shadowSet, L.shadow, L.shadowX, L.shadowY);
     g.uniform1f(u.u_light, L.light);
     g.uniform1f(u.u_glow, L.glow + (L.hoverGlow - L.glow) * logoHover);
@@ -521,6 +600,17 @@
     g.drawArrays(g.TRIANGLE_STRIP, 0, 4);
   }
 
+  function startSpin(now) {
+    if (!canSpin || !logoOn || spin.on) return;
+    spin.on = true;
+    spin.start = now;
+    // One soft ring spreads under the logo as it lifts off
+    const r = logoImg.getBoundingClientRect();
+    addRipple(r.left + r.width / 2, r.top + r.height / 2, SPIN.ripple);
+  }
+
+  function onLogoPress() { startSpin(performance.now()); }
+
   // Gives the plain logo image back (used when the logo layer fails or the device is slow)
   function dropLogo() {
     if (!logoOn) return;
@@ -528,6 +618,7 @@
     logoImg.classList.remove('water-over');
     logoImg.removeEventListener('pointerenter', onLogoEnter);
     logoImg.removeEventListener('pointerleave', onLogoLeave);
+    logoImg.removeEventListener('pointerdown', onLogoPress);
     logoCanvas.remove();
   }
 
@@ -718,6 +809,7 @@
       logoImg.offsetParent.appendChild(logoCanvas);
       logoImg.addEventListener('pointerenter', onLogoEnter);
       logoImg.addEventListener('pointerleave', onLogoLeave);
+      logoImg.addEventListener('pointerdown', onLogoPress, { passive: true });
     }
     buildTexture();
     sizeBackground();
@@ -776,7 +868,37 @@
         let sum = 0; for (let i = 0; i < px.length; i += 4) sum += px[i] + 3 * px[i + 1] + 7 * px[i + 2] + 11 * px[i + 3];
         return sum;
       },
-      logoInfo: () => (logo ? { ready: logoBox.ready, canvas: [logoCanvas.width, logoCanvas.height], box: Object.assign({}, logoBox), over: logoImg.classList.contains('water-over') } : null),
+      // hold the half turn at a point (0..1) for tests; null lets it run normally
+      spinAt: (turn) => { spin.hold = turn; },
+      spinNow: () => startSpin(performance.now()),
+      // how far the logo is from looking the same after a half turn (share of its pixels that differ)
+      ambigramError: () => {
+        const W = logoCanvas.width; const H = logoCanvas.height;
+        const c = document.createElement('canvas'); c.width = W; c.height = H;
+        // rebuild the crisp picture from the texture's source by drawing the image again
+        const cx = logoBox.center[0] * W; const cy = logoBox.center[1] * H;
+        const dpr = Math.min(window.devicePixelRatio || 1, MAX_DPR);
+        const w = logoImg.offsetWidth; const h = logoImg.offsetHeight;
+        const sx = W / (w + 2 * logoBox.padX); const sy = H / (h + logoBox.padTop + logoBox.padBottom);
+        const ratio = logoImg.naturalWidth / logoImg.naturalHeight;
+        const artW = Math.min(w, h * ratio); const artH = artW / ratio;
+        const ctx = c.getContext('2d');
+        ctx.drawImage(logoImg, (logoBox.padX + (w - artW) / 2) * sx, (logoBox.padTop + (h - artH) / 2) * sy, artW * sx, artH * sy);
+        const a = ctx.getImageData(0, 0, W, H).data;
+        let diff = 0; let total = 0;
+        for (let y = 0; y < H; y++) {
+          for (let x = 0; x < W; x++) {
+            const i = (y * W + x) * 4 + 3;
+            const rx = Math.round(2 * cx - x - 1); const ry = Math.round(2 * cy - y - 1);
+            const j = rx >= 0 && rx < W && ry >= 0 && ry < H ? (ry * W + rx) * 4 + 3 : -1;
+            const on = a[i] > 127; const back = j >= 0 && a[j] > 127;
+            if (on || back) total++;
+            if (on !== back) diff++;
+          }
+        }
+        return total ? diff / total : 0;
+      },
+      logoInfo: () => (logo ? { ready: logoBox.ready, canvas: [logoCanvas.width, logoCanvas.height], box: Object.assign({}, logoBox), over: logoImg.classList.contains('water-over'), spinning: spin.on, half: spin.half } : null),
       size: () => snakeCanvas.width,
       backgroundSize: () => (bg ? [bgCanvas.width, bgCanvas.height] : null),
       // largest background opacity currently drawn, read back from the GPU
