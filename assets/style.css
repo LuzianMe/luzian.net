@@ -215,6 +215,25 @@ h1, h2, h3, .nav-pill {
   box-shadow: 0 0 14px rgba(56, 189, 248, 0.4);
 }
 
+/* Four nav buttons need tighter spacing to fit phone widths */
+@media (max-width: 480px) {
+  .nav-pills {
+    gap: 0.15rem;
+    padding: 0.3rem 0.35rem;
+  }
+
+  .nav-pill {
+    padding: 0.45rem 0.6rem;
+  }
+}
+
+@media (max-width: 340px) {
+  .nav-pill {
+    padding: 0.45rem 0.5rem;
+    font-size: 0.75rem;
+  }
+}
+
 /* ==========================================================================
    Header & Shimmer Text
    ========================================================================== */
@@ -422,21 +441,24 @@ html {
   margin: 0 auto 0.5rem;
 }
 
-.now-list {
+.now-list,
+.bullet-list {
   max-width: 680px;
   margin: 0 auto 1.25rem;
   padding-left: 0;
   list-style: none;
 }
 
-.now-list li {
+.now-list li,
+.bullet-list li {
   position: relative;
   margin-bottom: 0.35rem;
   padding-left: 1.4rem;
 }
 
 /* Glowing chevron bullets */
-.now-list li::before {
+.now-list li::before,
+.bullet-list li::before {
   content: '\203A';
   position: absolute;
   left: 0.2rem;
@@ -636,6 +658,75 @@ html {
   color: #7dd3fc;
   background: rgba(56, 189, 248, 0.12);
   border: 1px solid rgba(56, 189, 248, 0.35);
+}
+
+/* ---- Career page ---- */
+header .career-name {
+  margin: 0.4rem 0 0.2rem;
+  font-family: var(--font-ui);
+  font-size: var(--fs-body);
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  color: #e2e8f0;
+}
+
+.cta {
+  display: inline-block;
+  margin-top: 0.75rem;
+  padding: 0.5rem 1.4rem;
+  border-radius: 999px;
+  font-family: var(--font-ui);
+  font-weight: 600;
+  color: #ffffff;
+  text-decoration: none;
+  background: linear-gradient(135deg, rgba(56, 189, 248, 0.35) 0%, rgba(14, 116, 144, 0.35) 100%);
+  border: 1px solid rgba(118, 199, 255, 0.6);
+  box-shadow: 0 0 12px rgba(56, 189, 248, 0.35);
+  transition: box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.cta:hover {
+  background: linear-gradient(135deg, rgba(56, 189, 248, 0.5) 0%, rgba(14, 116, 144, 0.5) 100%);
+  box-shadow: 0 0 18px rgba(56, 189, 248, 0.55);
+}
+
+.career-grid .setup-card p {
+  margin: 0 0 0.75rem;
+  color: #d5dde8;
+}
+
+.career-grid .setup-card p:last-child {
+  margin-bottom: 0;
+}
+
+.career-grid p strong {
+  color: #7dd3fc;
+  font-weight: 500;
+}
+
+.career-grid .tags {
+  justify-content: flex-start;
+  margin: 0;
+  max-width: none;
+}
+
+.career-grid .bullet-list {
+  max-width: none;
+  margin: 0;
+}
+
+.career-grid .bullet-list li:last-child {
+  margin-bottom: 0;
+}
+
+.career-more {
+  text-align: center;
+  padding: 0.5rem 0 0;
+}
+
+.career-more p {
+  margin: 0;
+  color: #94a3b8;
 }
 
 .setup-card-intro {
