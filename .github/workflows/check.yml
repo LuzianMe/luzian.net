@@ -1,0 +1,18 @@
+# Runs the site checks on every pull request and every push to main (see scripts/check_site.py)
+name: Site checks
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check the site
+        run: python3 scripts/check_site.py
