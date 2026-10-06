@@ -31,13 +31,14 @@ if (zelleTrigger && modal) {
   });
 }
 
-// Copy buttons on each payment card
+// Copy buttons on each payment card (messages come from data attributes on <body>)
+const msg = document.body.dataset;
 document.querySelectorAll('.pay-btn[data-copy]').forEach((btn) => {
   btn.addEventListener('click', () => {
     const text = btn.dataset.copy;
     copyText(text)
-      .then(() => flashLabel(btn, 'Copied!'))
-      .catch(() => prompt('Copy this:', text));
+      .then(() => flashLabel(btn, msg.copied || 'Copied!'))
+      .catch(() => prompt(msg.promptCopy || 'Copy this:', text));
   });
 });
 

@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" href="/assets/ouro.ico" type="image/x-icon">
+  <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+  <meta name="theme-color" content="#0d111b">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Ingeniero en Ciencias Computacionales explorando VR, computación espacial e IA local.">
+  <meta property="og:title" content="Luzian">
+  <meta property="og:description" content="Ingeniero en Ciencias Computacionales explorando VR, computación espacial e IA local.">
+  <meta property="og:image" content="https://luzian.net/assets/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Logotipo de Luzian sobre un ouroboros luminoso">
+  <meta property="og:site_name" content="Luzian">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta property="og:url" content="https://luzian.net/es/">
+  <link rel="canonical" href="https://luzian.net/es/">
+  <meta property="og:locale" content="es_MX">
+  <meta property="og:locale:alternate" content="en_US">
+  <link rel="alternate" hreflang="es" href="https://luzian.net/es/">
+  <link rel="alternate" hreflang="en" href="https://luzian.net/">
+  <link rel="alternate" hreflang="x-default" href="https://luzian.net/">
+  <meta property="og:type" content="website">
+  <title>Luzian | Ingeniero explorando VR e IA</title>
+  <link rel="stylesheet" href="/assets/style.css?v=20261006a">
+  <script>
+    document.documentElement.style.setProperty('--rotator-delay', `-${(Date.now() / 1000 % 120).toFixed(3)}s`);
+  </script>
+</head>
+
+<body class="home">
+  <!-- Ambient Visual Background Layers -->
+  <div class="ouro-bg-rotator" aria-hidden="true"></div>
+  <canvas id="ambient-canvas" aria-hidden="true"></canvas>
+  <div class="spotlight-overlay" aria-hidden="true"></div>
+
+  <div class="page-bg">
+    <nav class="nav-container" aria-label="Navegación principal">
+      <ul class="nav-pills">
+        <li><a href="/es/" class="nav-pill active">Inicio</a></li>
+        <li><a href="/es/career/" class="nav-pill">Trayectoria</a></li>
+        <li><a href="/es/setup/" class="nav-pill">Mi equipo</a></li>
+        <li><a href="/es/contact/" class="nav-pill">Contacto</a></li>
+      </ul>
+    </nav>
+    <div class="lang-switch" role="group" aria-label="Idioma"><a href="/" hreflang="en" lang="en" title="View in English" data-lang="en">EN</a><span class="lang-current" aria-current="true">ES</span></div>
+    <header class="hero">
+      <img src="/assets/logo.svg" alt="Luzian" class="logo">
+      <div class="hero-sub">
+        <p class="shimmer-text">Ingeniero en Ciencias Computacionales&nbsp;| Entusiasta de la tecnología</p>
+        <a href="#about" class="scroll-cue">Sobre mí <span aria-hidden="true">&darr;</span></a>
+      </div>
+    </header>
+    <main>
+      <section id="about">
+        <h2>Sobre mí</h2>
+        <p>Soy ingeniero en ciencias computacionales y me gusta experimentar en casa: en mi homelab, en mi PC, con lo que sea
+          nuevo. Últimamente eso significa <strong>VR, computación espacial</strong> y
+          <strong>la nueva ola de herramientas de IA</strong>, <strong>bajo mis propios términos</strong>.</p>
+        <h3>Lo que estoy explorando</h3>
+        <ul class="now-list">
+          <li>Reuniones en VRChat y noches de DJ con mi Quest Pro</li>
+          <li>Afinando mi equipo de PC VR para lograr un VR social fluido y nítido</li>
+          <li>Usando IA tanto de forma local como en la nube, eligiendo lo que mejor encaja en cada tarea</li>
+          <li>Haciendo de la IA parte de mi flujo de trabajo diario</li>
+        </ul>
+        <ul class="tags" aria-label="Intereses">
+          <li>VR</li>
+          <li>VRChat</li>
+          <li title="Seguimiento de cuerpo completo">FBT</li>
+          <li>Seguimiento facial (Face tracking)</li>
+          <li>IA</li>
+          <li>IA local</li>
+          <li>Homelab</li>
+          <li>Privacidad</li>
+          <li class="tag-link"><a href="/es/setup/">Mi equipo &rarr;</a></li>
+        </ul>
+      </section>
+    </main>
+    <footer>
+      <p>&copy; <span id="current-year">2026</span> Luzian. Todos los derechos reservados.</p>
+    </footer>
+    <script>
+      const yearEl = document.getElementById('current-year');
+      if (yearEl) yearEl.textContent = new Date().getFullYear();
+    </script>
+    <script src="/assets/effects.js?v=20261006a"></script>
+    <script src="/assets/lang.js?v=20261006a"></script>
+  </div>
+</body>
+
+</html>
