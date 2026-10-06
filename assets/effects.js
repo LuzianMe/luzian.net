@@ -8,6 +8,7 @@ if (location.pathname.endsWith('/index.html')) {
    - Spotlight Cursor Glow
    - 3D Interactive Card Tilt
    - Atmospheric Ambient Particle System
+   - Calm mode: on the home page the menus and labels fade away when nothing moves
    ========================================================================== */
 
 (function () {
@@ -140,14 +141,54 @@ if (location.pathname.endsWith('/index.html')) {
     requestAnimationFrame(animate);
   }
 
+  // 4. Calm mode (home page only): after a few quiet seconds at the top of the page, the menu, the
+  //    language switch and the labels fade out, leaving just the water, the snake and the logo.
+  //    Any mouse movement, touch, key press or scroll brings them back.
+  function initCalmMode() {
+    if (!document.body.classList.contains('home')) return;
+    const IDLE_MS = 8000;       // quiet time before the page goes calm
+    const MOVE_PX = 4;          // ignore tiny mouse jitters
+    const TOP_PX = 40;          // only when the page is at the top
+    let timer = 0;
+    let lastX = null;
+    let lastY = null;
+
+    function calm() {
+      if (window.scrollY < TOP_PX && document.visibilityState === 'visible') {
+        document.body.classList.add('calm');
+      }
+    }
+
+    function wake() {
+      document.body.classList.remove('calm');
+      clearTimeout(timer);
+      timer = setTimeout(calm, IDLE_MS);
+    }
+
+    document.addEventListener('pointermove', (e) => {
+      if (lastX !== null && Math.abs(e.clientX - lastX) < MOVE_PX && Math.abs(e.clientY - lastY) < MOVE_PX) return;
+      lastX = e.clientX;
+      lastY = e.clientY;
+      wake();
+    }, { passive: true });
+    ['pointerdown', 'keydown', 'wheel', 'touchstart'].forEach((type) => {
+      document.addEventListener(type, wake, { passive: true });
+    });
+    window.addEventListener('scroll', wake, { passive: true });
+    document.addEventListener('visibilitychange', wake);
+    wake();
+  }
+
   // Initialize once DOM is ready
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
       initCardTilt();
       initParticleCanvas();
+      initCalmMode();
     });
   } else {
     initCardTilt();
     initParticleCanvas();
+    initCalmMode();
   }
 })();
