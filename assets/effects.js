@@ -67,7 +67,7 @@ if (location.pathname.endsWith('/index.html')) {
     });
   }
 
-  // 3. Lightweight Atmospheric Dust Particles
+  // 3. Lightweight Atmospheric Particles: blue dust in Water, cinders in Fire
   function initParticleCanvas() {
     const canvas = document.getElementById('ambient-canvas');
     if (!canvas) return;
@@ -75,7 +75,17 @@ if (location.pathname.endsWith('/index.html')) {
     const ctx = canvas.getContext('2d');
     let width, height;
     let particles = [];
+    let fire = document.documentElement.getAttribute('data-theme') === 'fire';
     const PARTICLE_COUNT = 32;
+    const CINDER_COUNT = 46;
+
+    // The dust takes the theme's colour (Water: blue specks)
+    let tint = '56, 189, 248';
+    function readTint() {
+      const value = getComputedStyle(document.documentElement).getPropertyValue('--particle').trim();
+      if (value) tint = value.split(/\s+/).join(', ');
+    }
+    readTint();
 
     function resize() {
       width = canvas.width = window.innerWidth;
@@ -118,27 +128,188 @@ if (location.pathname.endsWith('/index.html')) {
         const currentOpacity = this.opacity * (0.7 + 0.3 * Math.sin(this.pulse));
         ctx.beginPath();
         ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(56, 189, 248, ${currentOpacity.toFixed(3)})`;
+        ctx.fillStyle = `rgba(${tint}, ${currentOpacity.toFixed(3)})`;
         ctx.shadowBlur = 8;
-        ctx.shadowColor = 'rgba(56, 189, 248, 0.8)';
+        ctx.shadowColor = `rgba(${tint}, 0.8)`;
         ctx.fill();
       }
     }
 
-    for (let i = 0; i < PARTICLE_COUNT; i++) {
-      particles.push(new Particle());
+    // Fire: a cinder is thrown up hot, flickers and now and then flares, cools from yellow through
+    // orange to deep red, goes dark, and ends up sinking slowly like ash.
+    const mix = (from, to, t) => from + (to - from) * t;
+
+    // The colour of something glowing at this heat (1 = white-hot yellow ... 0 = out)
+    function glowColor(heat) {
+      if (heat > 0.6) {            // white-hot yellow to orange
+        const t = (heat - 0.6) / 0.4;
+        return [255, mix(120, 225, t), mix(24, 120, t * t)];
+      }
+      if (heat > 0.2) {            // orange to deep red
+        const t = (heat - 0.2) / 0.4;
+        return [mix(150, 255, t), mix(22, 120, t), mix(8, 24, t)];
+      }
+      const t = heat / 0.2;        // red to dark: out
+      return [mix(60, 150, t), mix(10, 22, t), mix(6, 8, t)];
     }
 
-    function animate() {
+    class Cinder {
+      constructor(initial) {
+        this.reset(initial);
+      }
+
+      reset(initial) {
+        this.life = 5 + Math.random() * 7;                  // seconds from hot to out
+        this.age = initial ? Math.random() * this.life : 0;
+        this.x = Math.random() * width;
+        this.y = initial ? Math.random() * height : height * (0.5 + Math.random() * 0.55);
+        this.size = Math.random() * 1.7 + 0.8;
+        this.rise = Math.random() * 0.55 + 0.35;            // pixels a frame (at 60 fps) while hot
+        this.sway = (Math.random() - 0.5) * 0.3;
+        this.phase = Math.random() * Math.PI * 2;
+        this.flicker = 5 + Math.random() * 9;               // radians a second
+        this.spark = 0;                                     // a sudden flare, 0..1
+      }
+
+      heat() {
+        return Math.max(0, 1 - this.age / this.life);
+      }
+
+      update(dt) {
+        const step = dt * 60;
+        this.age += dt;
+        const heat = this.heat();
+        // Hot, it rises; cold, it is heavier than the air and sinks
+        this.y += (-this.rise * heat * heat + 0.3 * (1 - heat) * (1 - heat)) * step;
+        this.x += (this.sway + Math.sin(this.age * 1.4 + this.phase) * 0.22) * step;
+        if (Math.random() < 0.012 * step) this.spark = 1;
+        this.spark *= Math.pow(0.9, step);
+        if (this.age > this.life || this.y > height + 12 || this.y < -12 || this.x < -12 || this.x > width + 12) {
+          this.reset(false);
+        }
+      }
+
+      draw() {
+        const heat = this.heat();
+        const [r, g, b] = glowColor(heat);
+        const flicker = 0.55 + 0.45 * Math.sin(this.age * this.flicker + this.phase);
+        let alpha = (0.25 + 0.75 * Math.min(1, heat * 1.6)) * flicker + this.spark * 0.9;
+        alpha *= Math.min(1, heat / 0.18);                   // fades out as it goes dark
+        alpha = Math.min(1, alpha) * 0.9;
+        if (alpha < 0.02) return;
+        const color = `${r.toFixed(0)}, ${g.toFixed(0)}, ${b.toFixed(0)}`;
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size * (1 + 0.6 * this.spark), 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(${color}, ${alpha.toFixed(3)})`;
+        ctx.shadowBlur = 5 + 12 * this.spark + 8 * heat;
+        ctx.shadowColor = `rgba(${color}, ${Math.min(1, alpha * 1.3).toFixed(3)})`;
+        ctx.fill();
+      }
+    }
+
+    // A burst of sparks thrown out where the page is clicked or tapped (Fire only)
+    class Spark {
+      constructor(x, y) {
+        const angle = -Math.PI / 2 + (Math.random() - 0.5) * Math.PI * 1.15;   // mostly upward, in a fan
+        const speed = 70 + Math.random() * 230;                                // pixels a second
+        this.x = x;
+        this.y = y;
+        this.vx = Math.cos(angle) * speed;
+        this.vy = Math.sin(angle) * speed;
+        this.life = 0.9 + Math.random() * 1.4;
+        this.age = 0;
+        this.size = Math.random() * 1.4 + 0.8;
+      }
+
+      update(dt) {
+        this.age += dt;
+        this.vy += 150 * dt;                     // gravity pulls it back down
+        this.vx *= Math.max(0, 1 - 1.3 * dt);    // and the air slows it
+        this.x += this.vx * dt;
+        this.y += this.vy * dt;
+      }
+
+      draw() {
+        const heat = Math.max(0, 1 - this.age / this.life);
+        const [r, g, b] = glowColor(heat);
+        const alpha = Math.min(1, heat * 1.8) * 0.95;
+        if (alpha < 0.02) return;
+        const color = `${r.toFixed(0)}, ${g.toFixed(0)}, ${b.toFixed(0)}`;
+        // a short streak along the way it is moving
+        ctx.beginPath();
+        ctx.moveTo(this.x, this.y);
+        ctx.lineTo(this.x - this.vx * 0.035, this.y - this.vy * 0.035);
+        ctx.lineCap = 'round';
+        ctx.lineWidth = this.size * (0.6 + heat);
+        ctx.strokeStyle = `rgba(${color}, ${alpha.toFixed(3)})`;
+        ctx.shadowBlur = 8;
+        ctx.shadowColor = `rgba(${color}, ${alpha.toFixed(3)})`;
+        ctx.stroke();
+      }
+    }
+
+    let sparks = [];
+    function burst(x, y) {
+      if (!fire || reduceMotion) return;
+      for (let i = 0; i < 12; i++) sparks.push(new Spark(x, y));
+      if (sparks.length > 90) sparks.splice(0, sparks.length - 90);
+    }
+    document.addEventListener('pointerdown', (event) => burst(event.clientX, event.clientY), { passive: true });
+
+    function populate() {
+      particles = [];
+      const count = fire ? CINDER_COUNT : PARTICLE_COUNT;
+      for (let i = 0; i < count; i++) {
+        particles.push(fire ? new Cinder(true) : new Particle());
+      }
+    }
+    populate();
+
+    window.addEventListener('themechange', (event) => {
+      fire = event.detail.theme === 'fire';
+      sparks = [];
+      readTint();
+      populate();
+      if (reduceMotion) requestAnimationFrame(animate);
+    });
+
+    let last = 0;
+    function animate(timestamp) {
+      const now = timestamp || performance.now();
+      const dt = last ? Math.min((now - last) / 1000, 0.1) : 1 / 60;
+      last = now;
       ctx.clearRect(0, 0, width, height);
       particles.forEach((p) => {
-        if (!reduceMotion) p.update();
+        if (!reduceMotion) p.update(dt);
         p.draw();
       });
+      if (sparks.length) {
+        sparks.forEach((spark) => { spark.update(dt); spark.draw(); });
+        sparks = sparks.filter((spark) => spark.age < spark.life);
+      }
       // With reduced motion, draw the particles once as a still starfield
       if (!reduceMotion) requestAnimationFrame(animate);
     }
     requestAnimationFrame(animate);
+
+    // ?water=debug: let tests move the particles on by hand (a hidden browser tab draws no frames)
+    if (/[?&]water=debug\b/.test(location.search)) {
+      window.__ouroParticles = {
+        step: (seconds) => {
+          for (let t = 0; t < seconds; t += 1 / 30) particles.forEach((p) => p.update(1 / 30));
+          ctx.clearRect(0, 0, width, height);
+          particles.forEach((p) => p.draw());
+        },
+        burst,
+        sparkCount: () => sparks.length,
+        // [hot, mid, dark, out] counts of cinders, to see the life cycle at work
+        counts: () => {
+          const c = [0, 0, 0, 0];
+          particles.forEach((p) => { if (p.heat) { const h = p.heat(); c[h > 0.6 ? 0 : h > 0.2 ? 1 : h > 0.05 ? 2 : 3]++; } });
+          return c;
+        },
+      };
+    }
   }
 
   // 4. Calm mode (home page only): after a few quiet seconds at the top of the page, the menu, the

@@ -10,7 +10,8 @@ What it checks
   - every English page has its Spanish twin, and the language links point at each other
   - canonical and og:url match the page's own address; og:image exists
   - Spanish pages do not link to English pages (and the other way round), except the language switch
-  - pages with the ouroboros background load water.js
+  - pages with the ouroboros background load water.js, and every page loads theme.js (Water / Fire)
+  - the stylesheet has no hard-coded theme colours left (they must be CSS variables, so Fire gets them too)
   - no leftover test pages or temporary hooks
 The wedding/ folder is an archive and is left alone.
 """
@@ -25,6 +26,7 @@ SITE = 'https://luzian.net'
 SKIP_DIRS = {'wedding', 'water-lab', '.git', '.github', 'scripts', 'node_modules'}   # water-lab: reported on its own below
 # Pages that are only a redirect or have no Spanish twin on purpose
 NO_TWIN = {'404.html', 'home/index.html'}
+NO_THEME = {'home/index.html'}   # only a redirect
 LEFTOVERS = re.compile(r'TEMPORARY|LAB HOOK|__ouroWaterLevels|__ouroLogoLevels|__ouroSpinLevels|water-lab|Water lab|Logo lab|Spin lab')
 
 errors = []
@@ -189,7 +191,12 @@ def main():
             if target is None or not exists(target):
                 error(name, f'og:image {image} does not exist')
 
-        # 6. The water effect needs its script
+        # 6a. Every page that uses the stylesheet needs the theme script (in the head, for the first paint)
+        if any('assets/style.css' in v for _, _, v, _ in page.links) and name not in NO_THEME:
+            if not any(t == 'script' and 'theme.js' in v for t, _, v, _ in page.links):
+                error(name, 'does not load assets/theme.js')
+
+        # 6b. The water effect needs its script
         if page.has_rotator and not any('water.js' in v for _, _, v, _ in page.links):
             error(name, 'has the ouroboros background but does not load water.js')
 
@@ -211,6 +218,17 @@ def main():
                 target = resolve(path, m.group(1))
                 if target is not None and not exists(target):
                     error(str(rel), f'{m.group(1)} points to nothing')
+
+    # 7b. The stylesheet's colours are theme variables; a hard-coded Water colour would stay blue in Fire
+    water_colours = re.compile(
+        r'rgba?\(\s*(?:56\s*,\s*189\s*,\s*248|118\s*,\s*199\s*,\s*255|14\s*,\s*116\s*,\s*144|14\s*,\s*165\s*,\s*233|'
+        r'148\s*,\s*163\s*,\s*184|15\s*,\s*20\s*,\s*32|16\s*,\s*22\s*,\s*36|24\s*,\s*30\s*,\s*48|32\s*,\s*42\s*,\s*68)\b|'
+        r'#(?:38bdf8|76c7ff|7dd3fc|e0f2fe|94a3b8|64748b|e2e8f0|cbd5e1|f8fafc|151b2a|080a10|1e293b)\b', re.I)
+    for number, line in enumerate((ROOT / 'assets' / 'style.css').read_text(encoding='utf-8').splitlines(), 1):
+        if line.lstrip().startswith('--'):
+            continue   # the variable definitions themselves
+        if water_colours.search(line):
+            error(f'assets/style.css:{number}', f'hard-coded theme colour (use a var(--...) colour): {line.strip()[:70]}')
 
     # 8. Nothing temporary left behind
     if (ROOT / 'water-lab').exists():

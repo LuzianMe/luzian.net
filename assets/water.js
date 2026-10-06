@@ -23,7 +23,6 @@
 
   const PAD = 0.12;                    // room for the glow on each side, as a fraction of the layer
   const GLOW_BLUR = 70;                // canvas blur that matches the CSS drop-shadow(0 0 35px ...)
-  const GLOW_COLOR = 'rgba(56, 189, 248, 0.35)';
   const MAX_RIPPLES = 8;
   const FRAME_MS = 1000 / 30;          // 30 frames a second is plenty for slow water
   const MAX_DPR = 1.5;
@@ -47,6 +46,22 @@
   // The snake sits near the surface and the light; the background is the deep void. The same wave
   // field lights both, but up close it is finer, sharper and livelier, and far away it spreads
   // into bigger, softer, slower, bluer light.
+  // The two themes (assets/theme.js). Same effects, different light:
+  //   glow   : the halo round the snake      tint  : the faint light that fills the page
+  //   absorb : what the water takes out of the light between the caustic lines (Water loses red first,
+  //            so it goes blue; Fire loses blue and green first, so it goes red)
+  //   body   : a tint on the snake's body    letters/halo/hi/shade : the logo's letters, halo, highlights, shadow
+  const THEMES = {
+    water: { glow: 'rgba(56, 189, 248, 0.35)', tint: [0.40, 0.72, 1.0], absorb: [0.44, 0.34, 0.22], body: [1.0, 1.0, 1.0], letters: [1.0, 1.0, 1.0], halo: [0.463, 0.780, 1.0], hi: [0.10, 0.28, 0.40], shade: [0.005, 0.02, 0.06], vein: [0, 0, 0], tintHot: [0.40, 0.72, 1.0] },
+    fire: { glow: 'rgba(255, 70, 10, 0.5)', tint: [1.0, 0.34, 0.04], absorb: [0.12, 0.42, 0.58], body: [1.0, 0.44, 0.20], letters: [1.0, 0.84, 0.58], halo: [1.0, 0.34, 0.05], hi: [0.55, 0.20, 0.0], shade: [0.08, 0.01, 0.0], vein: [0.55, 0.38, 0.12], tintHot: [1.0, 0.72, 0.22] },
+  };
+  // Fire's extra effects. Water has none of them (they are 0 there, which leaves its pictures exactly as they were).
+  //   flicker : how far the halo and the page's glow rise and fall, like firelight (0 = steady)
+  //   haze    : heat shimmer: rising waves, stronger and faster water, and a faint wobble of the letters
+  //   veins   : how white-hot the brightest points of the caustic web get on the snake
+  const FIRE = { flicker: 0.4, haze: 0.75, veins: 1.4 };
+  let palette = THEMES[document.documentElement.getAttribute('data-theme') === 'fire' ? 'fire' : 'water'];
+
   const SNAKE_FEEL = { size: 1.25, line: 0.08, gain: 2.3, rate: 1.25 };
   const BG_FEEL = { size: 0.6, line: 0.32, gain: 1.7, rate: 0.5 };   // softer lines: the void is out of focus
   // The logo is a rotational ambigram: turned half way round, in the plane of the page, it reads the
@@ -140,6 +155,7 @@
     uniform float u_swellAmp;   // how far the calm swell bends things
     uniform float u_swellTime;  // the swell's own clock, so changing its speed never jumps
     uniform float u_shimmer;    // how much soft light the swell moves across things
+    uniform float u_haze;       // Fire's heat shimmer: waves rising up the page (0 = none)
 
     // One travelling wave: bends the picture along its direction and adds a bit of shimmer
     void wave(vec2 k, float freq, float speed, float amp, vec2 p, inout vec2 disp, inout float light) {
@@ -155,6 +171,9 @@
       wave(vec2(-0.500,  0.866), 23.0, 1.09956, 0.0046, p, disp, light);
       wave(vec2( 0.200, -0.980), 34.0, 1.49749, 0.0032, p, disp, light);
       wave(vec2(-0.900, -0.436), 47.0, 2.00013, 0.0021, p, disp, light);
+      // heat haze: two fine waves whose crests travel up the page
+      wave(vec2( 0.050,  0.999), 41.0, 2.39803, 0.0036 * u_haze, p, disp, light);
+      wave(vec2(-0.120,  0.993), 66.0, 3.00562, 0.0022 * u_haze, p, disp, light);
     }`;
 
   const SNAKE_FRAGMENT = `${COMMON}${SWELL}
@@ -163,6 +182,9 @@
     uniform float u_caustic;    // 0..1
     uniform float u_cScale;     // caustic cell size (from the snake's depth feel and its dials)
     uniform float u_cLine;      // caustic line thickness
+    uniform vec3 u_absorb;      // what is taken out of the light between the caustic lines (the theme)
+    uniform vec3 u_body;        // a tint on the snake's body (the theme)
+    uniform vec3 u_vein;        // white-hot light along the brightest caustic lines (Fire; zero in Water)
 
     void main() {
       vec2 p = v_uv;
@@ -181,9 +203,8 @@
       // Lit like something in dark water: bright along the light web, and dimmer and bluer between
       // the lines (water takes out red first). The snake's body is already white, so the lines
       // stand out by the rest getting darker rather than by brightening further.
-      vec3 absorb = vec3(0.44, 0.34, 0.22);
-      vec3 lit = vec3(1.0) - u_caustic * absorb * (1.0 - web);
-      gl_FragColor = vec4(min(col.rgb * (1.0 + light) * lit, vec3(1.0)), col.a);
+      vec3 lit = vec3(1.0) - u_caustic * u_absorb * (1.0 - web);
+      gl_FragColor = vec4(min(col.rgb * (1.0 + light) * lit * u_body + u_vein * pow(web, 2.0) * col.a, vec3(1.0)), col.a);
     }`;
 
   const BACKGROUND_FRAGMENT = `${COMMON}
@@ -192,6 +213,9 @@
     uniform float u_caustic;   // 0..1
     uniform float u_cScale;    // caustic cell size
     uniform float u_cLine;     // caustic line softness
+    uniform vec3 u_tint;       // the colour of the light (the theme)
+    uniform vec3 u_tintHot;    // ...and of its brightest lines (the same in Water)
+    uniform float u_flicker;   // Fire's firelight: 1 is steady
 
     void main() {
       vec2 p = v_uv * u_size / 1000.0;      // same pixel scale on every screen
@@ -201,8 +225,8 @@
 
       float web = caustic(p + disp * 1.5, u_cScale, u_cLine, ${BG_FEEL.gain.toFixed(2)});
       float depth = mix(1.0, 0.45, v_uv.y);   // a little brighter toward the top, like light from the surface
-      float a = clamp(u_caustic * (0.45 * web * depth + 0.10 * max(light, 0.0)), 0.0, 0.5);
-      gl_FragColor = vec4(vec3(0.40, 0.72, 1.0) * a, a);   // deeper water is bluer
+      float a = clamp(u_caustic * (0.45 * web * depth + 0.10 * max(light, 0.0)) * u_flicker, 0.0, 0.5);
+      gl_FragColor = vec4((u_tint + (u_tintHot - u_tint) * (web * web)) * a, a);   // the colour of the light comes from the theme
     }`;
 
   // The logo: crisp letters above the water, with a halo, a shadow that falls on the water (bent by
@@ -226,6 +250,12 @@
     uniform vec3 u_turn;          // how far it has turned (radians), how much bigger it is, how high it is lifted (0..1)
     uniform vec2 u_live;          // top and bottom of the part of the canvas that is used while it is not turning
     uniform float u_hoverFall;    // how much further the shadow falls when it is lifted (px)
+    uniform vec3 u_absorb;        // the theme's colours: what the water takes out of the light,
+    uniform vec3 u_letters;       // a tint on the letters,
+    uniform vec3 u_haloColor;     // the halo,
+    uniform vec3 u_hi;            // the highlight on the light lines,
+    uniform vec3 u_shade;         // and the shadow
+    uniform float u_flicker;      // Fire's firelight on the halo: 1 is steady
 
     // Where in the artwork this spot comes from, once the artwork has been turned about its middle
     vec2 turned(vec2 uv) {
@@ -262,21 +292,22 @@
       vec2 sc = turned(v_uv - fall + 1.5 * disp / u_span);
       // Lifted higher, the shadow is softer and wider
       float sh = mix(texture2D(u_soft, sc).a, min(texture2D(u_halo, sc).a * 1.8, 1.0), 0.6 * u_turn.z) * u_shadowSet.x;
-      vec4 col = vec4(vec3(0.005, 0.02, 0.06) * sh, sh);
+      vec4 col = vec4(u_shade * sh, sh);
 
       // Halo
-      float g = texture2D(u_halo, turned(v_uv)).a * 0.25 * u_glow;
-      col = vec4(vec3(0.463, 0.780, 1.0) * g, g) + col * (1.0 - g);
+      float g = texture2D(u_halo, turned(v_uv)).a * 0.25 * u_glow * u_flicker;
+      col = vec4(u_haloColor * g, g) + col * (1.0 - g);
 
       // Letters, raised by the swell. Caustic light from the water below plays across them: the
       // same light web as under the snake, so it lines up, with the same dim-between-lines look,
       // plus a cool highlight on the lines.
-      vec4 L = texture2D(u_tex, turned(v_uv + vec2(0.0, lift) * u_px));
+      // Fire: heat shimmer ripples the letters a little (u_haze is 0 in Water)
+      float wobble = u_haze * 0.0011 * sin(v_uv.y * 130.0 - u_swellTime * 3.2);
+      vec4 L = texture2D(u_tex, turned(v_uv + vec2(wobble, lift * u_px.y)));
       if (L.a > 0.004) {                               // only where there are letters
         float web = caustic(w + disp * 2.0, u_cScale, u_cLine, ${SNAKE_FEEL.gain.toFixed(2)});
-        vec3 absorb = vec3(0.44, 0.34, 0.22);
-        vec3 rgb = L.rgb * (vec3(1.0) - u_light * absorb * (1.0 - web));
-        rgb += L.a * vec3(0.10, 0.28, 0.40) * u_light * web;
+        vec3 rgb = L.rgb * u_letters * (vec3(1.0) - u_light * u_absorb * (1.0 - web));
+        rgb += L.a * u_hi * u_light * web;
         rgb *= 1.0 + 0.5 * max(l0, 0.0);               // a passing ring catches a little glint
         L = vec4(min(rgb, vec3(L.a)), L.a);
       }
@@ -334,7 +365,7 @@
   snakeCanvas.setAttribute('aria-hidden', 'true');
   const RING_UNIFORMS = ['u_ringAmp', 'u_ringGlint', 'u_ringSpeed', 'u_ringLife'];
   const snake = makeRenderer(snakeCanvas, SNAKE_FRAGMENT,
-    ['u_time', 'u_ripples', 'u_tex', 'u_caustic', 'u_swellAmp', 'u_swellTime', 'u_shimmer', 'u_cScale', 'u_cLine', 'u_causticTime', ...RING_UNIFORMS]);
+    ['u_time', 'u_ripples', 'u_tex', 'u_caustic', 'u_swellAmp', 'u_swellTime', 'u_shimmer', 'u_haze', 'u_cScale', 'u_cLine', 'u_causticTime', 'u_absorb', 'u_body', 'u_vein', ...RING_UNIFORMS]);
   if (!snake) return;
   snake.gl.uniform1i(snake.uniforms.u_tex, 0);
 
@@ -342,7 +373,7 @@
   const bgCanvas = document.createElement('canvas');
   bgCanvas.className = 'ouro-caustics';
   bgCanvas.setAttribute('aria-hidden', 'true');
-  const bg = makeRenderer(bgCanvas, BACKGROUND_FRAGMENT, ['u_time', 'u_ripples', 'u_size', 'u_caustic', 'u_cScale', 'u_cLine', 'u_causticTime', ...RING_UNIFORMS]);
+  const bg = makeRenderer(bgCanvas, BACKGROUND_FRAGMENT, ['u_time', 'u_ripples', 'u_size', 'u_caustic', 'u_cScale', 'u_cLine', 'u_causticTime', 'u_tint', 'u_tintHot', 'u_flicker', ...RING_UNIFORMS]);
 
   // The logo is another optional layer: if it cannot start, the plain logo image stays as it is
   const logoImg = document.querySelector('img.logo');
@@ -351,8 +382,8 @@
   logoCanvas.setAttribute('aria-hidden', 'true');
   const logo = logoImg && logoImg.offsetParent ? makeRenderer(logoCanvas, LOGO_FRAGMENT,
     ['u_time', 'u_ripples', 'u_tex', 'u_soft', 'u_halo', 'u_origin', 'u_span', 'u_px', 'u_lift', 'u_shadowSet', 'u_light', 'u_glow',
-      'u_cScale', 'u_cLine', 'u_causticTime', 'u_swellAmp', 'u_swellTime', 'u_shimmer', 'u_canvasPx', 'u_center', 'u_turn', 'u_live',
-      'u_hoverFall', ...RING_UNIFORMS]) : null;
+      'u_cScale', 'u_cLine', 'u_causticTime', 'u_swellAmp', 'u_swellTime', 'u_shimmer', 'u_haze', 'u_flicker', 'u_canvasPx', 'u_center', 'u_turn', 'u_live',
+      'u_hoverFall', 'u_absorb', 'u_letters', 'u_haloColor', 'u_hi', 'u_shade', ...RING_UNIFORMS]) : null;
   if (logo) {
     logo.gl.uniform1i(logo.uniforms.u_tex, 0);
     logo.gl.uniform1i(logo.uniforms.u_soft, 1);
@@ -399,7 +430,7 @@
     const flat = document.createElement('canvas');
     flat.width = flat.height = size;
     const ctx = flat.getContext('2d');
-    ctx.shadowColor = GLOW_COLOR;
+    ctx.shadowColor = palette.glow;
     ctx.shadowBlur = GLOW_BLUR * scale;
     ctx.drawImage(image, offset, offset, art, art);
 
@@ -576,12 +607,19 @@
     g.uniform1f(u.u_cScale, SNAKE_FEEL.size);
     g.uniform1f(u.u_cLine, SNAKE_FEEL.line);
     g.uniform1f(u.u_causticTime, snakeCausticClock);
-    g.uniform1f(u.u_swellAmp, LEVELS.swellAmp);
+    g.uniform3fv(u.u_absorb, palette.absorb);
+    g.uniform3fv(u.u_letters, palette.letters);
+    g.uniform3fv(u.u_haloColor, palette.halo);
+    g.uniform3fv(u.u_hi, palette.hi);
+    g.uniform3fv(u.u_shade, palette.shade);
+    g.uniform1f(u.u_swellAmp, fx.swellAmp);
+    g.uniform1f(u.u_haze, fx.haze);
+    g.uniform1f(u.u_flicker, fx.flick);
     g.uniform1f(u.u_swellTime, swellClock);
     g.uniform1f(u.u_shimmer, LEVELS.shimmer);
-    g.uniform1f(u.u_ringAmp, LEVELS.ringAmp);
+    g.uniform1f(u.u_ringAmp, fx.ringAmp);
     g.uniform1f(u.u_ringGlint, LEVELS.ringGlint);
-    g.uniform1f(u.u_ringSpeed, LEVELS.ringSpeed);
+    g.uniform1f(u.u_ringSpeed, fx.ringSpeed);
     g.uniform1f(u.u_ringLife, LEVELS.ringLife);
     g.uniform4fv(u.u_ripples, ripplesSnake);
     g.drawArrays(g.TRIANGLE_STRIP, 0, 4);
@@ -677,13 +715,31 @@
   let snakeCausticClock = 0;
   let bgCausticClock = 0;
 
+  // An irregular wobble between about -1 and 1: several sines that never line up, some of them
+  // switching each other on and off, so the light seems to gust rather than pulse
+  function flickerNoise(t) {
+    return 0.45 * Math.sin(t * 5.3) + 0.30 * Math.sin(t * 8.9 + 1.3) * Math.sin(t * 1.7) + 0.25 * Math.sin(t * 13.7 + 0.4) * Math.sin(t * 0.9 + 2.0);
+  }
+
+  // What Fire adds this frame (all zero or neutral in Water)
+  const fx = { haze: 0, flick: 1, swellAmp: 0, ringAmp: 0, ringSpeed: 1, vein: [0, 0, 0] };
+
   function draw(seconds) {
     const level = LEVELS;
     expireRipples(seconds, level.ringLife);
     const wrapped = seconds % TIME_WRAP;
+
+    const fire = palette === THEMES.fire ? FIRE : null;
+    fx.haze = fire ? fire.haze : 0;
+    fx.flick = fire ? 1 + fire.flicker * flickerNoise(seconds) : 1;
+    fx.swellAmp = level.swellAmp * (1 + 0.35 * fx.haze);
+    fx.ringAmp = level.ringAmp * (1 + 0.35 * fx.haze);
+    fx.ringSpeed = level.ringSpeed * (1 + 0.15 * fx.haze);
+    fx.vein = fire ? palette.vein.map((c) => c * fire.veins) : palette.vein;
+
     const dt = swellLast === null ? 0 : Math.max(0, Math.min(seconds - swellLast, 0.25));
     swellLast = seconds;
-    swellClock = (swellClock + dt * level.swellSpeed) % TIME_WRAP;
+    swellClock = (swellClock + dt * level.swellSpeed * (1 + 0.5 * fx.haze)) % TIME_WRAP;
     snakeCausticClock = (snakeCausticClock + dt * SNAKE_FEEL.rate) % TIME_WRAP;
     bgCausticClock = (bgCausticClock + dt * BG_FEEL.rate) % TIME_WRAP;
 
@@ -694,12 +750,16 @@
     gl.uniform1f(snake.uniforms.u_cScale, SNAKE_FEEL.size);
     gl.uniform1f(snake.uniforms.u_cLine, SNAKE_FEEL.line);
     gl.uniform1f(snake.uniforms.u_causticTime, snakeCausticClock);
-    gl.uniform1f(snake.uniforms.u_swellAmp, level.swellAmp);
+    gl.uniform3fv(snake.uniforms.u_absorb, palette.absorb);
+    gl.uniform3fv(snake.uniforms.u_body, palette.body);
+    gl.uniform1f(snake.uniforms.u_swellAmp, fx.swellAmp);
+    gl.uniform1f(snake.uniforms.u_haze, fx.haze);
+    gl.uniform3fv(snake.uniforms.u_vein, fx.vein);
     gl.uniform1f(snake.uniforms.u_swellTime, swellClock);
     gl.uniform1f(snake.uniforms.u_shimmer, level.shimmer);
-    gl.uniform1f(snake.uniforms.u_ringAmp, level.ringAmp);
+    gl.uniform1f(snake.uniforms.u_ringAmp, fx.ringAmp);
     gl.uniform1f(snake.uniforms.u_ringGlint, level.ringGlint);
-    gl.uniform1f(snake.uniforms.u_ringSpeed, level.ringSpeed);
+    gl.uniform1f(snake.uniforms.u_ringSpeed, fx.ringSpeed);
     gl.uniform1f(snake.uniforms.u_ringLife, level.ringLife);
     gl.uniform4fv(snake.uniforms.u_ripples, ripplesSnake);
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
@@ -715,9 +775,12 @@
         g.uniform1f(bg.uniforms.u_cScale, BG_FEEL.size);
         g.uniform1f(bg.uniforms.u_cLine, BG_FEEL.line);
         g.uniform1f(bg.uniforms.u_causticTime, bgCausticClock);
-        g.uniform1f(bg.uniforms.u_ringAmp, level.ringAmp);
+        g.uniform3fv(bg.uniforms.u_tint, palette.tint);
+        g.uniform3fv(bg.uniforms.u_tintHot, palette.tintHot);
+        g.uniform1f(bg.uniforms.u_flicker, fx.flick);
+        g.uniform1f(bg.uniforms.u_ringAmp, fx.ringAmp);
         g.uniform1f(bg.uniforms.u_ringGlint, level.ringGlint);
-        g.uniform1f(bg.uniforms.u_ringSpeed, level.ringSpeed);
+        g.uniform1f(bg.uniforms.u_ringSpeed, fx.ringSpeed);
         g.uniform1f(bg.uniforms.u_ringLife, level.ringLife);
         g.uniform4fv(bg.uniforms.u_ripples, ripplesBg);
         g.drawArrays(g.TRIANGLE_STRIP, 0, 4);
@@ -789,6 +852,7 @@
     window.removeEventListener('pointerdown', onDown);
     window.removeEventListener('pointermove', onMove);
     window.removeEventListener('resize', onResize);
+    window.removeEventListener('themechange', onTheme);
     layer.classList.remove('water-on');
     snakeCanvas.remove();
     bgCanvas.remove();
@@ -828,6 +892,15 @@
     }, 150);
   }
 
+  // The theme changed (assets/theme.js): new colours, and the snake's halo is drawn into its picture
+  function onTheme(event) {
+    palette = THEMES[event.detail && event.detail.theme] || THEMES.water;
+    if (started) {
+      buildTexture();
+      draw(performance.now() / 1000);
+    }
+  }
+
   snakeCanvas.addEventListener('webglcontextlost', (event) => { event.preventDefault(); dispose(); });
   bgCanvas.addEventListener('webglcontextlost', (event) => { event.preventDefault(); dispose(); });
   logoCanvas.addEventListener('webglcontextlost', (event) => { event.preventDefault(); dropLogo(); });
@@ -853,6 +926,7 @@
     window.addEventListener('pointerdown', onDown, { passive: true });
     window.addEventListener('pointermove', onMove, { passive: true });
     window.addEventListener('resize', onResize);
+    window.addEventListener('themechange', onTheme);
     start();
   };
   image.onerror = () => { /* keep the CSS version */ };
