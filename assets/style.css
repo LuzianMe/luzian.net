@@ -151,6 +151,17 @@ h1, h2, h3, .nav-pill {
   display: block;
 }
 
+/* Faint caustic light behind the snake (assets/water.js), drawn small and stretched to the page */
+.ouro-caustics {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+}
+
 /* Once the canvas is drawing it takes over the picture, the spin and the glow */
 .ouro-bg-rotator.water-on {
   background-image: none;
