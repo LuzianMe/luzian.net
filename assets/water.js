@@ -29,12 +29,25 @@
   const TIME_WRAP = 600;               // keeps shader numbers small; all wave speeds repeat in this time
   const BG_SCALE = 0.35;               // the page background is drawn at this fraction of its size
   const BG_MAX_WIDTH = 720;            // ...and never wider than this many pixels
-  const CAUSTIC_GAIN = 2.1;            // how strongly the surface curves: more folds, a denser web
-  const CAUSTIC_LINE = 0.07;           // how thin the bright lines are (smaller is thinner)
 
-  // How strong the caustics are, from 0 (off) to 1 (strong). A test page can override these.
-  const DEFAULT_LEVELS = { snake: 0.25, background: 0.2, spin: 1 };   // spin: 1 = normal, 0 = stopped
-  const levels = () => window.__ouroWaterLevels || DEFAULT_LEVELS;
+  // Strengths. A test page can override any of these.
+  //   snake, background : caustics, 0 (off) to 1 (strong)
+  //   spin              : 1 = the normal 120 s turn, 0 = stopped in the artwork's own position
+  //   swell*, shimmer   : the calm bending and soft light of the water (1 = as it was)
+  //   ring*, trail      : rings from the pointer (1 = as they were; trail 0 = rings only on a press)
+  const DEFAULT_LEVELS = {
+    snake: 1, background: 0.2, spin: 0,
+    swellAmp: 1, swellSpeed: 1, shimmer: 1,
+    ringAmp: 1, ringGlint: 1, ringSpeed: 1, ringLife: 1, trail: 1,
+    snakeSize: 1, snakeSharp: 1, snakeSpeed: 1,      // caustics on the snake: cell size, sharpness, drift speed
+    bgSize: 1, bgSoft: 1, bgSpeed: 1,                // caustics in the deep background: cell size, softness, drift speed
+  };
+  // The snake sits near the surface and the light; the background is the deep void. The same wave
+  // field lights both, but up close it is finer, sharper and livelier, and far away it spreads
+  // into bigger, softer, slower, bluer light.
+  const SNAKE_FEEL = { size: 1.25, line: 0.08, gain: 2.3, rate: 1.25 };
+  const BG_FEEL = { size: 0.6, line: 0.16, gain: 1.7, rate: 0.5 };
+  const levels = () => Object.assign({}, DEFAULT_LEVELS, window.__ouroWaterLevels);
 
   // ---------------------------------------------------------------------------------------------
   // Shaders
@@ -57,45 +70,51 @@
 
     uniform float u_time;
     uniform vec4 u_ripples[${MAX_RIPPLES}];   // x, y, start time, strength
+    uniform float u_ringAmp;     // how far rings bend the picture
+    uniform float u_ringGlint;   // how brightly ring crests catch the light
+    uniform float u_ringSpeed;   // how fast rings spread
+    uniform float u_ringLife;    // how long rings last
+    uniform float u_causticTime; // the caustics' own clock (so changing their speed never jumps)
 
     // Rings spreading from where the pointer touched: bend the picture and let the crests catch light
     void rings(vec2 p, inout vec2 disp, inout float light) {
       for (int i = 0; i < ${MAX_RIPPLES}; i++) {
         vec4 r = u_ripples[i];
         float age = u_time - r.z;
-        if (age > 0.0 && age < 5.5 && r.w > 0.0) {
+        if (age > 0.0 && age < 5.5 * u_ringLife && r.w > 0.0) {
           vec2 dv = p - r.xy;
           float dist = length(dv);
-          float x = dist - age * 0.16;                       // the ring front travels outward
+          float x = dist - age * 0.16 * u_ringSpeed;           // the ring front travels outward
           float width = 0.018 + age * 0.014;                 // and widens as it goes
           float env = exp(-(x * x) / (width * width));
           float osc = cos(x * 70.0 / (1.0 + age * 0.5));
-          float h = env * osc * r.w * exp(-age * 0.65) / (1.0 + dist * 2.5);
-          disp  += (dv / max(dist, 0.0005)) * h * 0.045;
-          light += h * 0.7;
+          float h = env * osc * r.w * exp(-age * 0.65 / u_ringLife) / (1.0 + dist * 2.5);
+          disp  += (dv / max(dist, 0.0005)) * h * 0.045 * u_ringAmp;
+          light += h * 0.7 * u_ringGlint;
         }
       }
     }
 
     // One wave of the water surface, adding its curvature to the running total h = (Hxx, Hxy, Hyy)
-    void bend(vec2 k, float freq, float speed, float curve, vec2 p, inout vec3 h) {
-      float s = -curve * ${CAUSTIC_GAIN.toFixed(3)} * sin(freq * dot(k, p) + u_time * speed);
+    void bend(vec2 k, float freq, float speed, float curve, vec2 p, float gain, inout vec3 h) {
+      float s = -curve * gain * sin(freq * dot(k, p) + u_causticTime * speed);
       h += s * vec3(k.x * k.x, k.x * k.y, k.y * k.y);
     }
 
     // Caustics: light focuses into thin bright lines where the curved surface folds the rays
     // together, which is where the determinant of (1 + curvature) falls to zero. Slow on purpose.
-    float caustic(vec2 p, float scale) {
+    // scale: cell size (bigger = finer), line: how thick the bright lines are, gain: how folded the web is
+    float caustic(vec2 p, float scale, float line, float gain) {
       vec2 q = p * scale;
       vec3 h = vec3(0.0);
-      bend(vec2( 0.9689,  0.2474), 38.0, 0.46077, 0.42, q, h);
-      bend(vec2(-0.2588,  0.9659), 47.0, 0.56549, 0.40, q, h);
-      bend(vec2( 0.7071, -0.7071), 55.0, 0.71210, 0.36, q, h);
-      bend(vec2(-0.9397, -0.3420), 63.0, 0.82729, 0.32, q, h);
-      bend(vec2( 0.3420,  0.9397), 29.0, 0.37699, 0.46, q, h);
-      bend(vec2( 0.8192, -0.5736), 71.0, 0.94248, 0.28, q, h);
+      bend(vec2( 0.9689,  0.2474), 38.0, 0.46077, 0.42, q, gain, h);
+      bend(vec2(-0.2588,  0.9659), 47.0, 0.56549, 0.40, q, gain, h);
+      bend(vec2( 0.7071, -0.7071), 55.0, 0.71210, 0.36, q, gain, h);
+      bend(vec2(-0.9397, -0.3420), 63.0, 0.82729, 0.32, q, gain, h);
+      bend(vec2( 0.3420,  0.9397), 29.0, 0.37699, 0.46, q, gain, h);
+      bend(vec2( 0.8192, -0.5736), 71.0, 0.94248, 0.28, q, gain, h);
       float det = (1.0 + h.x) * (1.0 + h.z) - h.y * h.y;
-      float c = ${CAUSTIC_LINE.toFixed(3)} / (abs(det) + ${CAUSTIC_LINE.toFixed(3)});
+      float c = line / (abs(det) + line);
       return c * c;
     }`;
 
@@ -103,13 +122,18 @@
     varying vec2 v_uv;
     uniform sampler2D u_tex;
     uniform float u_angle;
-    uniform float u_caustic;   // 0..1
+    uniform float u_caustic;    // 0..1
+    uniform float u_cScale;     // caustic cell size (from the snake's depth feel and its dials)
+    uniform float u_cLine;      // caustic line thickness
+    uniform float u_swellAmp;   // how far the calm swell bends the snake
+    uniform float u_swellTime;  // the swell's own clock, so changing its speed never jumps
+    uniform float u_shimmer;    // how much soft light the swell moves across the snake
 
     // One travelling wave: bends the picture along its direction and adds a bit of shimmer
     void wave(vec2 k, float freq, float speed, float amp, vec2 p, inout vec2 disp, inout float light) {
-      float ph = freq * dot(k, p) + u_time * speed;
-      disp  += k * (amp * cos(ph));
-      light -= amp * freq * sin(ph) * 0.25;
+      float ph = freq * dot(k, p) + u_swellTime * speed;
+      disp  += k * (amp * u_swellAmp * cos(ph));
+      light -= amp * freq * sin(ph) * 0.25 * u_shimmer;
     }
 
     void main() {
@@ -135,15 +159,22 @@
 
       // The light web lies on the water surface, not on the snake, so it does not spin with it,
       // and the rings bend it too
-      float web = caustic(p + disp * 2.0, 1.0);
-      vec3 glint = vec3(0.72, 0.90, 1.0) * (u_caustic * 0.9 * web);
-      gl_FragColor = vec4(min(col.rgb * (1.0 + light) + col.a * glint, vec3(1.0)), col.a);
+      float web = caustic(p + disp * 2.0, u_cScale, u_cLine, ${SNAKE_FEEL.gain.toFixed(2)});
+
+      // Lit like something in dark water: bright along the light web, and dimmer and bluer between
+      // the lines (water takes out red first). The snake's body is already white, so the lines
+      // stand out by the rest getting darker rather than by brightening further.
+      vec3 absorb = vec3(0.44, 0.34, 0.22);
+      vec3 lit = vec3(1.0) - u_caustic * absorb * (1.0 - web);
+      gl_FragColor = vec4(min(col.rgb * (1.0 + light) * lit, vec3(1.0)), col.a);
     }`;
 
   const BACKGROUND_FRAGMENT = `${COMMON}
     varying vec2 v_uv;
     uniform vec2 u_size;       // the page in CSS pixels
     uniform float u_caustic;   // 0..1
+    uniform float u_cScale;    // caustic cell size
+    uniform float u_cLine;     // caustic line softness
 
     void main() {
       vec2 p = v_uv * u_size / 1000.0;      // same pixel scale on every screen
@@ -151,10 +182,10 @@
       float light = 0.0;
       rings(p, disp, light);
 
-      float web = caustic(p + disp * 1.5, 0.9);
+      float web = caustic(p + disp * 1.5, u_cScale, u_cLine, ${BG_FEEL.gain.toFixed(2)});
       float depth = mix(1.0, 0.45, v_uv.y);   // a little brighter toward the top, like light from the surface
       float a = clamp(u_caustic * (0.45 * web * depth + 0.10 * max(light, 0.0)), 0.0, 0.5);
-      gl_FragColor = vec4(vec3(0.55, 0.85, 1.0) * a, a);
+      gl_FragColor = vec4(vec3(0.40, 0.72, 1.0) * a, a);   // deeper water is bluer
     }`;
 
   // ---------------------------------------------------------------------------------------------
@@ -206,7 +237,9 @@
   const snakeCanvas = document.createElement('canvas');
   snakeCanvas.className = 'ouro-water';
   snakeCanvas.setAttribute('aria-hidden', 'true');
-  const snake = makeRenderer(snakeCanvas, SNAKE_FRAGMENT, ['u_time', 'u_angle', 'u_ripples', 'u_tex', 'u_caustic']);
+  const RING_UNIFORMS = ['u_ringAmp', 'u_ringGlint', 'u_ringSpeed', 'u_ringLife'];
+  const snake = makeRenderer(snakeCanvas, SNAKE_FRAGMENT,
+    ['u_time', 'u_angle', 'u_ripples', 'u_tex', 'u_caustic', 'u_swellAmp', 'u_swellTime', 'u_shimmer', 'u_cScale', 'u_cLine', 'u_causticTime', ...RING_UNIFORMS]);
   if (!snake) return;
   snake.gl.uniform1i(snake.uniforms.u_tex, 0);
 
@@ -214,7 +247,7 @@
   const bgCanvas = document.createElement('canvas');
   bgCanvas.className = 'ouro-caustics';
   bgCanvas.setAttribute('aria-hidden', 'true');
-  const bg = makeRenderer(bgCanvas, BACKGROUND_FRAGMENT, ['u_time', 'u_ripples', 'u_size', 'u_caustic']);
+  const bg = makeRenderer(bgCanvas, BACKGROUND_FRAGMENT, ['u_time', 'u_ripples', 'u_size', 'u_caustic', 'u_cScale', 'u_cLine', 'u_causticTime', ...RING_UNIFORMS]);
 
   const texture = snake.gl.createTexture();
   const ripplesSnake = new Float32Array(MAX_RIPPLES * 4);   // x, y (0..1 across the canvas), start (wrapped), strength
@@ -276,9 +309,9 @@
   // ---------------------------------------------------------------------------------------------
   // Drawing
   // ---------------------------------------------------------------------------------------------
-  function expireRipples(seconds) {
+  function expireRipples(seconds, life) {
     for (let i = 0; i < MAX_RIPPLES; i++) {
-      if (seconds - rippleStart[i] > 5.5) {
+      if (seconds - rippleStart[i] > 5.5 * life) {
         ripplesSnake[i * 4 + 3] = 0;
         ripplesBg[i * 4 + 3] = 0;
       }
@@ -293,10 +326,16 @@
   let integrating = false;
   function angleFor(seconds, speed) {
     const wall = ((Date.now() / 1000) % SPIN_SECONDS) / SPIN_SECONDS * Math.PI * 2;
+    if (speed === 0) {                 // stopped: the snake sits in the artwork's own position
+      integrating = true;
+      spinAngle = 0;
+      spinClock = seconds;
+      return 0;
+    }
     if (!integrating) {
       if (speed === 1) return wall;
       integrating = true;
-      spinAngle = wall;
+      spinAngle = lastAngle;
       spinClock = seconds;
     }
     const dt = Math.max(0, Math.min(seconds - spinClock, 0.25));
@@ -305,18 +344,39 @@
     return spinAngle;
   }
 
+  // The swell runs on its own clock so changing its speed never makes the water jump
+  let swellClock = 0;
+  let swellLast = null;
+  let snakeCausticClock = 0;
+  let bgCausticClock = 0;
+
   function draw(seconds) {
-    expireRipples(seconds);
-    const wrapped = seconds % TIME_WRAP;
     const level = levels();
+    expireRipples(seconds, level.ringLife);
+    const wrapped = seconds % TIME_WRAP;
+    const dt = swellLast === null ? 0 : Math.max(0, Math.min(seconds - swellLast, 0.25));
+    swellLast = seconds;
+    swellClock = (swellClock + dt * level.swellSpeed) % TIME_WRAP;
+    snakeCausticClock = (snakeCausticClock + dt * SNAKE_FEEL.rate * level.snakeSpeed) % TIME_WRAP;
+    bgCausticClock = (bgCausticClock + dt * BG_FEEL.rate * level.bgSpeed) % TIME_WRAP;
 
     // The snake: the same turn as the CSS spin unless a test page changes the speed
-    const angle = lastAngle = angleFor(seconds, level.spin === undefined ? 1 : level.spin);
+    const angle = lastAngle = angleFor(seconds, level.spin);
     const gl = snake.gl;
     gl.clear(gl.COLOR_BUFFER_BIT);
     gl.uniform1f(snake.uniforms.u_time, wrapped);
     gl.uniform1f(snake.uniforms.u_angle, angle);
     gl.uniform1f(snake.uniforms.u_caustic, level.snake);
+    gl.uniform1f(snake.uniforms.u_cScale, SNAKE_FEEL.size * level.snakeSize);
+    gl.uniform1f(snake.uniforms.u_cLine, SNAKE_FEEL.line / Math.max(level.snakeSharp, 0.05));
+    gl.uniform1f(snake.uniforms.u_causticTime, snakeCausticClock);
+    gl.uniform1f(snake.uniforms.u_swellAmp, level.swellAmp);
+    gl.uniform1f(snake.uniforms.u_swellTime, swellClock);
+    gl.uniform1f(snake.uniforms.u_shimmer, level.shimmer);
+    gl.uniform1f(snake.uniforms.u_ringAmp, level.ringAmp);
+    gl.uniform1f(snake.uniforms.u_ringGlint, level.ringGlint);
+    gl.uniform1f(snake.uniforms.u_ringSpeed, level.ringSpeed);
+    gl.uniform1f(snake.uniforms.u_ringLife, level.ringLife);
     gl.uniform4fv(snake.uniforms.u_ripples, ripplesSnake);
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
 
@@ -328,6 +388,13 @@
         g.uniform1f(bg.uniforms.u_time, wrapped);
         g.uniform2f(bg.uniforms.u_size, window.innerWidth, window.innerHeight);
         g.uniform1f(bg.uniforms.u_caustic, level.background);
+        g.uniform1f(bg.uniforms.u_cScale, BG_FEEL.size * level.bgSize);
+        g.uniform1f(bg.uniforms.u_cLine, BG_FEEL.line * level.bgSoft);
+        g.uniform1f(bg.uniforms.u_causticTime, bgCausticClock);
+        g.uniform1f(bg.uniforms.u_ringAmp, level.ringAmp);
+        g.uniform1f(bg.uniforms.u_ringGlint, level.ringGlint);
+        g.uniform1f(bg.uniforms.u_ringSpeed, level.ringSpeed);
+        g.uniform1f(bg.uniforms.u_ringLife, level.ringLife);
         g.uniform4fv(bg.uniforms.u_ripples, ripplesBg);
         g.drawArrays(g.TRIANGLE_STRIP, 0, 4);
       }
@@ -406,7 +473,8 @@
     lastMoveTime = now;
     lastX = event.clientX;
     lastY = event.clientY;
-    addRipple(event.clientX, event.clientY, 0.45);
+    const trail = levels().trail;
+    if (trail > 0) addRipple(event.clientX, event.clientY, 0.45 * trail);
   }
 
   let resizeTimer = 0;
@@ -461,6 +529,22 @@
         return (performance.now() - t) / frames;
       },
       angle: () => lastAngle,
+      backgroundChecksum: (seconds) => {
+        if (!bg) return 0;
+        draw(seconds);
+        const g = bg.gl; const w = bgCanvas.width; const h = bgCanvas.height;
+        const px = new Uint8Array(w * h * 4); g.readPixels(0, 0, w, h, g.RGBA, g.UNSIGNED_BYTE, px);
+        let sum = 0; for (let i = 0; i < px.length; i += 4) sum += px[i] + 3 * px[i + 1] + 7 * px[i + 2] + 11 * px[i + 3];
+        return sum;
+      },
+      // a number that changes whenever the snake canvas looks different (for tests)
+      snakeChecksum: (seconds) => {
+        draw(seconds);
+        const g = snake.gl; const n = snakeCanvas.width;
+        const px = new Uint8Array(n * n * 4); g.readPixels(0, 0, n, n, g.RGBA, g.UNSIGNED_BYTE, px);
+        let sum = 0; for (let i = 0; i < px.length; i += 4) sum += px[i] + 3 * px[i + 1] + 7 * px[i + 2] + 11 * px[i + 3];
+        return sum;
+      },
       size: () => snakeCanvas.width,
       backgroundSize: () => (bg ? [bgCanvas.width, bgCanvas.height] : null),
       // largest background opacity currently drawn, read back from the GPU

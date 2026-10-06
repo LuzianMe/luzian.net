@@ -10,10 +10,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="Computer science engineer exploring VR, spatial computing and local AI.">
   <title>Water lab (temporary test page)</title>
-  <link rel="stylesheet" href="/assets/style.css?v=20261007b">
+  <link rel="stylesheet" href="/assets/style.css?v=20261007d">
   <script>
     document.documentElement.style.setProperty('--rotator-delay', `-${(Date.now() / 1000 % 120).toFixed(3)}s`);
   </script>
+  <style>.ouro-bg-rotator { animation: none; }</style>
 </head>
 
 <body class="home">
@@ -71,64 +72,111 @@
       const yearEl = document.getElementById('current-year');
       if (yearEl) yearEl.textContent = new Date().getFullYear();
     </script>
-    <script src="/assets/effects.js?v=20261007b"></script>
+    <script src="/assets/effects.js?v=20261007d"></script>
     <script>
-      // TEMPORARY: caustic levels for testing (the real site has fixed levels). 0..100 each.
+      // TEMPORARY: strengths for testing (the real site will have fixed values). Percent; 100 = as it was.
+      window.__LAB_DEFS = [
+        { group: 'Caustics and rotation' },
+        { k: 'snake', label: 'Caustics on the snake', min: 0, max: 100, step: 1, def: 100 },
+        { k: 'background', label: 'Caustics on the background', min: 0, max: 100, step: 1, def: 20 },
+        { k: 'spin', label: 'Snake rotation speed (0 = stopped, original position)', min: 0, max: 150, step: 5, def: 0 },
+        { group: 'Caustics on the snake (in front, near the light)' },
+      { k: 'snakeSize', label: 'Cell size (bigger = broader light web)', min: 50, max: 300, step: 5, def: 100 },
+      { k: 'snakeSharp', label: 'Sharpness of the light lines', min: 50, max: 300, step: 5, def: 100 },
+      { k: 'snakeSpeed', label: 'Drift speed', min: 0, max: 300, step: 5, def: 100 },
+      { group: 'Caustics in the background (deep void)' },
+      { k: 'bgSize', label: 'Cell size (bigger = broader light web)', min: 50, max: 300, step: 5, def: 100 },
+      { k: 'bgSoft', label: 'Softness of the light lines', min: 25, max: 300, step: 5, def: 100 },
+      { k: 'bgSpeed', label: 'Drift speed', min: 0, max: 300, step: 5, def: 100 },
+      { group: 'Water bending (the calm swell on the snake)' },
+        { k: 'swellAmp', label: 'How far it bends the snake', min: 0, max: 300, step: 5, def: 100 },
+        { k: 'swellSpeed', label: 'How fast it moves', min: 0, max: 300, step: 5, def: 100 },
+        { k: 'shimmer', label: 'Soft shimmer of light', min: 0, max: 300, step: 5, def: 100 },
+        { group: 'Ripple rings (mouse and touch)' },
+        { k: 'ringAmp', label: 'How far rings bend things', min: 0, max: 300, step: 5, def: 100 },
+        { k: 'ringGlint', label: 'Light on the ring crests', min: 0, max: 300, step: 5, def: 100 },
+        { k: 'ringSpeed', label: 'How fast rings spread', min: 25, max: 300, step: 5, def: 100 },
+        { k: 'ringLife', label: 'How long rings last', min: 25, max: 300, step: 5, def: 100 },
+        { k: 'trail', label: 'Mouse trail (0 = rings only on a press or tap)', min: 0, max: 200, step: 5, def: 100 }
+      ];
       (function () {
         var saved = {};
-        try { saved = JSON.parse(localStorage.getItem('water-lab') || '{}'); } catch (e) {}
-        var lv = { snake: (saved.snake == null ? 25 : saved.snake) / 100, background: (saved.background == null ? 20 : saved.background) / 100, spin: (saved.spin == null ? 100 : saved.spin) / 100 };
+        try { saved = JSON.parse(localStorage.getItem('water-lab2') || '{}'); } catch (e) {}
+        var lv = {};
+        window.__LAB_DEFS.forEach(function (d) { if (d.k) lv[d.k] = (saved[d.k] == null ? d.def : saved[d.k]) / 100; });
         window.__ouroWaterLevels = lv;
       })();
     </script>
-    <script src="/assets/water.js?v=20261007b"></script>
-    <script src="/assets/lang.js?v=20261007b"></script>
+    <script src="/assets/water.js?v=20261007d"></script>
+    <script src="/assets/lang.js?v=20261007d"></script>
 
     <!-- TEMPORARY dial panel: lives only in this test page -->
     <style>
-      #lab { position: fixed; left: 50%; bottom: 12px; transform: translateX(-50%); width: min(94vw, 420px); box-sizing: border-box;
-        z-index: 9999; padding: 12px 14px; border-radius: 14px; background: rgba(8, 12, 20, 0.92); color: #e2e8f0;
-        border: 1px solid rgba(118, 199, 255, 0.4); font: 13px/1.4 system-ui, sans-serif; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6); }
-      #lab h4 { margin: 0 0 6px; font-size: 13px; color: #7dd3fc; }
-      #lab label { display: grid; grid-template-columns: 1fr auto; gap: 2px 8px; margin: 8px 0 0; }
-      #lab input[type=range] { grid-column: 1 / -1; width: 100%; }
-      #lab .row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
-      #lab button { padding: 5px 10px; border-radius: 999px; border: 1px solid rgba(118, 199, 255, 0.45); background: rgba(56, 189, 248, 0.15); color: #e2e8f0; font: inherit; cursor: pointer; }
-      #lab.min > :not(h4) { display: none; }
+      #lab { position: fixed; left: 50%; bottom: 10px; transform: translateX(-50%); width: min(96vw, 440px); box-sizing: border-box;
+        z-index: 9999; padding: 10px 14px 12px; border-radius: 14px; background: rgba(8, 12, 20, 0.94); color: #e2e8f0;
+        border: 1px solid rgba(118, 199, 255, 0.4); font: 13px/1.35 system-ui, sans-serif; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6); }
+      #lab h4 { margin: 0 0 4px; font-size: 13px; color: #7dd3fc; }
+      #lab-body { max-height: min(56vh, 460px); overflow-y: auto; padding-right: 6px; overscroll-behavior: contain; }
+      #lab .grp { margin: 12px 0 2px; font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: #94a3b8; }
+      #lab .grp:first-child { margin-top: 2px; }
+      #lab label { display: grid; grid-template-columns: 1fr auto; gap: 1px 8px; margin: 6px 0 0; }
+      #lab input[type=range] { grid-column: 1 / -1; width: 100%; margin: 2px 0 0; }
+      #lab .row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+      #lab button { padding: 4px 10px; border-radius: 999px; border: 1px solid rgba(118, 199, 255, 0.45); background: rgba(56, 189, 248, 0.15); color: #e2e8f0; font: inherit; cursor: pointer; }
+      #lab textarea { width: 100%; box-sizing: border-box; margin-top: 8px; height: 64px; background: #05080f; color: #cbd5e1; border: 1px solid rgba(118, 199, 255, 0.3); border-radius: 8px; font: 12px/1.35 ui-monospace, monospace; display: none; }
+      #lab.min #lab-body, #lab.min .foot { display: none; }
     </style>
     <div id="lab">
       <h4>Water lab (temporary) <button type="button" id="lab-toggle" style="float:right;padding:1px 8px">hide</button></h4>
-      <label>Caustics on the snake <b id="v-snake"></b><input type="range" id="r-snake" min="0" max="100" step="1"></label>
-      <label>Caustics on the background <b id="v-bg"></b><input type="range" id="r-bg" min="0" max="100" step="1"></label>
-      <label>Snake rotation speed <b id="v-spin"></b><input type="range" id="r-spin" min="0" max="150" step="5"></label>
-      <div class="row">
-        <button type="button" data-s="0">Stop</button>
-        <button type="button" data-s="25">Slow</button>
-        <button type="button" data-s="100">Normal</button>
+      <div id="lab-body"></div>
+      <div class="foot">
+        <div class="row">
+          <button type="button" data-w="0,0,0,0,0,100,100">No water</button>
+          <button type="button" data-w="60,70,60,60,60,100,100">Calm</button>
+          <button type="button" data-w="100,100,100,100,100,100,100">As it was</button>
+          <button type="button" data-w="170,130,120,170,150,120,120">Lively</button>
+        </div>
+        <div class="row">
+          <button type="button" id="lab-same">Same caustics front and back (old)</button>
+          <button type="button" id="lab-reset">Reset to my choices</button>
+          <button type="button" id="lab-copy">Show my numbers</button>
+        </div>
+        <textarea id="lab-text" readonly></textarea>
+        <p style="margin:8px 0 0;color:#94a3b8">Tap or drag on the page to make ripples. Numbers are remembered on this device.</p>
       </div>
-      <div class="row">
-        <button type="button" data-p="0,0">Off</button>
-        <button type="button" data-p="15,10">Barely</button>
-        <button type="button" data-p="25,20">Subtle</button>
-        <button type="button" data-p="45,35">Medium</button>
-        <button type="button" data-p="80,65">Strong</button>
-      </div>
-      <p style="margin:8px 0 0;color:#94a3b8">Tap or drag on the page to make ripples. Your numbers are remembered on this device.</p>
     </div>
     <script>
       (function () {
-        var lv = window.__ouroWaterLevels, lab = document.getElementById('lab');
-        var rs = document.getElementById('r-snake'), rb = document.getElementById('r-bg');
-        var vs = document.getElementById('v-snake'), vb = document.getElementById('v-bg');
-        var rp = document.getElementById('r-spin'), vp = document.getElementById('v-spin');
-        function show() { rs.value = Math.round(lv.snake * 100); rb.value = Math.round(lv.background * 100); rp.value = Math.round(lv.spin * 100); vs.textContent = rs.value + '%'; vb.textContent = rb.value + '%'; vp.textContent = rp.value === '0' ? 'stopped' : rp.value + '%'; }
-        function save() { try { localStorage.setItem('water-lab', JSON.stringify({ snake: +rs.value, background: +rb.value, spin: +rp.value })); } catch (e) {} }
-        function apply() { lv.snake = rs.value / 100; lv.background = rb.value / 100; lv.spin = rp.value / 100; show(); save(); }
-        rs.addEventListener('input', apply); rb.addEventListener('input', apply); rp.addEventListener('input', apply);
-        lab.querySelectorAll('[data-s]').forEach(function (b) { b.addEventListener('click', function () { rp.value = b.dataset.s; apply(); }); });
-        lab.querySelectorAll('[data-p]').forEach(function (b) { b.addEventListener('click', function () { var p = b.dataset.p.split(','); rs.value = p[0]; rb.value = p[1]; apply(); }); });
+        var defs = window.__LAB_DEFS, lv = window.__ouroWaterLevels, lab = document.getElementById('lab');
+        var body = document.getElementById('lab-body'), inputs = {}, outs = {};
+        function fmt(d, v) { return (d.k === 'spin' && +v === 0) ? 'stopped' : v + '%'; }
+        defs.forEach(function (d) {
+          if (d.group) { var g = document.createElement('div'); g.className = 'grp'; g.textContent = d.group; body.appendChild(g); return; }
+          var l = document.createElement('label'), t = document.createElement('span'), o = document.createElement('b'), r = document.createElement('input');
+          t.textContent = d.label; r.type = 'range'; r.min = d.min; r.max = d.max; r.step = d.step; r.value = Math.round(lv[d.k] * 100);
+          l.appendChild(t); l.appendChild(o); l.appendChild(r); body.appendChild(l); inputs[d.k] = r; outs[d.k] = o;
+          r.addEventListener('input', apply);
+        });
+        function show() { defs.forEach(function (d) { if (d.k) outs[d.k].textContent = fmt(d, inputs[d.k].value); }); }
+        function save() { var s = {}; defs.forEach(function (d) { if (d.k) s[d.k] = +inputs[d.k].value; }); try { localStorage.setItem('water-lab2', JSON.stringify(s)); } catch (e) {} }
+        function apply() { defs.forEach(function (d) { if (d.k) lv[d.k] = inputs[d.k].value / 100; }); show(); save(); }
+        function set(k, v) { inputs[k].value = v; }
+        // water presets: swellAmp, swellSpeed, shimmer, ringAmp, ringGlint, ringSpeed, ringLife
+        var wk = ['swellAmp', 'swellSpeed', 'shimmer', 'ringAmp', 'ringGlint', 'ringSpeed', 'ringLife'];
+        lab.querySelectorAll('[data-w]').forEach(function (b) { b.addEventListener('click', function () { b.dataset.w.split(',').forEach(function (v, i) { set(wk[i], v); }); apply(); }); });
+        // the earlier look, where the snake and the background used the same kind of caustics
+        document.getElementById('lab-same').addEventListener('click', function () {
+          var o = { snakeSize: 67, snakeSharp: 64, snakeSpeed: 80, bgSize: 150, bgSoft: 44, bgSpeed: 200 };
+          Object.keys(o).forEach(function (k) { set(k, o[k]); }); apply();
+        });
+        document.getElementById('lab-reset').addEventListener('click', function () { defs.forEach(function (d) { if (d.k) set(d.k, d.def); }); apply(); });
+        document.getElementById('lab-copy').addEventListener('click', function () {
+          var txt = defs.filter(function (d) { return d.k; }).map(function (d) { return d.label + ': ' + fmt(d, inputs[d.k].value); }).join('\n');
+          var ta = document.getElementById('lab-text'); ta.value = txt; ta.style.display = 'block'; ta.select();
+          try { navigator.clipboard.writeText(txt); } catch (e) {}
+        });
         document.getElementById('lab-toggle').addEventListener('click', function () { lab.classList.toggle('min'); this.textContent = lab.classList.contains('min') ? 'show' : 'hide'; });
-        // the panel is not part of the water: keep its taps from making ripples
+        // the panel is not part of the water: keep its taps and drags from making ripples
         ['pointerdown', 'pointermove'].forEach(function (t) { lab.addEventListener(t, function (e) { e.stopPropagation(); }); });
         show();
       })();
