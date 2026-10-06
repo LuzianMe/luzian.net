@@ -139,6 +139,20 @@ if (location.pathname.endsWith('/index.html')) {
     // orange to deep red, goes dark, and ends up sinking slowly like ash.
     const mix = (from, to, t) => from + (to - from) * t;
 
+    // The colour of something glowing at this heat (1 = white-hot yellow ... 0 = out)
+    function glowColor(heat) {
+      if (heat > 0.6) {            // white-hot yellow to orange
+        const t = (heat - 0.6) / 0.4;
+        return [255, mix(120, 225, t), mix(24, 120, t * t)];
+      }
+      if (heat > 0.2) {            // orange to deep red
+        const t = (heat - 0.2) / 0.4;
+        return [mix(150, 255, t), mix(22, 120, t), mix(8, 24, t)];
+      }
+      const t = heat / 0.2;        // red to dark: out
+      return [mix(60, 150, t), mix(10, 22, t), mix(6, 8, t)];
+    }
+
     class Cinder {
       constructor(initial) {
         this.reset(initial);
@@ -177,19 +191,7 @@ if (location.pathname.endsWith('/index.html')) {
 
       draw() {
         const heat = this.heat();
-        let r;
-        let g;
-        let b;
-        if (heat > 0.6) {            // white-hot yellow to orange
-          const t = (heat - 0.6) / 0.4;
-          r = 255; g = mix(120, 225, t); b = mix(24, 120, t * t);
-        } else if (heat > 0.2) {     // orange to deep red
-          const t = (heat - 0.2) / 0.4;
-          r = mix(150, 255, t); g = mix(22, 120, t); b = mix(8, 24, t);
-        } else {                     // red to dark: out
-          const t = heat / 0.2;
-          r = mix(60, 150, t); g = mix(10, 22, t); b = mix(6, 8, t);
-        }
+        const [r, g, b] = glowColor(heat);
         const flicker = 0.55 + 0.45 * Math.sin(this.age * this.flicker + this.phase);
         let alpha = (0.25 + 0.75 * Math.min(1, heat * 1.6)) * flicker + this.spark * 0.9;
         alpha *= Math.min(1, heat / 0.18);                   // fades out as it goes dark
@@ -205,6 +207,55 @@ if (location.pathname.endsWith('/index.html')) {
       }
     }
 
+    // A burst of sparks thrown out where the page is clicked or tapped (Fire only)
+    class Spark {
+      constructor(x, y) {
+        const angle = -Math.PI / 2 + (Math.random() - 0.5) * Math.PI * 1.15;   // mostly upward, in a fan
+        const speed = 70 + Math.random() * 230;                                // pixels a second
+        this.x = x;
+        this.y = y;
+        this.vx = Math.cos(angle) * speed;
+        this.vy = Math.sin(angle) * speed;
+        this.life = 0.9 + Math.random() * 1.4;
+        this.age = 0;
+        this.size = Math.random() * 1.4 + 0.8;
+      }
+
+      update(dt) {
+        this.age += dt;
+        this.vy += 150 * dt;                     // gravity pulls it back down
+        this.vx *= Math.max(0, 1 - 1.3 * dt);    // and the air slows it
+        this.x += this.vx * dt;
+        this.y += this.vy * dt;
+      }
+
+      draw() {
+        const heat = Math.max(0, 1 - this.age / this.life);
+        const [r, g, b] = glowColor(heat);
+        const alpha = Math.min(1, heat * 1.8) * 0.95;
+        if (alpha < 0.02) return;
+        const color = `${r.toFixed(0)}, ${g.toFixed(0)}, ${b.toFixed(0)}`;
+        // a short streak along the way it is moving
+        ctx.beginPath();
+        ctx.moveTo(this.x, this.y);
+        ctx.lineTo(this.x - this.vx * 0.035, this.y - this.vy * 0.035);
+        ctx.lineCap = 'round';
+        ctx.lineWidth = this.size * (0.6 + heat);
+        ctx.strokeStyle = `rgba(${color}, ${alpha.toFixed(3)})`;
+        ctx.shadowBlur = 8;
+        ctx.shadowColor = `rgba(${color}, ${alpha.toFixed(3)})`;
+        ctx.stroke();
+      }
+    }
+
+    let sparks = [];
+    function burst(x, y) {
+      if (!fire || reduceMotion) return;
+      for (let i = 0; i < 12; i++) sparks.push(new Spark(x, y));
+      if (sparks.length > 90) sparks.splice(0, sparks.length - 90);
+    }
+    document.addEventListener('pointerdown', (event) => burst(event.clientX, event.clientY), { passive: true });
+
     function populate() {
       particles = [];
       const count = fire ? CINDER_COUNT : PARTICLE_COUNT;
@@ -216,6 +267,7 @@ if (location.pathname.endsWith('/index.html')) {
 
     window.addEventListener('themechange', (event) => {
       fire = event.detail.theme === 'fire';
+      sparks = [];
       readTint();
       populate();
       if (reduceMotion) requestAnimationFrame(animate);
@@ -231,6 +283,10 @@ if (location.pathname.endsWith('/index.html')) {
         if (!reduceMotion) p.update(dt);
         p.draw();
       });
+      if (sparks.length) {
+        sparks.forEach((spark) => { spark.update(dt); spark.draw(); });
+        sparks = sparks.filter((spark) => spark.age < spark.life);
+      }
       // With reduced motion, draw the particles once as a still starfield
       if (!reduceMotion) requestAnimationFrame(animate);
     }
@@ -244,6 +300,8 @@ if (location.pathname.endsWith('/index.html')) {
           ctx.clearRect(0, 0, width, height);
           particles.forEach((p) => p.draw());
         },
+        burst,
+        sparkCount: () => sparks.length,
         // [hot, mid, dark, out] counts of cinders, to see the life cycle at work
         counts: () => {
           const c = [0, 0, 0, 0];

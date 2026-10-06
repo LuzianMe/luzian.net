@@ -14,6 +14,7 @@
   const root = document.documentElement;
   const BROWSER_COLORS = { water: '#0d111b', fire: '#0a0403' };   // the phone's address bar
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const DURATION = 750;   // milliseconds for the circle to cross the page
 
   function save(theme) {
     try { localStorage.setItem(KEY, theme); } catch (e) { /* private window: just not remembered */ }
@@ -58,9 +59,29 @@
     transition.ready.then(() => {
       root.animate(
         { clipPath: [`circle(0px at ${x}px ${y}px)`, `circle(${radius}px at ${x}px ${y}px)`] },
-        { duration: 750, easing: 'ease-out', pseudoElement: '::view-transition-new(root)' }
+        { duration: DURATION, easing: 'ease-out', pseudoElement: '::view-transition-new(root)' }
       );
+      rim(x, y, radius);
     }).catch(() => { /* the theme has changed anyway */ });
+  }
+
+  // A glowing rim on the front of the spreading circle, in the new theme's colour: an ember front
+  // when the page catches fire. It grows in step with the circle (same length, same easing).
+  function rim(x, y, radius) {
+    const ring = document.createElement('div');
+    ring.className = 'theme-rim';
+    ring.setAttribute('aria-hidden', 'true');
+    ring.style.cssText = `left:${x - radius}px;top:${y - radius}px;width:${2 * radius}px;height:${2 * radius}px;`;
+    document.body.appendChild(ring);
+    const growing = ring.animate(
+      [
+        { transform: 'scale(0)', opacity: 1 },
+        { transform: 'scale(0.8)', opacity: 1, offset: 0.8 },
+        { transform: 'scale(1)', opacity: 0 },
+      ],
+      { duration: DURATION, easing: 'ease-out', fill: 'forwards' }
+    );
+    growing.onfinish = () => ring.remove();
   }
 
   // The first paint already has the right colours
@@ -78,7 +99,16 @@
   const DROPLET = '<svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><path d="M12 2.4C8.2 7 5.8 10.2 5.8 13.7a6.2 6.2 0 0 0 12.4 0C18.2 10.2 15.8 7 12 2.4z"/></svg>';
   const FLAME = '<svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><path d="M12.4 2c.5 3.3 2.3 4.9 4 6.8 1.7 1.9 3.1 3.7 3.1 6.4a7.5 7.5 0 0 1-15 0c0-2.7 1.3-4.6 2.8-6 .2 1.4.9 2.4 1.9 3C9.3 9.2 10.3 5 12.4 2zm-.4 11.2c-1.2 1.2-2 2.1-2 3.4a2 2 0 0 0 4 0c0-1.3-.8-2.2-2-3.4z" fill-rule="evenodd"/></svg>';
 
+  // Fire only (the stylesheet shows it): a glow along the bottom of the page, like embers below the screen
+  function buildGlow() {
+    const glow = document.createElement('div');
+    glow.className = 'ember-glow';
+    glow.setAttribute('aria-hidden', 'true');
+    document.body.insertBefore(glow, document.body.firstChild);   // first, so everything else is drawn over it
+  }
+
   function build() {
+    buildGlow();
     const spanish = root.lang === 'es';
     const group = document.createElement('div');
     group.className = 'theme-switch';

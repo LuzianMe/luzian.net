@@ -1345,6 +1345,64 @@ body.home .switch-row .lang-switch {
   z-index: 1;
 }
 
+/* The glowing front of that circle (assets/theme.js) */
+.theme-rim {
+  position: fixed;
+  z-index: 100000;
+  border-radius: 50%;
+  pointer-events: none;
+  transform-origin: center;
+  mix-blend-mode: screen;
+  background: radial-gradient(
+    circle closest-side,
+    transparent calc(100% - 110px),
+    rgb(var(--accent) / 0.28) calc(100% - 40px),
+    rgb(var(--accent-light) / 0.95) calc(100% - 7px),
+    transparent 100%
+  );
+}
+
+/* Fire only: a glow along the bottom edge of the page that breathes like embers (assets/theme.js adds the element) */
+.ember-glow {
+  display: none;
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 58vh;
+  pointer-events: none;
+  z-index: 0;
+  background: radial-gradient(
+    ellipse 78% 90% at 50% 110%,
+    rgb(255 72 8 / calc(0.46 * var(--ember-glow, 0.7))) 0%,
+    rgb(190 30 4 / calc(0.24 * var(--ember-glow, 0.7))) 38%,
+    transparent 74%
+  );
+  animation: ember-breathe 9s ease-in-out infinite;
+}
+
+html[data-theme="fire"] .ember-glow {
+  display: block;
+}
+
+@keyframes ember-breathe {
+  0%, 100% { opacity: 0.78; }
+  11% { opacity: 0.94; }
+  23% { opacity: 0.62; }
+  36% { opacity: 0.88; }
+  47% { opacity: 0.7; }
+  61% { opacity: 1; }
+  73% { opacity: 0.66; }
+  87% { opacity: 0.84; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ember-glow {
+    animation: none;
+    opacity: 0.85;
+  }
+}
+
 ::view-transition-new(root) {
   z-index: 2;
 }
@@ -1521,4 +1579,21 @@ body.calm-show {
   .footer-links > .footer-sep:first-child {
     display: none;
   }
+}
+
+/* Fire: the page and section titles take a flame gradient, hot yellow at the top to red at the bottom.
+   --heading-fire is how strongly (0 = plain). A text-shadow would paint over the gradient, so the glow is a drop-shadow. */
+html[data-theme="fire"]:not([data-heading-fire="off"]) :is(h1, h2) {
+  background-image:
+    linear-gradient(180deg,
+      rgb(255 238 160 / var(--heading-fire, 0.75)) 0%,
+      rgb(255 148 28 / var(--heading-fire, 0.75)) 52%,
+      rgb(232 46 8 / var(--heading-fire, 0.75)) 100%),
+    linear-gradient(rgb(var(--text-strong)), rgb(var(--text-strong)));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  text-shadow: none;
+  filter: drop-shadow(0 0 12px rgb(var(--accent) / 0.4));
 }
