@@ -17,8 +17,8 @@ const shareTrigger = document.getElementById('share-trigger');
 const shareLink = document.getElementById('share-link');
 
 if (shareModal && shareTrigger) {
-  const open = () => { shareModal.style.display = 'block'; };
-  const close = () => { shareModal.style.display = 'none'; };
+  const open = () => window.showModal(shareModal);
+  const close = () => window.hideModal(shareModal);
 
   shareTrigger.addEventListener('click', open);
   shareModal.querySelector('[data-close]').addEventListener('click', close);
@@ -26,7 +26,7 @@ if (shareModal && shareTrigger) {
     if (event.target === shareModal) close();
   });
   document.addEventListener('keydown', (event) => {
-    if (event.key === 'Escape') close();
+    if (event.key === 'Escape' && shareModal.style.display === 'block') close();
   });
 
   shareLink.addEventListener('click', () => {
@@ -35,10 +35,4 @@ if (shareModal && shareTrigger) {
       .then(() => flashLabel(shareLink, msg.linkCopied || 'Link copied!'))
       .catch(() => prompt(msg.promptLink || 'Copy this link:', url));
   });
-}
-
-// Update copyright year
-const yearEl = document.getElementById('current-year');
-if (yearEl) {
-  yearEl.textContent = new Date().getFullYear();
 }

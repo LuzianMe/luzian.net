@@ -18,8 +18,24 @@ function copyText(text) {
   return legacyCopy();
 }
 
-// Briefly swap an element's text to confirm the copy
+// Say something to screen readers without showing it (a hidden status region)
+function announce(message) {
+  let region = document.getElementById('live-status');
+  if (!region) {
+    region = document.createElement('div');
+    region.id = 'live-status';
+    region.className = 'sr-only';
+    region.setAttribute('role', 'status');
+    region.setAttribute('aria-live', 'polite');
+    document.body.appendChild(region);
+  }
+  region.textContent = '';
+  setTimeout(() => { region.textContent = message; }, 50);
+}
+
+// Briefly swap an element's text to confirm the copy (and tell screen readers)
 function flashLabel(el, message) {
+  announce(message);
   // Remember the real label once, so repeated clicks don't "restore" to the message
   if (!el.dataset.label) el.dataset.label = el.textContent;
   el.textContent = message;

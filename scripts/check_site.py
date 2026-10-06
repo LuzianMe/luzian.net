@@ -10,6 +10,8 @@ What it checks
   - every English page has its Spanish twin, and the language links point at each other
   - canonical and og:url match the page's own address; og:image exists
   - Spanish pages do not link to English pages (and the other way round), except the language switch
+  - the shared parts of every page (head, menu, footer, scripts) and sitemap.xml are in step with scripts/sync_pages.py
+  - every page has exactly one <h1> and a <main id="main"> for the skip link; the wedding archive has noindex
   - pages with the ouroboros background load water.js, and every page loads theme.js (Water / Fire)
   - the stylesheet has no hard-coded theme colours left (they must be CSS variables, so Fire gets them too)
   - no leftover test pages or temporary hooks
@@ -20,6 +22,9 @@ import sys
 from html.parser import HTMLParser
 from pathlib import Path
 from urllib.parse import urlparse
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import sync_pages  # noqa: E402  (the list of pages and their shared parts)
 
 ROOT = Path(__file__).resolve().parent.parent
 SITE = 'https://luzian.net'
@@ -46,10 +51,16 @@ class Page(HTMLParser):
         self.lang = None
         self.refresh = False
         self.has_rotator = False
+        self.h1 = 0
+        self.main_id = None
         self.body_class = ''
 
     def handle_starttag(self, tag, attrs):
         a = dict(attrs)
+        if tag == 'h1':
+            self.h1 += 1
+        if tag == 'main':
+            self.main_id = a.get('id')
         if tag == 'html':
             self.lang = a.get('lang')
         if tag == 'body':
@@ -191,6 +202,13 @@ def main():
             if target is None or not exists(target):
                 error(name, f'og:image {image} does not exist')
 
+        # 5b. One <h1> per page, and a place for the skip link to land
+        if name in sync_pages.PAGES:
+            if page.h1 != 1:
+                error(name, f'has {page.h1} <h1> elements (it should have exactly one)')
+            if page.main_id != 'main':
+                error(name, 'needs <main id="main"> (the skip link jumps there)')
+
         # 6a. Every page that uses the stylesheet needs the theme script (in the head, for the first paint)
         if any('assets/style.css' in v for _, _, v, _ in page.links) and name not in NO_THEME:
             if not any(t == 'script' and 'theme.js' in v for t, _, v, _ in page.links):
@@ -199,6 +217,17 @@ def main():
         # 6b. The water effect needs its script
         if page.has_rotator and not any('water.js' in v for _, _, v, _ in page.links):
             error(name, 'has the ouroboros background but does not load water.js')
+
+    # 6c. Shared parts and the sitemap are in step with scripts/sync_pages.py
+    for problem in sync_pages.check():
+        error('shared parts', problem)
+
+    # 6d. The wedding archive stays out of search results
+    wedding = ROOT / 'wedding' / 'index.html'
+    if wedding.exists() and not re.search(r'<meta[^>]+name="robots"[^>]+noindex', wedding.read_text(encoding='utf-8')):
+        error('wedding/index.html', 'needs <meta name="robots" content="noindex, nofollow">')
+    if not (ROOT / 'robots.txt').exists():
+        error('robots.txt', 'is missing')
 
     # 7. Stylesheets and scripts: files they name exist
     for path in sorted((ROOT / 'assets').rglob('*')):

@@ -900,6 +900,8 @@
       draw(performance.now() / 1000);
     }
   }
+  // Listen from the start: a switch made while the snake picture is still loading must not be missed
+  window.addEventListener('themechange', onTheme);
 
   snakeCanvas.addEventListener('webglcontextlost', (event) => { event.preventDefault(); dispose(); });
   bgCanvas.addEventListener('webglcontextlost', (event) => { event.preventDefault(); dispose(); });
@@ -926,7 +928,6 @@
     window.addEventListener('pointerdown', onDown, { passive: true });
     window.addEventListener('pointermove', onMove, { passive: true });
     window.addEventListener('resize', onResize);
-    window.addEventListener('themechange', onTheme);
     start();
   };
   image.onerror = () => { /* keep the CSS version */ };
