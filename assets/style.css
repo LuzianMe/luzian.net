@@ -1352,3 +1352,43 @@ body.home.calm .lang-banner {
   pointer-events: none;
   transition: opacity 1.6s ease;
 }
+
+/* Calm view (/?calm): calm from the start; the pointer hides, and a quiet hint says how to leave */
+body.calm-show {
+  cursor: none;
+}
+
+.calm-hint {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 1.75rem;
+  margin: 0;
+  text-align: center;
+  font-family: var(--font-ui);
+  font-size: var(--fs-sm);
+  letter-spacing: 0.04em;
+  color: #94a3b8;
+  pointer-events: none;
+  opacity: 0;
+  animation: calm-hint 7s ease forwards;
+}
+
+@keyframes calm-hint {
+  0% { opacity: 0; }
+  12% { opacity: 0.85; }
+  70% { opacity: 0.85; }
+  100% { opacity: 0; }
+}
+
+/* On a phone the footer links get their own line under the copyright, instead of wrapping raggedly */
+@media (max-width: 519px) {
+  .footer-links {
+    display: block;
+    margin-top: 0.35rem;
+  }
+
+  .footer-links > .footer-sep:first-child {
+    display: none;
+  }
+}
