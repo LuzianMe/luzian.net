@@ -80,6 +80,7 @@
   --bg-edge: 8 10 16;
   --scroll: 30 41 59;
   --particle: 56 189 248;
+  --icon: 255 255 255;   /* the colour of the white icons (Water leaves them white) */
 
   --mouse-x: 50vw;
   --mouse-y: 30vh;
@@ -124,6 +125,8 @@ html[data-theme="fire"] {
   --bg-edge: 5 2 2;
   --scroll: 60 26 14;
   --particle: 255 100 20;
+  --icon: 255 172 84;
+  --icon-tint: url(#icon-tint);   /* an SVG colour filter, built by assets/theme.js from --icon */
 }
 
 
@@ -868,7 +871,13 @@ button.grid-item {
 .grid-icon {
   width: clamp(26px, 4vw, 42px);
   height: clamp(26px, 4vw, 42px);
+  filter: var(--icon-tint,);
   transition: transform 0.22s ease, filter 0.25s ease;
+}
+
+/* Fire: the white icons take the theme's colour, with a faint ember glow like the titles */
+html[data-theme="fire"] .grid-icon {
+  filter: var(--icon-tint) drop-shadow(0 0 6px rgb(var(--accent) / 0.35));
 }
 
 .grid-item:hover .grid-icon {
@@ -880,51 +889,51 @@ button.grid-item {
    ========================================================================== */
 /* Discord */
 a[href*="discord"]:hover .grid-icon {
-  filter: drop-shadow(0 0 12px rgba(88, 101, 242, 0.9));
+  filter: var(--icon-tint,) drop-shadow(0 0 12px rgba(88, 101, 242, 0.9));
 }
 /* LinkedIn */
 a[href*="linkedin"]:hover .grid-icon {
-  filter: drop-shadow(0 0 12px rgba(10, 102, 194, 0.9));
+  filter: var(--icon-tint,) drop-shadow(0 0 12px rgba(10, 102, 194, 0.9));
 }
 /* GitHub */
 a[href*="github"]:hover .grid-icon {
-  filter: drop-shadow(0 0 12px rgb(var(--white) / 0.9));
+  filter: var(--icon-tint,) drop-shadow(0 0 12px rgb(var(--white) / 0.9));
 }
 /* Bluesky */
 a[href*="bsky"]:hover .grid-icon {
-  filter: drop-shadow(0 0 12px rgba(0, 133, 255, 0.9));
+  filter: var(--icon-tint,) drop-shadow(0 0 12px rgba(0, 133, 255, 0.9));
 }
 /* Phone / Call */
 a[href^="tel"]:hover .grid-icon {
-  filter: drop-shadow(0 0 12px rgba(52, 211, 153, 0.9));
+  filter: var(--icon-tint,) drop-shadow(0 0 12px rgba(52, 211, 153, 0.9));
 }
 /* Email */
 #copyEmail:hover .grid-icon {
-  filter: drop-shadow(0 0 12px rgb(var(--accent) / 0.9));
+  filter: var(--icon-tint,) drop-shadow(0 0 12px rgb(var(--accent) / 0.9));
 }
 /* Share (QR) */
 #share-trigger:hover .grid-icon {
-  filter: drop-shadow(0 0 12px rgba(168, 85, 247, 0.9));
+  filter: var(--icon-tint,) drop-shadow(0 0 12px rgba(168, 85, 247, 0.9));
 }
 /* Save Contact Card (.vcf) */
 a[href*="contact.vcf"]:hover .grid-icon {
-  filter: drop-shadow(0 0 12px rgba(245, 158, 11, 0.9));
+  filter: var(--icon-tint,) drop-shadow(0 0 12px rgba(245, 158, 11, 0.9));
 }
 /* Venmo */
 .pay-item[data-brand="venmo"]:hover .grid-icon {
-  filter: drop-shadow(0 0 12px rgba(0, 140, 255, 0.9));
+  filter: var(--icon-tint,) drop-shadow(0 0 12px rgba(0, 140, 255, 0.9));
 }
 /* Cash App */
 .pay-item[data-brand="cashapp"]:hover .grid-icon {
-  filter: drop-shadow(0 0 12px rgba(0, 214, 79, 0.9));
+  filter: var(--icon-tint,) drop-shadow(0 0 12px rgba(0, 214, 79, 0.9));
 }
 /* PayPal */
 .pay-item[data-brand="paypal"]:hover .grid-icon {
-  filter: drop-shadow(0 0 12px rgba(0, 112, 186, 0.9));
+  filter: var(--icon-tint,) drop-shadow(0 0 12px rgba(0, 112, 186, 0.9));
 }
 /* Zelle */
 .pay-item[data-brand="zelle"]:hover .grid-icon {
-  filter: drop-shadow(0 0 12px rgba(138, 43, 226, 0.9));
+  filter: var(--icon-tint,) drop-shadow(0 0 12px rgba(138, 43, 226, 0.9));
 }
 
 /* ==========================================================================

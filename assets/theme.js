@@ -35,10 +35,34 @@
     if (meta) meta.setAttribute('content', BROWSER_COLORS[theme]);
   }
 
+  // The white icons are tinted with an SVG colour filter (no extra image files). Its matrix is built
+  // from the theme's --icon colour, so changing that variable in the stylesheet re-colours them all.
+  function buildIconFilter() {
+    if (document.getElementById('icon-tint')) return;
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('width', '0');
+    svg.setAttribute('height', '0');
+    svg.setAttribute('aria-hidden', 'true');
+    svg.setAttribute('focusable', 'false');
+    svg.style.cssText = 'position:absolute;width:0;height:0;overflow:hidden';
+    svg.innerHTML = '<filter id="icon-tint" color-interpolation-filters="sRGB"><feColorMatrix type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 1 0"/></filter>';
+    document.body.appendChild(svg);
+    paintIcons();
+  }
+
+  function paintIcons() {
+    const matrix = document.querySelector('#icon-tint feColorMatrix');
+    if (!matrix) return;
+    const rgb = getComputedStyle(root).getPropertyValue('--icon').trim().split(/\s+/).map(Number);
+    if (rgb.length !== 3 || rgb.some(isNaN)) return;
+    matrix.setAttribute('values', `${rgb[0] / 255} 0 0 0 0  0 ${rgb[1] / 255} 0 0 0  0 0 ${rgb[2] / 255} 0 0  0 0 0 1 0`);
+  }
+
   // Everything that has to change when the theme changes
   function apply(theme) {
     root.setAttribute('data-theme', theme);
     paintBrowserBar(theme);
+    paintIcons();
     document.querySelectorAll('[data-theme-set]').forEach((button) => {
       button.setAttribute('aria-pressed', String(button.getAttribute('data-theme-set') === theme));
     });
@@ -109,6 +133,7 @@
 
   function build() {
     buildGlow();
+    buildIconFilter();
     const spanish = root.lang === 'es';
     const group = document.createElement('div');
     group.className = 'theme-switch';
