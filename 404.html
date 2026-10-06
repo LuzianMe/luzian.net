@@ -19,7 +19,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="404 - Page Not Found">
   <title>404 - Page Not Found</title>
-  <link rel="stylesheet" href="/assets/style.css?v=20261005b">
+  <link rel="stylesheet" href="/assets/style.css?v=20261006a">
   <script>
     document.documentElement.style.setProperty('--rotator-delay', `-${(Date.now() / 1000 % 120).toFixed(3)}s`);
   </script>
@@ -34,33 +34,42 @@
   <div class="page-bg">
     <nav class="nav-container" aria-label="Main Navigation">
       <ul class="nav-pills">
-        <li><a href="/" class="nav-pill">Home</a></li>
-        <li><a href="/career/" class="nav-pill">Career</a></li>
-        <li><a href="/setup/" class="nav-pill">Setup</a></li>
-        <li><a href="/contact/" class="nav-pill">Contact</a></li>
+        <li><a href="/" class="nav-pill" data-es="Inicio" data-es-href="/es/">Home</a></li>
+        <li><a href="/career/" class="nav-pill" data-es="Trayectoria" data-es-href="/es/career/">Career</a></li>
+        <li><a href="/setup/" class="nav-pill" data-es="Mi equipo" data-es-href="/es/setup/">Setup</a></li>
+        <li><a href="/contact/" class="nav-pill" data-es="Contacto" data-es-href="/es/contact/">Contact</a></li>
       </ul>
     </nav>
     <header>
-      <h1>Oops! Page Not Found</h1>
+      <h1 data-es="¡Ups! Página no encontrada">Oops! Page Not Found</h1>
     </header>
     <main>
       <div class="message-box">
-        <p>The page you're looking for doesn’t exist or might have been moved.</p>
+        <p data-es="La página que buscas no existe o pudo haberse movido.">The page you're looking for doesn’t exist or might have been moved.</p>
       </div>
       <div class="grid">
-        <a href="/" class="grid-item"><p>Go to Home</p></a>
-        <a href="/setup/" class="grid-item"><p>Setup Page</p></a>
-        <a href="/contact/" class="grid-item"><p>Contact Page</p></a>
+        <a href="/" class="grid-item" data-es-href="/es/"><p data-es="Ir al inicio">Go to Home</p></a>
+        <a href="/setup/" class="grid-item" data-es-href="/es/setup/"><p data-es="Página de mi equipo">Setup Page</p></a>
+        <a href="/contact/" class="grid-item" data-es-href="/es/contact/"><p data-es="Página de contacto">Contact Page</p></a>
       </div>
     </main>
     <footer>
       <p>&copy; <span id="current-year">2026</span> Luzian. All rights reserved.</p>
     </footer>
     <script>
+      // GitHub Pages serves one 404 page for the whole site: show Spanish when the broken address is under /es/
+      if (location.pathname.indexOf('/es/') === 0) {
+        document.documentElement.lang = 'es';
+        document.title = '404 - Página no encontrada';
+        document.querySelector('meta[name="description"]').setAttribute('content', '404 - Página no encontrada');
+        document.querySelectorAll('[data-es]').forEach((el) => { el.textContent = el.dataset.es; });
+        document.querySelectorAll('[data-es-href]').forEach((el) => { el.setAttribute('href', el.dataset.esHref); });
+        document.querySelector('footer p').innerHTML = '&copy; <span id="current-year">2026</span> Luzian. Todos los derechos reservados.';
+      }
       const yearEl = document.getElementById('current-year');
       if (yearEl) yearEl.textContent = new Date().getFullYear();
     </script>
-    <script src="/assets/effects.js?v=20261005b"></script>
+    <script src="/assets/effects.js?v=20261006a"></script>
   </div>
 </body>
 

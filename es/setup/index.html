@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" href="/assets/ouro.ico" type="image/x-icon">
+  <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+  <meta name="theme-color" content="#0d111b">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Mi equipo de VR y PC: Quest Pro, seguimiento de cuerpo completo de 11 puntos, seguimiento facial y una PC con Ryzen 7 9800X3D y RX 7900 XTX.">
+  <meta property="og:title" content="Mi equipo - Luzian">
+  <meta property="og:description" content="Quest Pro, seguimiento de cuerpo completo de 11 puntos, seguimiento facial y una PC con Ryzen 7 9800X3D y RX 7900 XTX.">
+  <meta property="og:image" content="https://luzian.net/assets/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Logotipo de Luzian sobre un ouroboros luminoso">
+  <meta property="og:site_name" content="Luzian">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta property="og:url" content="https://luzian.net/es/setup/">
+  <link rel="canonical" href="https://luzian.net/es/setup/">
+  <meta property="og:locale" content="es_MX">
+  <meta property="og:locale:alternate" content="en_US">
+  <link rel="alternate" hreflang="es" href="https://luzian.net/es/setup/">
+  <link rel="alternate" hreflang="en" href="https://luzian.net/setup/">
+  <link rel="alternate" hreflang="x-default" href="https://luzian.net/setup/">
+  <meta property="og:type" content="website">
+  <title>Luzian | Mi equipo</title>
+  <link rel="stylesheet" href="/assets/style.css?v=20261006a">
+  <script>
+    document.documentElement.style.setProperty('--rotator-delay', `-${(Date.now() / 1000 % 120).toFixed(3)}s`);
+  </script>
+</head>
+
+<body>
+  <!-- Ambient Visual Background Layers -->
+  <div class="ouro-bg-rotator" aria-hidden="true"></div>
+  <canvas id="ambient-canvas" aria-hidden="true"></canvas>
+  <div class="spotlight-overlay" aria-hidden="true"></div>
+
+  <div class="page-bg">
+    <nav class="nav-container" aria-label="Navegación principal">
+      <ul class="nav-pills">
+        <li><a href="/es/" class="nav-pill">Inicio</a></li>
+        <li><a href="/es/career/" class="nav-pill">Trayectoria</a></li>
+        <li><a href="/es/setup/" class="nav-pill active">Mi equipo</a></li>
+        <li><a href="/es/contact/" class="nav-pill">Contacto</a></li>
+      </ul>
+    </nav>
+    <div class="lang-switch" role="group" aria-label="Idioma"><a href="/setup/" hreflang="en" lang="en" title="View in English" data-lang="en">EN</a><span class="lang-current" aria-current="true">ES</span></div>
+    <header>
+      <h1>Mi equipo</h1>
+      <p>Lo que uso para VR social, seguimiento de cuerpo completo e IA local.</p>
+      <ul class="setup-chips" aria-label="Aspectos destacados">
+        <li>Quest Pro</li>
+        <li>FBT de 11 puntos</li>
+        <li>Seguimiento facial</li>
+        <li>RX 7900 XTX</li>
+      </ul>
+    </header>
+    <main class="setup-grid">
+      <section class="setup-card">
+        <h2>Visor</h2>
+        <ul class="gear-list">
+          <li>
+            <div><span class="gear-name">Meta Quest Pro</span><span class="gear-note">Seguimiento facial y de ojos integrado</span></div>
+            <span class="status status-main">Principal</span>
+          </li>
+          <li>
+            <div><span class="gear-name">Meta Quest 3</span></div>
+            <span class="status status-backup">Respaldo</span>
+          </li>
+          <li>
+            <div><span class="gear-name">Visor by Immersed</span></div>
+            <span class="status status-preorder">Preordenado</span>
+          </li>
+        </ul>
+      </section>
+
+      <section class="setup-card">
+        <h2>Seguimiento de cuerpo completo</h2>
+        <ul class="gear-list">
+          <li>
+            <div><span class="gear-name">HaritoraX2 (11 trackers)</span><span class="gear-note">2 dongles GX6 &middot; SlimeTora</span></div>
+            <span class="status status-inuse">En uso</span>
+          </li>
+          <li>
+            <div><span class="gear-name">SlimeVR Butterflies</span></div>
+            <span class="status status-preorder">Preordenado</span>
+          </li>
+          <li>
+            <div><span class="gear-name">Flux Pose</span></div>
+            <span class="status status-preorder">Preordenado</span>
+          </li>
+        </ul>
+      </section>
+
+      <section class="setup-card setup-card-wide">
+        <h2>Locomoción</h2>
+        <ul class="gear-list">
+          <li>
+            <div><span class="gear-name">Caminadora Sunny + Reality Runner</span><span class="gear-note">Camino en la vida real, me muevo en VR</span></div>
+            <span class="status status-inuse">En uso</span>
+          </li>
+        </ul>
+      </section>
+
+      <section class="setup-card setup-card-wide">
+        <h2>PC</h2>
+        <p class="setup-card-intro">Hecha para eventos de VRChat y para correr modelos de IA de forma local.</p>
+        <dl class="spec-list">
+          <div><dt>CPU</dt><dd>AMD Ryzen 7 9800X3D <span class="spec-hl">3D V-Cache</span></dd></div>
+          <div><dt>GPU</dt><dd>XFX Radeon RX 7900 XTX <span class="spec-hl">24 GB de VRAM</span></dd></div>
+          <div><dt>RAM</dt><dd>32 GB DDR5-6000</dd></div>
+          <div><dt>Almacenamiento</dt><dd>SSD NVMe de 1 TB</dd></div>
+        </dl>
+      </section>
+
+      <p class="setup-updated">Última actualización: septiembre de 2026</p>
+    </main>
+    <footer>
+      <p>&copy; <span id="current-year">2026</span> Luzian. Todos los derechos reservados.</p>
+    </footer>
+    <script>
+      const yearEl = document.getElementById('current-year');
+      if (yearEl) yearEl.textContent = new Date().getFullYear();
+    </script>
+    <script src="/assets/effects.js?v=20261006a"></script>
+    <script src="/assets/lang.js?v=20261006a"></script>
+  </div>
+</body>
+
+</html>

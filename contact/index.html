@@ -10,7 +10,7 @@
 	<meta name="description" content="Luzian's Contact Information">
 	<!-- Open Graph meta tags -->
 	<meta property="og:title" content="Contact Me - Luzian">
-	<meta property="og:description" content="Connect with Luzian through Discord, LinkedIn, GitHub, and more.">
+	<meta property="og:description" content="Connect with Luzian through LinkedIn, email, GitHub and more.">
 	<meta property="og:image" content="https://luzian.net/assets/og-image.png">
 	<meta property="og:image:width" content="1200">
 	<meta property="og:image:height" content="630">
@@ -20,9 +20,14 @@
 	<!-- Thumbnail URL -->
 	<meta property="og:url" content="https://luzian.net/contact/"> <!-- Page URL -->
 	<link rel="canonical" href="https://luzian.net/contact/">
+	<meta property="og:locale" content="en_US">
+	<meta property="og:locale:alternate" content="es_MX">
+	<link rel="alternate" hreflang="en" href="https://luzian.net/contact/">
+	<link rel="alternate" hreflang="es" href="https://luzian.net/es/contact/">
+	<link rel="alternate" hreflang="x-default" href="https://luzian.net/contact/">
 	<meta property="og:type" content="website">
 	<title>Luzian | Contact Me</title>
-	<link rel="stylesheet" href="../assets/style.css?v=20261005b">
+	<link rel="stylesheet" href="../assets/style.css?v=20261006a">
 	<script>
 		document.documentElement.style.setProperty('--rotator-delay', `-${(Date.now() / 1000 % 120).toFixed(3)}s`);
 	</script>
@@ -43,6 +48,7 @@
 				<li><a href="/contact/" class="nav-pill active">Contact</a></li>
 			</ul>
 		</nav>
+		<div class="lang-switch" role="group" aria-label="Language"><span class="lang-current" aria-current="true">EN</span><a href="/es/contact/" hreflang="es" lang="es" title="Ver en español" data-lang="es">ES</a></div>
 		<header>
 			<img src="../assets/logo.svg" alt="Luzian" class="logo">
 			<p class="shimmer-text">Computer Science Engineer&nbsp;| Technology Enthusiast</p>
@@ -53,35 +59,35 @@
 				<div class="grid">
 					<a href="https://www.linkedin.com/in/luciano-melendrez-3a9b1682/" class="grid-item" target="_blank"
 						rel="noopener noreferrer" title="Visit my LinkedIn profile">
-						<img src="../assets/linkedin-icon.svg" alt="LinkedIn Icon" class="grid-icon">
+						<img src="../assets/linkedin-icon.svg" alt="" class="grid-icon">
 						<p>LinkedIn</p>
 					</a>
 					<button type="button" class="grid-item" id="copyEmail" title="Copy Email (me@luzian.net)">
-						<img src="../assets/email-icon.svg" alt="Email Icon" class="grid-icon">
+						<img src="../assets/email-icon.svg" alt="" class="grid-icon">
 						<p>Email</p>
 					</button>
 					<a href="https://github.com/LuzianMe" class="grid-item" target="_blank"
 						rel="noopener noreferrer" title="Check out my GitHub">
-						<img src="../assets/github-icon.svg" alt="GitHub Icon" class="grid-icon">
+						<img src="../assets/github-icon.svg" alt="" class="grid-icon">
 						<p>GitHub</p>
 					</a>
 					<a href="https://bsky.app/profile/luzian.net" class="grid-item" target="_blank"
 						rel="noopener noreferrer" title="Find me on Bluesky">
-						<img src="../assets/bluesky-icon.svg" alt="Bluesky Icon" class="grid-icon">
+						<img src="../assets/bluesky-icon.svg" alt="" class="grid-icon">
 						<p>Bluesky</p>
 					</a>
 					<a href="https://discordapp.com/users/490539308147671051" class="grid-item" target="_blank"
 						rel="noopener noreferrer" title="Connect with me on Discord">
-						<img src="../assets/discord-icon.svg" alt="Discord Icon" class="grid-icon">
+						<img src="../assets/discord-icon.svg" alt="" class="grid-icon">
 						<p>Discord</p>
 					</a>
 					<a href="tel:+16232264417" class="grid-item" title="Call Virtual Phone (+1 623 226 4417)">
-						<img src="../assets/phone-icon.svg" alt="Phone Icon" class="grid-icon">
+						<img src="../assets/phone-icon.svg" alt="" class="grid-icon">
 						<p>Virtual Phone</p>
 					</a>
 					<a href="../assets/contact.vcf" class="grid-item" download="Luzian.vcf"
 						title="Save contact card to your phone or computer">
-						<img src="../assets/contact-icon.svg" alt="Contact Card Icon" class="grid-icon">
+						<img src="../assets/contact-icon.svg" alt="" class="grid-icon">
 						<p>Save Contact</p>
 					</a>
 					<button type="button" class="grid-item" id="share-trigger" title="Show a QR code of this page">
@@ -106,9 +112,10 @@
 		<footer>
 			<p>&copy; <span id="current-year">2026</span> Luzian. All rights reserved.</p>
 		</footer>
-		<script src="../assets/copy.js?v=20261005b"></script>
-		<script src="script.js?v=20261005b"></script>
-		<script src="../assets/effects.js?v=20261005b"></script>
+		<script src="../assets/copy.js?v=20261006a"></script>
+		<script src="script.js?v=20261006a"></script>
+		<script src="../assets/effects.js?v=20261006a"></script>
+		<script src="/assets/lang.js?v=20261006a"></script>
 	</div>
 </body>
 

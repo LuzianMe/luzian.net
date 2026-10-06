@@ -16,11 +16,16 @@
   <meta name="twitter:card" content="summary_large_image">
   <meta property="og:url" content="https://luzian.net/">
   <link rel="canonical" href="https://luzian.net/">
+  <meta property="og:locale" content="en_US">
+  <meta property="og:locale:alternate" content="es_MX">
+  <link rel="alternate" hreflang="en" href="https://luzian.net/">
+  <link rel="alternate" hreflang="es" href="https://luzian.net/es/">
+  <link rel="alternate" hreflang="x-default" href="https://luzian.net/">
   <meta property="og:type" content="website">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="Computer science engineer exploring VR, spatial computing and local AI.">
   <title>Luzian | Engineer exploring VR &amp; AI</title>
-  <link rel="stylesheet" href="./assets/style.css?v=20261005b">
+  <link rel="stylesheet" href="./assets/style.css?v=20261006a">
   <script>
     document.documentElement.style.setProperty('--rotator-delay', `-${(Date.now() / 1000 % 120).toFixed(3)}s`);
   </script>
@@ -41,6 +46,7 @@
         <li><a href="/contact/" class="nav-pill">Contact</a></li>
       </ul>
     </nav>
+    <div class="lang-switch" role="group" aria-label="Language"><span class="lang-current" aria-current="true">EN</span><a href="/es/" hreflang="es" lang="es" title="Ver en español" data-lang="es">ES</a></div>
     <header class="hero">
       <img src="./assets/logo.svg" alt="Luzian" class="logo">
       <div class="hero-sub">
@@ -81,7 +87,8 @@
       const yearEl = document.getElementById('current-year');
       if (yearEl) yearEl.textContent = new Date().getFullYear();
     </script>
-    <script src="./assets/effects.js?v=20261005b"></script>
+    <script src="./assets/effects.js?v=20261006a"></script>
+    <script src="/assets/lang.js?v=20261006a"></script>
   </div>
 </body>
 

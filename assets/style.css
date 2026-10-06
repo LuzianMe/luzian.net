@@ -1178,3 +1178,126 @@ footer p {
     max-height: 16vh;
   }
 }
+
+/* ==========================================================================
+   Language switch (EN | ES) and the one-time Spanish suggestion banner
+   ========================================================================== */
+.lang-switch {
+  display: flex;
+  justify-content: center;
+  margin: 0.35rem 0 0;
+  position: relative;
+  z-index: 5;
+}
+
+.lang-switch > * {
+  padding: 0.15rem 0.75rem;
+  font-family: var(--font-ui);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-decoration: none;
+  color: #94a3b8;
+  background: rgba(15, 20, 32, 0.6);
+  border: 1px solid rgba(118, 199, 255, 0.25);
+}
+
+.lang-switch > :first-child {
+  border-radius: 999px 0 0 999px;
+  border-right-width: 0;
+}
+
+.lang-switch > :last-child {
+  border-radius: 0 999px 999px 0;
+}
+
+.lang-switch .lang-current {
+  color: #ffffff;
+  background: linear-gradient(135deg, rgba(56, 189, 248, 0.4) 0%, rgba(14, 116, 144, 0.4) 100%);
+  border-color: rgba(118, 199, 255, 0.45);
+}
+
+.lang-switch a:hover {
+  color: #ffffff;
+  background: rgba(118, 199, 255, 0.14);
+}
+
+/* Homepage: the switch floats under the nav so the hero stays exactly centered */
+body.home .lang-switch {
+  position: absolute;
+  top: 4.7rem;
+  left: 0;
+  right: 0;
+  margin: 0;
+}
+
+.lang-banner {
+  position: fixed;
+  left: 50%;
+  bottom: 1rem;
+  transform: translateX(-50%);
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem 0.9rem;
+  width: max-content;
+  max-width: calc(100vw - 2rem);
+  box-sizing: border-box;
+  padding: 0.6rem 1rem;
+  font-size: var(--fs-sm);
+  color: #e2e8f0;
+  background: rgba(16, 22, 36, 0.92);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(118, 199, 255, 0.35);
+  border-radius: 14px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
+}
+
+.lang-banner-go {
+  padding: 0.25rem 0.8rem;
+  border-radius: 999px;
+  font-family: var(--font-ui);
+  font-weight: 600;
+  color: #ffffff;
+  text-decoration: none;
+  background: linear-gradient(135deg, rgba(56, 189, 248, 0.35) 0%, rgba(14, 116, 144, 0.35) 100%);
+  border: 1px solid rgba(118, 199, 255, 0.6);
+}
+
+.lang-banner-close {
+  padding: 0.25rem 0.5rem;
+  font: inherit;
+  font-family: var(--font-ui);
+  color: #94a3b8;
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+
+.lang-banner-close:hover {
+  color: #ffffff;
+}
+
+/* Spanish labels are longer, so the four nav buttons need a little more squeezing on phones */
+@media (max-width: 480px) {
+  html[lang="es"] .nav-pills {
+    gap: 0.1rem;
+    padding: 0.3rem 0.3rem;
+  }
+
+  html[lang="es"] .nav-pill {
+    padding: 0.45rem 0.45rem;
+    font-size: 0.7rem;
+    letter-spacing: 0.02em;
+  }
+}
+
+@media (max-width: 340px) {
+  html[lang="es"] .nav-pill {
+    padding: 0.45rem 0.35rem;
+    font-size: 0.65rem;
+  }
+}

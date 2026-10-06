@@ -1,10 +1,13 @@
+// Messages come from data attributes on <body>, so the Spanish pages reuse this script
+const msg = document.body.dataset;
+
 const copyEmailBtn = document.getElementById('copyEmail');
 if (copyEmailBtn) {
   copyEmailBtn.addEventListener('click', () => {
     const email = 'me@luzian.net';
     copyText(email)
-      .then(() => flashLabel(copyEmailBtn.querySelector('p'), 'Copied!'))
-      .catch(() => prompt('Copy this email:', email));
+      .then(() => flashLabel(copyEmailBtn.querySelector('p'), msg.copied || 'Copied!'))
+      .catch(() => prompt(msg.promptEmail || 'Copy this email:', email));
   });
 }
 
@@ -27,10 +30,10 @@ if (shareModal && shareTrigger) {
   });
 
   shareLink.addEventListener('click', () => {
-    const url = 'https://luzian.net/contact/';
+    const url = msg.shareUrl || 'https://luzian.net/contact/';
     copyText(url)
-      .then(() => flashLabel(shareLink, 'Link copied!'))
-      .catch(() => prompt('Copy this link:', url));
+      .then(() => flashLabel(shareLink, msg.linkCopied || 'Link copied!'))
+      .catch(() => prompt(msg.promptLink || 'Copy this link:', url));
   });
 }
 
