@@ -77,6 +77,15 @@ if (location.pathname.endsWith('/index.html')) {
     let particles = [];
     const PARTICLE_COUNT = 32;
 
+    // The dust takes the theme's colour (blue specks in Water, rising embers in Fire)
+    let tint = '56, 189, 248';
+    function readTint() {
+      const value = getComputedStyle(document.documentElement).getPropertyValue('--particle').trim();
+      if (value) tint = value.split(/\s+/).join(', ');
+    }
+    readTint();
+    window.addEventListener('themechange', readTint);
+
     function resize() {
       width = canvas.width = window.innerWidth;
       height = canvas.height = window.innerHeight;
@@ -118,9 +127,9 @@ if (location.pathname.endsWith('/index.html')) {
         const currentOpacity = this.opacity * (0.7 + 0.3 * Math.sin(this.pulse));
         ctx.beginPath();
         ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(56, 189, 248, ${currentOpacity.toFixed(3)})`;
+        ctx.fillStyle = `rgba(${tint}, ${currentOpacity.toFixed(3)})`;
         ctx.shadowBlur = 8;
-        ctx.shadowColor = 'rgba(56, 189, 248, 0.8)';
+        ctx.shadowColor = `rgba(${tint}, 0.8)`;
         ctx.fill();
       }
     }
