@@ -17,14 +17,6 @@ if (location.pathname.endsWith('/index.html')) {
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const hasMouse = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
 
-  // 0. Synchronize Background Ouroboros Rotation Across Page Navigation
-  function syncRotator() {
-    const ROTATION_DURATION = 120; // matches 120s in CSS
-    const elapsed = (Date.now() / 1000) % ROTATION_DURATION;
-    document.documentElement.style.setProperty('--rotator-delay', `-${elapsed.toFixed(3)}s`);
-  }
-  syncRotator();
-
   // 1. Mouse Spotlight Tracker
   let mouseX = window.innerWidth / 2;
   let mouseY = window.innerHeight / 2;

@@ -112,7 +112,7 @@ h1, h2, h3, .nav-pill {
   transition: opacity 0.3s ease;
 }
 
-/* 2. Slow-Rotating Ouroboros Watermark (Clearly Visible & Radiant) */
+/* 2. Ouroboros Watermark (Clearly Visible & Radiant). Still; the water effect is drawn by assets/water.js */
 .ouro-bg-rotator {
   position: fixed;
   top: 50%;
@@ -127,18 +127,7 @@ h1, h2, h3, .nav-pill {
   opacity: 0.22;
   pointer-events: none;
   z-index: 0;
-  animation: ouro-spin 120s linear infinite;
-  animation-delay: var(--rotator-delay, 0s);
   filter: drop-shadow(0 0 35px rgba(56, 189, 248, 0.35));
-}
-
-@keyframes ouro-spin {
-  from {
-    transform: translate(-50%, -50%) rotate(0deg);
-  }
-  to {
-    transform: translate(-50%, -50%) rotate(360deg);
-  }
 }
 
 /* Water effect (assets/water.js): a canvas the size of the layer plus room for the glow */
@@ -162,10 +151,9 @@ h1, h2, h3, .nav-pill {
   z-index: 0;
 }
 
-/* Once the canvas is drawing it takes over the picture, the spin and the glow */
+/* Once the canvas is drawing it takes over the picture and the glow */
 .ouro-bg-rotator.water-on {
   background-image: none;
-  animation: none;
   filter: none;
 }
 
@@ -420,7 +408,6 @@ html {
   }
 
   .scroll-cue span,
-  .ouro-bg-rotator,
   .shimmer-text {
     animation: none;
   }
