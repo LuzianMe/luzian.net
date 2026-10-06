@@ -8,7 +8,7 @@ if (location.pathname.endsWith('/index.html')) {
    - Spotlight Cursor Glow
    - 3D Interactive Card Tilt
    - Atmospheric Ambient Particle System
-   - Calm mode: on the home page the menus and labels fade away when nothing moves
+   - Calm mode: on the home page the menus and labels fade away when nothing moves (or at once, with ?calm)
    ========================================================================== */
 
 (function () {
@@ -149,6 +149,11 @@ if (location.pathname.endsWith('/index.html')) {
     const IDLE_MS = 8000;       // quiet time before the page goes calm
     const MOVE_PX = 4;          // ignore tiny mouse jitters
     const TOP_PX = 40;          // only when the page is at the top
+    // luzian.net/?calm (the footer's "Calm mode" link): start calm at once and stay that way, so the page
+    // can be left on a screen. Only a click, tap, key press or scroll ends it; moving the mouse does not.
+    const showMode = /[?&]calm(?:&|=|$)/.test(location.search);
+    let showing = showMode;
+    let hint = null;
     let timer = 0;
     let lastX = null;
     let lastY = null;
@@ -160,12 +165,26 @@ if (location.pathname.endsWith('/index.html')) {
     }
 
     function wake() {
-      document.body.classList.remove('calm');
+      showing = false;
+      document.body.classList.remove('calm', 'calm-show');
+      if (hint) { hint.remove(); hint = null; }
       clearTimeout(timer);
       timer = setTimeout(calm, IDLE_MS);
     }
 
+    function startShow() {
+      window.scrollTo(0, 0);
+      document.body.classList.add('calm', 'calm-show');
+      hint = document.createElement('p');
+      hint.className = 'calm-hint';
+      hint.textContent = document.documentElement.lang === 'es'
+        ? 'Haz clic o pulsa una tecla para volver'
+        : 'Click or press any key to return';
+      document.body.appendChild(hint);
+    }
+
     document.addEventListener('pointermove', (e) => {
+      if (showing) return;
       if (lastX !== null && Math.abs(e.clientX - lastX) < MOVE_PX && Math.abs(e.clientY - lastY) < MOVE_PX) return;
       lastX = e.clientX;
       lastY = e.clientY;
@@ -175,8 +194,8 @@ if (location.pathname.endsWith('/index.html')) {
       document.addEventListener(type, wake, { passive: true });
     });
     window.addEventListener('scroll', wake, { passive: true });
-    document.addEventListener('visibilitychange', wake);
-    wake();
+    document.addEventListener('visibilitychange', () => { if (!showing) wake(); });
+    if (showMode) startShow(); else wake();
   }
 
   // Initialize once DOM is ready

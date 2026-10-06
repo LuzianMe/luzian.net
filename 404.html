@@ -19,7 +19,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="404 - Page Not Found">
   <title>404 - Page Not Found</title>
-  <link rel="stylesheet" href="/assets/style.css?v=20261007h">
+  <link rel="stylesheet" href="/assets/style.css?v=20261007j">
 </head>
 
 <body>
@@ -50,7 +50,7 @@
       </div>
     </main>
     <footer>
-      <p>&copy; <span id="current-year">2026</span> Luzian. All rights reserved. <span class="footer-sep" aria-hidden="true">&middot;</span> <a href="/payment/">Payments</a></p>
+      <p>&copy; <span id="current-year">2026</span> Luzian. All rights reserved. <span class="footer-links"><span class="footer-sep" aria-hidden="true">&middot;</span> <a href="/payment/">Payments</a> <span class="footer-sep" aria-hidden="true">&middot;</span> <a href="/?calm">Calm mode</a></span></p>
     </footer>
     <script>
       // GitHub Pages serves one 404 page for the whole site: show Spanish when the broken address is under /es/
@@ -60,13 +60,13 @@
         document.querySelector('meta[name="description"]').setAttribute('content', '404 - Página no encontrada');
         document.querySelectorAll('[data-es]').forEach((el) => { el.textContent = el.dataset.es; });
         document.querySelectorAll('[data-es-href]').forEach((el) => { el.setAttribute('href', el.dataset.esHref); });
-        document.querySelector('footer p').innerHTML = '&copy; <span id="current-year">2026</span> Luzian. Todos los derechos reservados. <span class="footer-sep" aria-hidden="true">&middot;</span> <a href="/es/payment/">Pagos</a>';
+        document.querySelector('footer p').innerHTML = '&copy; <span id="current-year">2026</span> Luzian. Todos los derechos reservados. <span class="footer-links"><span class="footer-sep" aria-hidden="true">&middot;</span> <a href="/es/payment/">Pagos</a> <span class="footer-sep" aria-hidden="true">&middot;</span> <a href="/es/?calm">Modo tranquilo</a></span>';
       }
       const yearEl = document.getElementById('current-year');
       if (yearEl) yearEl.textContent = new Date().getFullYear();
     </script>
-    <script src="/assets/effects.js?v=20261007h"></script>
-    <script src="/assets/water.js?v=20261007h"></script>
+    <script src="/assets/effects.js?v=20261007j"></script>
+    <script src="/assets/water.js?v=20261007j"></script>
   </div>
 </body>
 
