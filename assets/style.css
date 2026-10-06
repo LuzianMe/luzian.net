@@ -1313,3 +1313,23 @@ footer a:hover {
   color: #ffffff;
   border-color: rgba(255, 255, 255, 0.6);
 }
+
+/* The logo above the water (assets/water.js): a canvas over the logo image, which keeps its place
+   in the layout. It has room for the logo plus its halo and its shadow on the water. */
+.ouro-logo-water {
+  position: absolute;
+  display: block;
+  pointer-events: none;
+  z-index: -1;   /* above the snake, below the page's own text (the shadow falls behind the subtitle) */
+  transition: transform 0.3s ease;
+}
+
+.ouro-logo-water.hover {
+  transform: scale(1.04);
+}
+
+.logo.water-over,
+.logo.water-over:hover {
+  opacity: 0;
+  filter: none;
+}
