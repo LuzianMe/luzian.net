@@ -150,11 +150,18 @@ if (location.pathname.endsWith('/index.html')) {
     const MOVE_PX = 4;          // ignore tiny mouse jitters
     const TOP_PX = 40;          // only when the page is at the top
     // luzian.net/?calm (the footer's "Calm mode" link): start calm at once and stay that way, so the page
-    // can be left on a screen. Only a click, tap, key press or scroll ends it; moving the mouse does not.
+    // can be left on a screen. Mouse moves, clicks, taps and scrolling do NOT end it (they just play with
+    // the water); a key press does, or on a touch screen a touch held for a moment.
+    const HOLD_MS = 800;        // how long a touch is held to leave the calm view
+    const HOLD_SLOP_PX = 12;    // ...and how far the finger may wander meanwhile
+    const MODIFIERS = ['Shift', 'Control', 'Alt', 'AltGraph', 'Meta', 'OS', 'CapsLock', 'Fn', 'NumLock'];
     const showMode = /[?&]calm(?:&|=|$)/.test(location.search);
     let showing = showMode;
     let hint = null;
     let timer = 0;
+    let holdTimer = 0;
+    let holdX = 0;
+    let holdY = 0;
     let lastX = null;
     let lastY = null;
 
@@ -166,6 +173,7 @@ if (location.pathname.endsWith('/index.html')) {
 
     function wake() {
       showing = false;
+      clearTimeout(holdTimer);
       document.body.classList.remove('calm', 'calm-show');
       if (hint) { hint.remove(); hint = null; }
       clearTimeout(timer);
@@ -177,9 +185,11 @@ if (location.pathname.endsWith('/index.html')) {
       document.body.classList.add('calm', 'calm-show');
       hint = document.createElement('p');
       hint.className = 'calm-hint';
-      hint.textContent = document.documentElement.lang === 'es'
-        ? 'Haz clic o pulsa una tecla para volver'
-        : 'Click or press any key to return';
+      const touch = window.matchMedia('(hover: none) and (pointer: coarse)').matches;
+      const spanish = document.documentElement.lang === 'es';
+      hint.textContent = touch
+        ? (spanish ? 'Mantén pulsado para volver' : 'Touch and hold to return')
+        : (spanish ? 'Pulsa una tecla para volver' : 'Press any key to return');
       document.body.appendChild(hint);
     }
 
@@ -190,10 +200,34 @@ if (location.pathname.endsWith('/index.html')) {
       lastY = e.clientY;
       wake();
     }, { passive: true });
-    ['pointerdown', 'keydown', 'wheel', 'touchstart'].forEach((type) => {
-      document.addEventListener(type, wake, { passive: true });
+    ['pointerdown', 'wheel', 'touchstart'].forEach((type) => {
+      document.addEventListener(type, () => { if (!showing) wake(); }, { passive: true });
     });
-    window.addEventListener('scroll', wake, { passive: true });
+    window.addEventListener('scroll', () => { if (!showing) wake(); }, { passive: true });
+
+    // A key press. In the calm view, a lone modifier or a shortcut (Alt+Tab, Ctrl+R, ...) does not count
+    document.addEventListener('keydown', (e) => {
+      if (showing && (e.ctrlKey || e.metaKey || e.altKey || MODIFIERS.indexOf(e.key) !== -1)) return;
+      wake();
+    });
+
+    // In the calm view a touch held still for a moment leaves it (a plain tap or a swipe just plays)
+    document.addEventListener('pointerdown', (e) => {
+      if (!showing || e.pointerType === 'mouse') return;
+      holdX = e.clientX;
+      holdY = e.clientY;
+      clearTimeout(holdTimer);
+      holdTimer = setTimeout(wake, HOLD_MS);
+    }, { passive: true });
+    document.addEventListener('pointermove', (e) => {
+      if (holdTimer && (Math.abs(e.clientX - holdX) > HOLD_SLOP_PX || Math.abs(e.clientY - holdY) > HOLD_SLOP_PX)) {
+        clearTimeout(holdTimer);
+        holdTimer = 0;
+      }
+    }, { passive: true });
+    ['pointerup', 'pointercancel'].forEach((type) => {
+      document.addEventListener(type, () => { clearTimeout(holdTimer); holdTimer = 0; }, { passive: true });
+    });
     document.addEventListener('visibilitychange', () => { if (!showing) wake(); });
     if (showMode) startShow(); else wake();
   }
