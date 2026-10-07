@@ -49,6 +49,80 @@
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
 
+/* While a font is still downloading the browser shows a stand-in. These stand-ins are Arial (or its
+   metric twin) resized and re-spaced to match each font, so when the real one arrives the text barely
+   moves. Regular is for weights up to 500, bold for 600 and up. If Arial is not on the device they
+   are skipped and the plain fallback is used, as before. */
+@font-face {
+  font-family: 'Saira Fallback';
+  font-weight: 400;
+  src: local('Arial'), local('ArialMT'), local('Liberation Sans'), local('Helvetica');
+  size-adjust: 102.74%;
+  ascent-override: 110.47%;
+  descent-override: 42.73%;
+  line-gap-override: 0%;
+}
+
+@font-face {
+  font-family: 'Saira Fallback';
+  font-weight: 700;
+  src: local('Arial Bold'), local('Arial-BoldMT'), local('Liberation Sans Bold'), local('Helvetica Bold');
+  size-adjust: 96.86%;
+  ascent-override: 117.18%;
+  descent-override: 45.32%;
+  line-gap-override: 0%;
+}
+
+@font-face {
+  font-family: 'Orbitron Fallback';
+  font-weight: 400;
+  src: local('Arial'), local('ArialMT'), local('Liberation Sans'), local('Helvetica');
+  size-adjust: 120.61%;
+  ascent-override: 83.82%;
+  descent-override: 20.15%;
+  line-gap-override: 0%;
+}
+
+@font-face {
+  font-family: 'Orbitron Fallback';
+  font-weight: 700;
+  src: local('Arial Bold'), local('Arial-BoldMT'), local('Liberation Sans Bold'), local('Helvetica Bold');
+  size-adjust: 116.95%;
+  ascent-override: 86.45%;
+  descent-override: 20.78%;
+  line-gap-override: 0%;
+}
+
+@font-face {
+  font-family: 'Chakra Petch Fallback';
+  font-weight: 400;
+  src: local('Arial'), local('ArialMT'), local('Liberation Sans'), local('Helvetica');
+  size-adjust: 100.75%;
+  ascent-override: 98.46%;
+  descent-override: 30.57%;
+  line-gap-override: 0%;
+}
+
+@font-face {
+  font-family: 'Chakra Petch Fallback';
+  font-weight: 700;
+  src: local('Arial Bold'), local('Arial-BoldMT'), local('Liberation Sans Bold'), local('Helvetica Bold');
+  size-adjust: 96.91%;
+  ascent-override: 102.36%;
+  descent-override: 31.78%;
+  line-gap-override: 0%;
+}
+
+@font-face {
+  font-family: 'Inter Fallback';
+  font-weight: 400;
+  src: local('Arial'), local('ArialMT'), local('Liberation Sans'), local('Helvetica');
+  size-adjust: 107.00%;
+  ascent-override: 90.54%;
+  descent-override: 22.54%;
+  line-gap-override: 0%;
+}
+
 /* ==========================================================================
    Base & Typography
    ========================================================================== */
@@ -88,8 +162,8 @@
 
   /* Font roles: Orbitron for headings/nav, Chakra Petch for short UI labels,
      Saira for reading, Inter only for handles/emails where @ and $ must be crisp */
-  --font-ui: 'Chakra Petch', 'Saira', sans-serif;
-  --font-body: 'Saira', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-ui: 'Chakra Petch', 'Chakra Petch Fallback', 'Saira', 'Saira Fallback', sans-serif;
+  --font-body: 'Saira', 'Saira Fallback', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 
   /* Type scale: use these instead of one-off font sizes */
   --fs-sm: 0.8125rem;                        /* 13px: handles, tags, small buttons, nav, footer */
@@ -149,7 +223,7 @@ body {
 }
 
 h1, h2, h3, .nav-pill {
-  font-family: 'Orbitron', sans-serif;
+  font-family: 'Orbitron', 'Orbitron Fallback', sans-serif;
   letter-spacing: 0.04em;
 }
 
@@ -430,7 +504,7 @@ main {
   margin-top: 2.5rem;
   color: rgb(var(--muted));
   text-decoration: none;
-  font-family: 'Orbitron', sans-serif;
+  font-family: 'Orbitron', 'Orbitron Fallback', sans-serif;
   font-size: var(--fs-body);
   font-weight: 500;
   letter-spacing: 0.04em;
@@ -443,7 +517,7 @@ main {
 
 .scroll-cue span {
   display: block;
-  font-family: 'Inter', sans-serif;
+  font-family: 'Inter', 'Inter Fallback', sans-serif;
   font-size: 1.2rem;
   animation: cue-bob 2.4s ease-in-out infinite;
 }
@@ -489,7 +563,7 @@ html {
 }
 
 #about h3 {
-  font-family: 'Orbitron', sans-serif;
+  font-family: 'Orbitron', 'Orbitron Fallback', sans-serif;
   font-size: var(--fs-body);
   color: rgb(var(--accent-soft));
   max-width: 680px;
@@ -1048,7 +1122,7 @@ a[href*="contact.vcf"]:hover .grid-icon {
 }
 
 .grid-item p.pay-handle {
-  font-family: 'Inter', sans-serif;
+  font-family: 'Inter', 'Inter Fallback', sans-serif;
   margin-top: 0.1rem;
   font-size: var(--fs-sm);
   color: rgb(var(--muted));
@@ -1153,7 +1227,7 @@ a[href*="contact.vcf"]:hover .grid-icon {
 }
 
 .gear-note.handle {
-  font-family: 'Inter', sans-serif;
+  font-family: 'Inter', 'Inter Fallback', sans-serif;
   overflow-wrap: anywhere;
   word-spacing: 0.22em;   /* Inter draws the spaces in a phone number very tightly next to a 1 */
 }
