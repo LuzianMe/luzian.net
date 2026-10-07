@@ -1,3 +1,10 @@
+// ?stats on any address shows a small readout of frames per second, battery and so on (assets/stats.js)
+if (/[?&]stats\b/.test(location.search) && document.currentScript) {
+  const stats = document.createElement('script');
+  stats.src = document.currentScript.src.replace('effects.js', 'stats.js');
+  document.head.appendChild(stats);
+}
+
 // Show clean URLs: turn an old "/contact/index.html" link into "/contact/" in the address bar
 if (location.pathname.endsWith('/index.html')) {
   history.replaceState(null, '', location.pathname.slice(0, -'index.html'.length) + location.search + location.hash);
