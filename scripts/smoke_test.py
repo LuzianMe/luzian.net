@@ -291,6 +291,12 @@ def behaviours(browser, base):
                 fail(f'rows {path}', 'the copy icon did not come back')
             if page.evaluate("document.getElementById('live-status') && document.getElementById('live-status').textContent === ''"):
                 fail(f'rows {path}', 'the copy was not announced')
+            # the card is not wider than it needs to be, and not taller than its rows
+            page.set_viewport_size({'width': 1280, 'height': 900})
+            page.wait_for_timeout(200)
+            size = page.evaluate("(() => { const card = document.querySelector('.pay-card').getBoundingClientRect(); const last = [...document.querySelectorAll('.pay-item')].pop().getBoundingClientRect(); return [card.width, card.bottom - last.bottom]; })()")
+            if size[0] > 600 or size[1] > 60:
+                fail(f'rows {path}', f'the payment card is too wide or too tall (width {size[0]:.0f}, space under the last row {size[1]:.0f})')
             # the buttons stay to the right of the name, even on a phone
             page.set_viewport_size({'width': 360, 'height': 800})
             page.wait_for_timeout(200)
