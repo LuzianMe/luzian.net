@@ -167,6 +167,19 @@ def behaviours(browser, base):
         rim = page.evaluate("(el => [parseFloat(el.style.getPropertyValue('--rim-x')), parseFloat(el.style.getPropertyValue('--rim-y'))])(document.querySelector('.theme-rim'))")
         if abs(rim[0] - box[0]) > 2 or abs(rim[1] - box[1]) > 2:
             fail('calm view', f'the theme change did not start where the logo was clicked (clicked {box}, started {rim})')
+        # the spreading circle is described in percentages of the page picture (a circle in pixels was drawn
+        # at the wrong scale on one phone) and is centred where the click was
+        clip = page.evaluate("(a => a ? a.effect.getKeyframes().map(k => k.clipPath) : null)(document.getAnimations().find(a => a.effect && a.effect.pseudoElement === '::view-transition-new(root)'))")
+        if not clip:
+            fail('calm view', 'the circle animation was not found')
+        else:
+            import re as _re
+            m = _re.match(r'circle\(([\d.]+)% at ([\d.]+)% ([\d.]+)%\)', clip[-1] or '')
+            size = page.evaluate("[window.innerWidth, window.innerHeight]")
+            if not m:
+                fail('calm view', f'the circle is not in percentages: {clip}')
+            elif abs(float(m.group(2)) / 100 * size[0] - box[0]) > 2 or abs(float(m.group(3)) / 100 * size[1] - box[1]) > 2:
+                fail('calm view', f'the circle is not centred on the click: {clip} for a click at {box} on {size}')
     except Exception:
         fail('calm view', 'no glowing rim appeared when the theme changed')
     wait_for_theme_animation(page, before)

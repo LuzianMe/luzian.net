@@ -109,10 +109,19 @@
         rim(x, y, radius);
         return;
       }
+      // The circle is described in percentages of the page picture, not in pixels. On one phone (seen in a
+      // screen recording) a circle given in pixels was drawn at about 1/3 of its size, anchored at the
+      // top-left, while everything else was right; a percentage is relative to the picture itself, so the
+      // circle always lands where the page content is.
+      const width = window.innerWidth;
+      const height = window.innerHeight;
+      const cx = (x / width) * 100;
+      const cy = (y / height) * 100;
+      const cr = (radius / (Math.hypot(width, height) / Math.SQRT2)) * 100;   // circle() measures a radius against this length
       const transition = document.startViewTransition(() => apply(theme));
       transition.ready.then(() => {
         root.animate(
-          { clipPath: [`circle(0px at ${x}px ${y}px)`, `circle(${radius}px at ${x}px ${y}px)`] },
+          { clipPath: [`circle(0% at ${cx}% ${cy}%)`, `circle(${cr}% at ${cx}% ${cy}%)`] },
           { duration: DURATION, easing: 'ease-out', pseudoElement: '::view-transition-new(root)' }
         );
         rim(x, y, radius);
