@@ -1086,7 +1086,9 @@ a[href*="contact.vcf"]:hover .grid-icon {
 }
 
 /* The Payment card has only four short rows: a narrower card suits it better than the full width */
-.setup-card.pay-card {
+.setup-grid .setup-card.pay-card {
+  justify-self: center;   /* cards inside the page grid have no side margins, so centre it explicitly */
+  width: 100%;
   max-width: 560px;
 }
 
