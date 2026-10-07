@@ -592,6 +592,7 @@ html {
 
 .setup-grid {
   display: grid;
+  align-content: start;   /* cards keep their own height instead of stretching to fill the page */
   gap: 1rem;
   width: 90%;
   max-width: 920px;
@@ -1082,6 +1083,11 @@ a[href*="contact.vcf"]:hover .grid-icon {
 .pay-btn:hover {
   background: rgb(var(--accent) / 0.28);
   border-color: rgb(var(--accent-soft) / 0.6);
+}
+
+/* The Payment card has only four short rows: a narrower card suits it better than the full width */
+.setup-card.pay-card {
+  max-width: 560px;
 }
 
 /* Contact and Payment: rows inside cards, like the Setup page's gear lists */
