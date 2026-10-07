@@ -237,6 +237,32 @@ def behaviours(browser, base):
         fail('?reveal=ring', p)
     context.close()
 
+    # --- the water follows the real clock: a refresh or another page continues the pattern
+    problems = []
+    context, page = new_page(browser, base, 1024, 'water', problems)
+    def clock_offsets():
+        # how far each clock is from where the real clock says it should be (in clock units, around the wrap)
+        page.wait_for_function("window.__ouroWater && window.__ouroWater.clocks().snake > 0", timeout=15000)
+        return page.evaluate("""() => {
+            const c = window.__ouroWater.clocks(); const wall = Date.now() / 1000;
+            const off = (a, b) => { const d = Math.abs(a - b) % 600; return Math.min(d, 600 - d); };
+            return { following: c.following, snake: off(c.snake, (wall * 1.25) % 600), background: off(c.background, (wall * 0.5) % 600), swell: off(c.swell, (wall * 1.2) % 600) };
+        }""")
+    for address in ('/?water=debug', '/career/?water=debug', '/career/?water=debug'):   # a page, another page, a refresh
+        page.goto(base + address, wait_until='networkidle')
+        page.wait_for_timeout(1500)
+        got = clock_offsets()
+        if not got['following'] or got['snake'] > 4 or got['background'] > 4 or got['swell'] > 8:
+            fail('water clock', f'{address}: the pattern does not follow the real clock ({got})')
+    # the debug reset still gives tests a fixed starting point
+    page.evaluate("window.__ouroWater.reset()")
+    after = page.evaluate("window.__ouroWater.clocks()")
+    if after['following'] or after['snake'] != 0 or after['swell'] != 0:
+        fail('water clock', f'reset() did not return the clocks to zero ({after})')
+    for p in problems:
+        fail('water clock', p)
+    context.close()
+
     # --- ?stats: the readout appears, shows numbers, and tapping it does not touch the page
     problems = []
     context, page = new_page(browser, base, 375, 'water', problems)
