@@ -403,9 +403,10 @@ document.querySelectorAll('.current-year').forEach((el) => { el.textContent = ne
     // In the calm view (not the ordinary idle calm) the logo is the theme switch, since the menus are away
     const logo = document.querySelector('img.logo');
     if (logo) {
-      logo.addEventListener('pointerdown', () => {
+      logo.addEventListener('pointerdown', (event) => {
         if (!showing || !window.luzianTheme) return;
-        window.luzianTheme.set(window.luzianTheme.get() === 'fire' ? 'water' : 'fire', logo);
+        // the new theme spreads out from the very spot that was clicked or tapped
+        window.luzianTheme.set(window.luzianTheme.get() === 'fire' ? 'water' : 'fire', { x: event.clientX, y: event.clientY });
       }, { passive: true });
     }
 

@@ -75,9 +75,18 @@
     save(theme);
     if (!document.startViewTransition || reduceMotion) { apply(theme); return; }
 
-    const box = origin ? origin.getBoundingClientRect() : null;
-    const x = box ? box.left + box.width / 2 : window.innerWidth / 2;
-    const y = box ? box.top + box.height / 2 : 0;
+    // The circle spreads from where it was asked to: a point ({x, y}, e.g. where the screen was
+    // tapped), the middle of an element (e.g. a switch), or the middle of the top edge
+    let x = window.innerWidth / 2;
+    let y = 0;
+    if (origin && typeof origin.x === 'number' && typeof origin.y === 'number') {
+      x = origin.x;
+      y = origin.y;
+    } else if (origin && origin.getBoundingClientRect) {
+      const box = origin.getBoundingClientRect();
+      x = box.left + box.width / 2;
+      y = box.top + box.height / 2;
+    }
     const radius = Math.hypot(Math.max(x, window.innerWidth - x), Math.max(y, window.innerHeight - y));
     const transition = document.startViewTransition(() => apply(theme));
     transition.ready.then(() => {
@@ -91,17 +100,21 @@
 
   // A glowing rim on the front of the spreading circle, in the new theme's colour: an ember front
   // when the page catches fire. It grows in step with the circle (same length, same easing).
+  // It is one element the size of the screen with a ring drawn by a gradient whose radius is
+  // animated (--rim-r), centred on the point with plain coordinates: no huge element, no scaling.
   function rim(x, y, radius) {
+    if (!window.CSS || typeof CSS.registerProperty !== 'function') return;   // the circle alone, then
     const ring = document.createElement('div');
     ring.className = 'theme-rim';
     ring.setAttribute('aria-hidden', 'true');
-    ring.style.cssText = `left:${x - radius}px;top:${y - radius}px;width:${2 * radius}px;height:${2 * radius}px;`;
+    ring.style.setProperty('--rim-x', `${x}px`);
+    ring.style.setProperty('--rim-y', `${y}px`);
     document.body.appendChild(ring);
     const growing = ring.animate(
       [
-        { transform: 'scale(0)', opacity: 1 },
-        { transform: 'scale(0.8)', opacity: 1, offset: 0.8 },
-        { transform: 'scale(1)', opacity: 0 },
+        { '--rim-r': '0px', opacity: 1 },
+        { '--rim-r': `${0.8 * radius}px`, opacity: 1, offset: 0.8 },
+        { '--rim-r': `${radius}px`, opacity: 0 },
       ],
       { duration: DURATION, easing: 'ease-out', fill: 'forwards' }
     );
@@ -163,6 +176,7 @@
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', build);
   else build();
 
-  // set(theme, element): the new theme spreads out from that element (the middle of the page without one)
+  // set(theme, origin): the new theme spreads out from origin, a point {x, y} or an element
+  // (the middle of the top edge without one)
   window.luzianTheme = { get: current, set: (theme, origin) => change(theme === 'fire' ? 'fire' : 'water', origin || null) };
 })();

@@ -1351,20 +1351,26 @@ footer .lang-switch a:hover {
   z-index: 1;
 }
 
-/* The glowing front of that circle (assets/theme.js) */
+/* The glowing front of that circle (assets/theme.js): a ring drawn by a gradient whose radius is
+   animated, centred on --rim-x / --rim-y */
+@property --rim-r {
+  syntax: '<length>';
+  inherits: false;
+  initial-value: 0px;
+}
+
 .theme-rim {
   position: fixed;
+  inset: 0;
   z-index: 100000;
-  border-radius: 50%;
   pointer-events: none;
-  transform-origin: center;
   mix-blend-mode: screen;
   background: radial-gradient(
-    circle closest-side,
-    transparent calc(100% - 110px),
-    rgb(var(--accent) / 0.28) calc(100% - 40px),
-    rgb(var(--accent-light) / 0.95) calc(100% - 7px),
-    transparent 100%
+    circle at var(--rim-x, 50%) var(--rim-y, 0px),
+    transparent calc(var(--rim-r) - 110px),
+    rgb(var(--accent) / 0.28) calc(var(--rim-r) - 40px),
+    rgb(var(--accent-light) / 0.95) calc(var(--rim-r) - 7px),
+    transparent var(--rim-r)
   );
 }
 
