@@ -24,6 +24,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 SITE = 'https://luzian.net'
+PRELOAD_FONTS = ('saira-400-600', 'orbitron-500-700', 'chakra-petch-600')   # on every page, above the fold
 
 # Every page this script looks after: file -> (language, which page it is)
 PAGES = {
@@ -109,6 +110,8 @@ def part_head(lang, key, tag):
             f'<link rel="alternate" hreflang="x-default" href="{SITE}{address("en", key)}">',
         ]
     lines += [
+        # the fonts every page uses, fetched in parallel with the stylesheet instead of after it
+        *(f'<link rel="preload" href="/assets/fonts/{name}.woff2" as="font" type="font/woff2" crossorigin>' for name in PRELOAD_FONTS),
         f'<link rel="stylesheet" href="/assets/style.css?v={tag}">',
         f'<script src="/assets/theme.js?v={tag}"></script>',
     ]
