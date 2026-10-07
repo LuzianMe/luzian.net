@@ -4,7 +4,8 @@
 // <html data-theme="water|fire">, remembers the choice, and builds the little droplet | flame switch
 // in the footer, next to the language switch. It is loaded in the <head>, so the right colours are there from the
 // first paint. The choice is shared between open windows. Open any page with ?theme=fire (or
-// ?theme=water) to switch it from a link.
+// ?theme=water) to switch it from a link. ?reveal=ring on any address swaps the page-wide circle for just
+// the glowing ring (a fallback to try if the circle ever misbehaves on a device).
 //
 // Other scripts hear about a change through the "themechange" event on window (detail.theme).
 (function () {
@@ -15,6 +16,7 @@
   const BROWSER_COLORS = { water: '#0d111b', fire: '#0a0403' };   // the phone's address bar
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const DURATION = 750;   // milliseconds for the circle to cross the page
+  const SETTLE_MS = 40;   // a moment (two frames) between a tap and the start of the change
 
   function save(theme) {
     try { localStorage.setItem(KEY, theme); } catch (e) { /* private window: just not remembered */ }
@@ -69,11 +71,20 @@
     window.dispatchEvent(new CustomEvent('themechange', { detail: { theme: theme } }));
   }
 
-  // Switch with a circle of the new theme spreading out from the switch, where the browser supports it
+  // Switch with a circle of the new theme spreading out, where the browser supports it.
+  //
+  // Two precautions for touch screens (a light tap showed the circle misplaced and cut short on one phone):
+  //  - the change starts a moment after it was asked for, so a finger that is just lifting is not part of
+  //    the moment the browser takes its picture of the page (SETTLE_MS);
+  //  - ?reveal=ring on the page's address skips the browser's page-picture animation altogether: the
+  //    theme changes at once and only the glowing ring spreads from the tap. It cannot misbehave.
+  let pending = null;
+  const ringOnly = /[?&]reveal=ring\b/.test(location.search);
+
   function change(theme, origin) {
-    if (theme === current()) return;
+    if (theme === current() || theme === pending) return;
+    pending = theme;
     save(theme);
-    if (!document.startViewTransition || reduceMotion) { apply(theme); return; }
 
     // The circle spreads from where it was asked to: a point ({x, y}, e.g. where the screen was
     // tapped), the middle of an element (e.g. a switch), or the middle of the top edge
@@ -87,15 +98,26 @@
       x = box.left + box.width / 2;
       y = box.top + box.height / 2;
     }
-    const radius = Math.hypot(Math.max(x, window.innerWidth - x), Math.max(y, window.innerHeight - y));
-    const transition = document.startViewTransition(() => apply(theme));
-    transition.ready.then(() => {
-      root.animate(
-        { clipPath: [`circle(0px at ${x}px ${y}px)`, `circle(${radius}px at ${x}px ${y}px)`] },
-        { duration: DURATION, easing: 'ease-out', pseudoElement: '::view-transition-new(root)' }
-      );
-      rim(x, y, radius);
-    }).catch(() => { /* the theme has changed anyway */ });
+
+    setTimeout(() => {
+      pending = null;
+      if (theme === current()) return;
+      const radius = Math.hypot(Math.max(x, window.innerWidth - x), Math.max(y, window.innerHeight - y));
+      if (reduceMotion) { apply(theme); return; }
+      if (ringOnly || !document.startViewTransition) {
+        apply(theme);
+        rim(x, y, radius);
+        return;
+      }
+      const transition = document.startViewTransition(() => apply(theme));
+      transition.ready.then(() => {
+        root.animate(
+          { clipPath: [`circle(0px at ${x}px ${y}px)`, `circle(${radius}px at ${x}px ${y}px)`] },
+          { duration: DURATION, easing: 'ease-out', pseudoElement: '::view-transition-new(root)' }
+        );
+        rim(x, y, radius);
+      }).catch(() => { /* the theme has changed anyway */ });
+    }, SETTLE_MS);
   }
 
   // A glowing rim on the front of the spreading circle, in the new theme's colour: an ember front

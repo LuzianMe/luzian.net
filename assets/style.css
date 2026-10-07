@@ -1341,10 +1341,21 @@ footer .lang-switch a:hover {
 }
 
 /* Changing theme: the new theme spreads out from the switch as a circle (see assets/theme.js) */
+/* The browser's own animation of the page picture (it slides and resizes it between the old and the new
+   page) is switched off and the picture is pinned to the screen, so the circle and the glowing ring
+   cannot drift if the page's size changes during the animation (a phone's toolbar, for instance). */
+::view-transition-group(root) {
+  animation: none;
+}
+
 ::view-transition-old(root),
 ::view-transition-new(root) {
   animation: none;
   mix-blend-mode: normal;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: fill;
 }
 
 ::view-transition-old(root) {

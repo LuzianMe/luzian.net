@@ -179,6 +179,23 @@ def behaviours(browser, base):
     wait_for_theme_animation(page, after)
     if page.evaluate("document.documentElement.dataset.theme") != before:
         fail('calm view', 'clicking the logo again did not change the theme back')
+    # the change happens when the finger or button is released, not when it lands; a swipe is not a tap
+    now = page.evaluate("document.documentElement.dataset.theme")
+    page.mouse.move(box[0], box[1])
+    page.mouse.down()
+    page.wait_for_timeout(400)
+    if page.evaluate("document.documentElement.dataset.theme") != now:
+        fail('calm view', 'the theme changed before the button was released')
+    page.mouse.up()
+    wait_for_theme_animation(page, now)
+    now = page.evaluate("document.documentElement.dataset.theme")
+    page.mouse.move(box[0], box[1])
+    page.mouse.down()
+    page.mouse.move(box[0] + 90, box[1] + 10, steps=4)
+    page.mouse.up()
+    page.wait_for_timeout(600)
+    if page.evaluate("document.documentElement.dataset.theme") != now:
+        fail('calm view', 'a swipe over the logo changed the theme')
     page.keyboard.press('Shift')
     if not page.evaluate("document.body.classList.contains('calm-show')"):
         fail('calm view', 'a lone Shift ended the calm view')
@@ -188,6 +205,23 @@ def behaviours(browser, base):
         fail('calm view', 'a key press did not end the calm view')
     for p in problems:
         fail('calm view', p)
+    context.close()
+
+    # --- ?reveal=ring: no page-picture animation at all, just the glowing ring from the tap
+    problems = []
+    context, page = new_page(browser, base, 1024, 'water', problems)
+    page.goto(base + '/?calm&reveal=ring', wait_until='networkidle')
+    page.wait_for_timeout(500)
+    box = page.evaluate("(r => [r.left + r.width * 0.7, r.top + r.height * 0.6])(document.querySelector('img.logo').getBoundingClientRect())")
+    page.mouse.click(box[0], box[1])
+    page.wait_for_function("document.documentElement.dataset.theme === 'fire'", timeout=5000)
+    rim = page.evaluate("(el => el && [parseFloat(el.style.getPropertyValue('--rim-x')), parseFloat(el.style.getPropertyValue('--rim-y'))])(document.querySelector('.theme-rim'))")
+    if not rim or abs(rim[0] - box[0]) > 2 or abs(rim[1] - box[1]) > 2:
+        fail('?reveal=ring', f'the ring did not start at the tap (tapped {box}, ring {rim})')
+    if page.evaluate("document.getAnimations().some(a => a.effect && a.effect.pseudoElement)"):
+        fail('?reveal=ring', 'the page-picture animation ran anyway')
+    for p in problems:
+        fail('?reveal=ring', p)
     context.close()
 
     # --- pop-ups: focus moves in, stays in, and comes back; Escape closes
