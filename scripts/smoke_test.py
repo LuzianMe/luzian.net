@@ -73,6 +73,20 @@ def new_page(browser, base, width, theme, problems):
     return context, page
 
 
+def wait_for_theme_animation(page, was):
+    """After a click that changes the theme from `was`: wait for the change, then for its animation to be over.
+    (While the animation plays the page underneath cannot be clicked, and the software-rendered browser
+    used here and on GitHub draws slowly, so it can take a while.)"""
+    page.wait_for_function("t => document.documentElement.dataset.theme !== t", arg=was, timeout=15000)
+    try:
+        page.wait_for_selector('.theme-rim', state='attached', timeout=5000)
+    except Exception:
+        pass
+    page.wait_for_function(
+        "!document.querySelector('.theme-rim') && !document.getAnimations().some(a => a.effect && a.effect.pseudoElement)",
+        timeout=15000)
+
+
 def sweep(browser, base):
     for width in (1024, 375):
         for theme in ('water', 'fire'):
@@ -115,7 +129,7 @@ def behaviours(browser, base):
     context, page = new_page(browser, base, 1024, 'water', problems)
     page.goto(base + '/contact/', wait_until='networkidle')
     page.click('[data-theme-set="fire"]')
-    page.wait_for_timeout(500)
+    wait_for_theme_animation(page, 'water')
     if page.evaluate("document.documentElement.dataset.theme") != 'fire':
         fail('theme switch', 'the flame button did not switch to Fire')
     if page.evaluate("getComputedStyle(document.querySelector('.grid-icon')).filter").count('icon-tint') != 1:
@@ -138,23 +152,31 @@ def behaviours(browser, base):
     if not page.evaluate("document.body.classList.contains('calm-show')"):
         fail('calm view', '?calm did not start the calm view')
     page.mouse.move(300, 300)
-    page.mouse.move(500, 400)
-    page.mouse.click(500, 400)
+    page.mouse.move(120, 600)
+    page.mouse.click(120, 600)   # a click away from the logo
     page.mouse.wheel(0, 300)
     page.wait_for_timeout(300)
     if not page.evaluate("document.body.classList.contains('calm-show')"):
         fail('calm view', 'a mouse move, click or the wheel ended the calm view')
     # in the calm view the logo is the theme switch (and a click on it does not end the view)
     before = page.evaluate("document.documentElement.dataset.theme")
-    page.click('img.logo')
-    page.wait_for_timeout(500)
+    box = page.evaluate("(r => [r.left + r.width * 0.2, r.top + r.height * 0.3])(document.querySelector('img.logo').getBoundingClientRect())")
+    page.mouse.click(box[0], box[1])
+    try:
+        page.wait_for_function("!!document.querySelector('.theme-rim')", timeout=15000)
+        rim = page.evaluate("(el => [parseFloat(el.style.getPropertyValue('--rim-x')), parseFloat(el.style.getPropertyValue('--rim-y'))])(document.querySelector('.theme-rim'))")
+        if abs(rim[0] - box[0]) > 2 or abs(rim[1] - box[1]) > 2:
+            fail('calm view', f'the theme change did not start where the logo was clicked (clicked {box}, started {rim})')
+    except Exception:
+        fail('calm view', 'no glowing rim appeared when the theme changed')
+    wait_for_theme_animation(page, before)
     after = page.evaluate("document.documentElement.dataset.theme")
     if after == before:
         fail('calm view', 'clicking the logo did not change the theme')
     if not page.evaluate("document.body.classList.contains('calm-show')"):
         fail('calm view', 'clicking the logo ended the calm view')
     page.click('img.logo')
-    page.wait_for_timeout(500)
+    wait_for_theme_animation(page, after)
     if page.evaluate("document.documentElement.dataset.theme") != before:
         fail('calm view', 'clicking the logo again did not change the theme back')
     page.keyboard.press('Shift')
