@@ -13,7 +13,8 @@
   'use strict';
 
   const OPENED = performance.now();
-  const telemetry = window.__ouroTelemetry || null;       // counters kept by water.js when ?stats is on
+  // (water.js may finish loading after this file, so its counters are looked up each time, never kept)
+  const counters = () => window.__ouroTelemetry || null;   // kept by water.js when ?stats is on
   const root = document.documentElement;
 
   // ---- numbers ---------------------------------------------------------------------------------
@@ -44,6 +45,7 @@
   }
 
   function readWater(elapsed) {
+    const telemetry = counters();
     if (!telemetry) return;
     const frames = telemetry.frames - water.lastFrames;
     const draw = telemetry.drawMs - water.lastDraw;
@@ -70,12 +72,13 @@
   function lines() {
     const out = [];
     out.push(`page   ${f1(page.fps)} fps   lowest ${page.minFps === null ? '–' : f1(page.minFps)}   slow frames ${page.long}`);
+    const telemetry = counters();
     if (telemetry) {
       const s = telemetry.state();
       out.push(`water  ${f1(water.fps)} fps   draw ${f1(water.drawMs)} ms (worst ${f1(telemetry.drawMax)})`);
       out.push(`effect ${s.started ? 'on' : 'OFF'}   logo ${s.logo ? 'on' : 'off'}   background ${s.background ? 'on' : 'off'}`);
     } else {
-      out.push('water  not running (reduced motion, no WebGL, ?water=off, or the page dropped it)');
+      out.push(performance.now() - OPENED < 4000 ? 'water  starting…' : 'water  not running (reduced motion, no WebGL, ?water=off, or the page dropped it)');
     }
     if (battery.start === null) out.push('battery not available in this browser');
     else out.push(`battery ${battery.now}%  (${battery.now - battery.start >= 0 ? '+' : '−'}${Math.abs(battery.now - battery.start)} since opened)${battery.charging ? '  charging' : ''}`);

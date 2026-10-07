@@ -240,9 +240,17 @@ def behaviours(browser, base):
     # --- ?stats: the readout appears, shows numbers, and tapping it does not touch the page
     problems = []
     context, page = new_page(browser, base, 375, 'water', problems)
+    # the water script is delayed on purpose: the readout must still find it (it can load after the readout does)
+    def slow_water(route):
+        import time
+        time.sleep(1.0)
+        route.continue_()
+    page.route('**/assets/water.js*', slow_water)
     page.goto(base + '/?calm&stats', wait_until='networkidle')
     page.wait_for_timeout(2500)
     text = page.inner_text('#stats-overlay pre') if page.query_selector('#stats-overlay') else ''
+    if 'water  not running' in text:
+        fail('?stats', 'the readout missed the water effect when its script loaded late')
     if 'page' not in text or 'fps' not in text or 'battery' not in text:
         fail('?stats', f'the readout is missing or incomplete: {text!r}')
     if not page.query_selector('#stats-overlay button'):
