@@ -401,13 +401,25 @@ document.querySelectorAll('.current-year').forEach((el) => { el.textContent = ne
     window.addEventListener('scroll', () => { if (!showing) wake(); }, { passive: true });
 
     // In the calm view (not the ordinary idle calm) the logo is the theme switch, since the menus are away
+    // The change starts when the tap is finished (the finger or button is up): doing it while the finger
+    // was still landing or lifting made the animation misplaced on one phone.
     const logo = document.querySelector('img.logo');
     if (logo) {
+      let tap = null;
       logo.addEventListener('pointerdown', (event) => {
-        if (!showing || !window.luzianTheme) return;
-        // the new theme spreads out from the very spot that was clicked or tapped
-        window.luzianTheme.set(window.luzianTheme.get() === 'fire' ? 'water' : 'fire', { x: event.clientX, y: event.clientY });
+        if (showing) tap = { id: event.pointerId, x: event.clientX, y: event.clientY };
       }, { passive: true });
+      const finish = (event) => {
+        if (!tap || event.pointerId !== tap.id) return;
+        const start = tap;
+        tap = null;
+        const moved = Math.hypot(event.clientX - start.x, event.clientY - start.y);
+        if (event.type === 'pointercancel' || moved > 24 || !showing || !window.luzianTheme) return;   // a swipe is not a tap
+        // the new theme spreads out from the very spot that was tapped
+        window.luzianTheme.set(window.luzianTheme.get() === 'fire' ? 'water' : 'fire', { x: start.x, y: start.y });
+      };
+      document.addEventListener('pointerup', finish, { passive: true });
+      document.addEventListener('pointercancel', finish, { passive: true });
     }
 
     // A key press. In the calm view, a lone modifier or a shortcut (Alt+Tab, Ctrl+R, ...) does not count
