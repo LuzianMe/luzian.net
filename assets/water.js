@@ -723,6 +723,14 @@
   let snakeCausticClock = 0;
   let bgCausticClock = 0;
 
+  // The water follows the real clock, so a refresh or another page picks the pattern up where it was
+  // instead of starting over. Every wave speed is a whole multiple of 2*pi/TIME_WRAP (in clock units),
+  // so the pattern closes seamlessly: the snake's caustics come round every 8 minutes of real time and
+  // the background's every 20, both lining up with the clock. Tests switch this off (see reset()) to
+  // start from zero.
+  let followClock = true;
+  const wallSeconds = () => (Date.now() + spin.shift) / 1000;
+
   // An irregular wobble between about -1 and 1: several sines that never line up, some of them
   // switching each other on and off, so the light seems to gust rather than pulse
   function flickerNoise(t) {
@@ -745,11 +753,23 @@
     fx.ringSpeed = level.ringSpeed * (1 + 0.15 * fx.haze);
     fx.vein = fire ? palette.vein.map((c) => c * fire.veins) : palette.vein;
 
-    const dt = swellLast === null ? 0 : Math.max(0, Math.min(seconds - swellLast, 0.25));
+    // The caustics are a plain function of the real clock. The swell changes speed with the theme, so it
+    // keeps its own running total, set from the real clock when the page starts and after a long pause
+    // (a hidden tab), so it also picks up in the right place.
+    const gap = swellLast === null ? Infinity : seconds - swellLast;
+    const dt = gap === Infinity ? 0 : Math.max(0, Math.min(gap, 0.25));
     swellLast = seconds;
-    swellClock = (swellClock + dt * level.swellSpeed * (1 + 0.5 * fx.haze)) % TIME_WRAP;
-    snakeCausticClock = (snakeCausticClock + dt * SNAKE_FEEL.rate) % TIME_WRAP;
-    bgCausticClock = (bgCausticClock + dt * BG_FEEL.rate) % TIME_WRAP;
+    const swellRate = level.swellSpeed * (1 + 0.5 * fx.haze);
+    if (followClock) {
+      const wall = wallSeconds();
+      swellClock = gap > 2 ? (wall * swellRate) % TIME_WRAP : (swellClock + dt * swellRate) % TIME_WRAP;
+      snakeCausticClock = (wall * SNAKE_FEEL.rate) % TIME_WRAP;
+      bgCausticClock = (wall * BG_FEEL.rate) % TIME_WRAP;
+    } else {
+      swellClock = (swellClock + dt * swellRate) % TIME_WRAP;
+      snakeCausticClock = (snakeCausticClock + dt * SNAKE_FEEL.rate) % TIME_WRAP;
+      bgCausticClock = (bgCausticClock + dt * BG_FEEL.rate) % TIME_WRAP;
+    }
 
     const gl = snake.gl;
     gl.clear(gl.COLOR_BUFFER_BIT);
@@ -968,8 +988,8 @@
         }
         return (performance.now() - t) / frames;
       },
-      // forget the clocks and rings, so tests can compare two versions from the same starting point
-      reset: () => { swellClock = 0; swellLast = null; snakeCausticClock = 0; bgCausticClock = 0; ripplesSnake.fill(0); ripplesBg.fill(0); },
+      // stop following the real clock, forget the clocks and rings, so tests can compare two versions from the same starting point
+      reset: () => { followClock = false; swellClock = 0; swellLast = null; snakeCausticClock = 0; bgCausticClock = 0; ripplesSnake.fill(0); ripplesBg.fill(0); },
       backgroundChecksum: (seconds) => {
         if (!bg) return 0;
         draw(seconds);
@@ -997,6 +1017,8 @@
       // hold the half turn at a point (0..1) for tests; null lets it run normally
       spinAt: (turn) => { spin.hold = turn; },
       spinNow: () => startClickSpin(),
+      // the three water clocks, and whether they follow the real clock (for tests)
+      clocks: () => ({ snake: snakeCausticClock, background: bgCausticClock, swell: swellClock, following: followClock }),
       // pretend the clock is this many milliseconds ahead (for tests)
       spinShift: (ms) => { spin.shift = ms; },
       // how far the logo is from looking the same after a half turn (share of its pixels that differ)

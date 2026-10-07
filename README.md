@@ -23,6 +23,8 @@ Test pages used to tune the look go in `water-lab/` (git ignores it and the chec
 
 The site has two looks, **Water** (default) and **Fire**, switched with the droplet | flame pill under the menu. Colours are CSS variables (`:root` for Water, `html[data-theme="fire"]` for Fire, both in `assets/style.css`); use `rgb(var(--accent) / 0.4)` and friends instead of hard-coded colours. `assets/theme.js` tints the white icons of the contact and payment pages through an SVG colour filter built from `--icon` (no extra image files), and remembers the choice (and `?theme=fire` / `?theme=water` on any link sets it; `?reveal=ring` swaps the spreading circle for just the glowing ring); the water effect's palette is in `assets/water.js` (`THEMES`).
 
+The water's movement follows the real clock (`wallSeconds()` in `assets/water.js`), so a refresh or another page carries the pattern on instead of restarting it: the snake's caustics come round every 8 minutes and the background's every 20, in step with the clock. With `?water=debug`, `__ouroWater.reset()` stops following the clock and starts every clock at zero, which the checksum tests rely on.
+
 Fire also has its own effects (flickering firelight, heat haze, white-hot veins on the snake, a glow along the bottom, cinders instead of dust, sparks on click, flame-gradient titles); their strengths are the `FIRE` constants in `assets/water.js`, `--ember-glow` and `--heading-fire` in `assets/style.css`.
 
 ## Measuring it
