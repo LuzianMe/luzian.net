@@ -22,8 +22,8 @@
   <link rel="alternate" hreflang="en" href="https://luzian.net/contact/">
   <link rel="alternate" hreflang="es" href="https://luzian.net/es/contact/">
   <link rel="alternate" hreflang="x-default" href="https://luzian.net/contact/">
-  <link rel="stylesheet" href="/assets/style.css?v=20261007v">
-  <script src="/assets/theme.js?v=20261007v"></script>
+  <link rel="stylesheet" href="/assets/style.css?v=20261007x">
+  <script src="/assets/theme.js?v=20261007x"></script>
   <!-- /shared:head -->
   <meta name="description" content="Información de contacto de Luzian">
   <meta property="og:title" content="Contáctame - Luzian">
@@ -54,42 +54,72 @@
       <h1>Contáctame</h1>
       <p>Encuéntrame en línea o escríbeme directamente.</p>
     </header>
-    <main id="main" tabindex="-1">
-      <section id="links">
-        <div class="grid">
-          <a href="https://www.linkedin.com/in/luciano-melendrez-3a9b1682/" class="grid-item" target="_blank" rel="noopener noreferrer" title="Visita mi perfil de LinkedIn">
-            <img src="/assets/linkedin-icon.svg" alt="" class="grid-icon">
-            <p>LinkedIn</p>
-          </a>
-          <button type="button" class="grid-item" id="copyEmail" title="Copiar correo (me@luzian.net)">
-            <img src="/assets/email-icon.svg" alt="" class="grid-icon">
-            <p>Correo</p>
-          </button>
-          <a href="https://github.com/LuzianMe" class="grid-item" target="_blank" rel="noopener noreferrer" title="Mira mi GitHub">
-            <img src="/assets/github-icon.svg" alt="" class="grid-icon">
-            <p>GitHub</p>
-          </a>
-          <a href="https://bsky.app/profile/luzian.net" class="grid-item" target="_blank" rel="noopener noreferrer" title="Encuéntrame en Bluesky">
-            <img src="/assets/bluesky-icon.svg" alt="" class="grid-icon">
-            <p>Bluesky</p>
-          </a>
-          <a href="https://discordapp.com/users/490539308147671051" class="grid-item" target="_blank" rel="noopener noreferrer" title="Conecta conmigo en Discord">
-            <img src="/assets/discord-icon.svg" alt="" class="grid-icon">
-            <p>Discord</p>
-          </a>
-          <a href="tel:+16232264417" class="grid-item" title="Llamar al teléfono virtual (+1 623 226 4417)">
-            <img src="/assets/phone-icon.svg" alt="" class="grid-icon">
-            <p>Teléfono virtual</p>
-          </a>
-          <a href="/assets/contact.vcf" class="grid-item" download="Luzian.vcf" title="Guarda mi tarjeta de contacto en tu teléfono o computadora">
-            <img src="/assets/contact-icon.svg" alt="" class="grid-icon">
-            <p>Guardar contacto</p>
-          </a>
-          <button type="button" class="grid-item" id="share-trigger" title="Mostrar un código QR de esta página">
-            <img src="/assets/qr-icon.svg" alt="" class="grid-icon">
-            <p>Compartir</p>
-          </button>
-        </div>
+    <main id="main" tabindex="-1" class="setup-grid">
+      <section class="setup-card">
+        <h2>Encuéntrame en línea</h2>
+        <ul class="link-list">
+          <li>
+            <a class="link-row" href="https://www.linkedin.com/in/luciano-melendrez-3a9b1682/" target="_blank" rel="noopener noreferrer" title="Visita mi perfil de LinkedIn">
+              <img src="/assets/linkedin-icon.svg" alt="" class="grid-icon">
+              <span class="row-text"><span class="gear-name">LinkedIn</span><span class="gear-note">Perfil profesional</span></span>
+              <span class="row-pill">Abrir</span>
+            </a>
+          </li>
+          <li>
+            <a class="link-row" href="https://github.com/LuzianMe" target="_blank" rel="noopener noreferrer" title="Mira mi GitHub">
+              <img src="/assets/github-icon.svg" alt="" class="grid-icon">
+              <span class="row-text"><span class="gear-name">GitHub</span><span class="gear-note handle">@LuzianMe</span></span>
+              <span class="row-pill">Abrir</span>
+            </a>
+          </li>
+          <li>
+            <a class="link-row" href="https://bsky.app/profile/luzian.net" target="_blank" rel="noopener noreferrer" title="Encuéntrame en Bluesky">
+              <img src="/assets/bluesky-icon.svg" alt="" class="grid-icon">
+              <span class="row-text"><span class="gear-name">Bluesky</span><span class="gear-note handle">@luzian.net</span></span>
+              <span class="row-pill">Abrir</span>
+            </a>
+          </li>
+          <li>
+            <a class="link-row" href="https://discordapp.com/users/490539308147671051" target="_blank" rel="noopener noreferrer" title="Conecta conmigo en Discord">
+              <img src="/assets/discord-icon.svg" alt="" class="grid-icon">
+              <span class="row-text"><span class="gear-name">Discord</span><span class="gear-note">Envíame un mensaje</span></span>
+              <span class="row-pill">Abrir</span>
+            </a>
+          </li>
+        </ul>
+      </section>
+      <section class="setup-card">
+        <h2>Escríbeme directamente</h2>
+        <ul class="link-list">
+          <li>
+            <button type="button" class="link-row" id="copyEmail" title="Copiar correo (me@luzian.net)">
+              <img src="/assets/email-icon.svg" alt="" class="grid-icon">
+              <span class="row-text"><span class="gear-name">Correo</span><span class="gear-note handle">me<wbr>@luzian.net</span></span>
+              <span class="row-pill">Copiar</span>
+            </button>
+          </li>
+          <li>
+            <a class="link-row" href="tel:+16232264417" title="Llamar al teléfono virtual (+1 623 226 4417)">
+              <img src="/assets/phone-icon.svg" alt="" class="grid-icon">
+              <span class="row-text"><span class="gear-name">Teléfono virtual</span></span>
+              <span class="row-pill">Llamar</span>
+            </a>
+          </li>
+          <li>
+            <a class="link-row" href="/assets/contact.vcf" title="Guarda mi tarjeta de contacto en tu teléfono o computadora" download="Luzian.vcf">
+              <img src="/assets/contact-icon.svg" alt="" class="grid-icon">
+              <span class="row-text"><span class="gear-name">Guardar contacto</span><span class="gear-note">Agrégame a tus contactos</span></span>
+              <span class="row-pill">Guardar</span>
+            </a>
+          </li>
+          <li>
+            <button type="button" class="link-row" id="share-trigger" title="Mostrar un código QR de esta página">
+              <img src="/assets/qr-icon.svg" alt="" class="grid-icon">
+              <span class="row-text"><span class="gear-name">Compartir</span><span class="gear-note">Código QR de esta página</span></span>
+              <span class="row-pill">QR</span>
+            </button>
+          </li>
+        </ul>
       </section>
     </main>
     <!-- Modals live outside #links: its backdrop-filter would trap position:fixed inside the card -->
@@ -112,13 +142,13 @@
       <p>&copy; <span class="current-year">2026</span> Luzian. Todos los derechos reservados. <span class="footer-links"><span class="footer-sep" aria-hidden="true">&middot;</span> <a href="/es/payment/">Pagos</a> <span class="footer-sep" aria-hidden="true">&middot;</span> <a href="/es/?calm">Modo tranquilo</a></span></p>
     </footer>
     <!-- /shared:footer -->
-    <script src="/assets/copy.js?v=20261007v"></script>
-    <script src="/assets/modal.js?v=20261007v"></script>
-    <script src="/contact/script.js?v=20261007v"></script>
+    <script src="/assets/copy.js?v=20261007x"></script>
+    <script src="/assets/modal.js?v=20261007x"></script>
+    <script src="/contact/script.js?v=20261007x"></script>
     <!-- shared:scripts -->
-    <script src="/assets/effects.js?v=20261007v"></script>
-    <script src="/assets/water.js?v=20261007v"></script>
-    <script src="/assets/lang.js?v=20261007v"></script>
+    <script src="/assets/effects.js?v=20261007x"></script>
+    <script src="/assets/water.js?v=20261007x"></script>
+    <script src="/assets/lang.js?v=20261007x"></script>
     <!-- /shared:scripts -->
   </div>
 </body>

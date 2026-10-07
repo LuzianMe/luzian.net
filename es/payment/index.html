@@ -22,8 +22,8 @@
   <link rel="alternate" hreflang="en" href="https://luzian.net/payment/">
   <link rel="alternate" hreflang="es" href="https://luzian.net/es/payment/">
   <link rel="alternate" hreflang="x-default" href="https://luzian.net/payment/">
-  <link rel="stylesheet" href="/assets/style.css?v=20261007v">
-  <script src="/assets/theme.js?v=20261007v"></script>
+  <link rel="stylesheet" href="/assets/style.css?v=20261007x">
+  <script src="/assets/theme.js?v=20261007x"></script>
   <!-- /shared:head -->
   <meta name="description" content="Formas de pago de Luzian">
   <meta property="og:title" content="Págame - Luzian">
@@ -54,46 +54,43 @@
       <h1>Págame</h1>
       <p>Elige la forma que más te convenga.</p>
     </header>
-    <main id="main" tabindex="-1">
-      <section id="links">
-        <div class="grid">
-          <div class="grid-item pay-item" data-brand="zelle">
+    <main id="main" tabindex="-1" class="setup-grid">
+      <section class="setup-card setup-card-wide">
+        <h2>Formas de pago</h2>
+        <ul class="link-list">
+          <li class="pay-item" data-brand="zelle">
             <img src="/assets/zelle-icon.svg" alt="" class="grid-icon">
-            <p class="pay-name">Zelle</p>
-            <p class="pay-handle">me<wbr>@luzian.net</p>
-            <div class="pay-actions">
+            <span class="row-text"><span class="gear-name">Zelle</span><span class="gear-note handle">me<wbr>@luzian.net</span></span>
+            <span class="pay-actions">
               <button type="button" class="pay-btn" id="zelle-trigger" aria-label="Mostrar código QR de Zelle">QR</button>
               <button type="button" class="pay-btn" data-copy="me@luzian.net" aria-label="Copiar Zelle me@luzian.net">Copiar</button>
-            </div>
-          </div>
-          <div class="grid-item pay-item" data-brand="venmo">
+            </span>
+          </li>
+          <li class="pay-item" data-brand="venmo">
             <img src="/assets/venmo-icon.svg" alt="" class="grid-icon">
-            <p class="pay-name">Venmo</p>
-            <p class="pay-handle">@LuzianMe</p>
-            <div class="pay-actions">
+            <span class="row-text"><span class="gear-name">Venmo</span><span class="gear-note handle">@LuzianMe</span></span>
+            <span class="pay-actions">
               <a href="https://venmo.com/u/LuzianMe" class="pay-btn" target="_blank" rel="noopener noreferrer" aria-label="Abrir Venmo">Abrir</a>
               <button type="button" class="pay-btn" data-copy="@LuzianMe" aria-label="Copiar Venmo @LuzianMe">Copiar</button>
-            </div>
-          </div>
-          <div class="grid-item pay-item" data-brand="cashapp">
+            </span>
+          </li>
+          <li class="pay-item" data-brand="cashapp">
             <img src="/assets/cashapp-icon.svg" alt="" class="grid-icon">
-            <p class="pay-name">Cash App</p>
-            <p class="pay-handle">$LuzianMe</p>
-            <div class="pay-actions">
+            <span class="row-text"><span class="gear-name">Cash App</span><span class="gear-note handle">$LuzianMe</span></span>
+            <span class="pay-actions">
               <a href="https://cash.app/$LuzianMe" class="pay-btn" target="_blank" rel="noopener noreferrer" aria-label="Abrir Cash App">Abrir</a>
               <button type="button" class="pay-btn" data-copy="$LuzianMe" aria-label="Copiar Cash App $LuzianMe">Copiar</button>
-            </div>
-          </div>
-          <div class="grid-item pay-item" data-brand="paypal">
+            </span>
+          </li>
+          <li class="pay-item" data-brand="paypal">
             <img src="/assets/paypal-icon.svg" alt="" class="grid-icon">
-            <p class="pay-name">PayPal</p>
-            <p class="pay-handle">@LuzianMe</p>
-            <div class="pay-actions">
+            <span class="row-text"><span class="gear-name">PayPal</span><span class="gear-note handle">@LuzianMe</span></span>
+            <span class="pay-actions">
               <a href="https://paypal.me/LuzianMe" class="pay-btn" target="_blank" rel="noopener noreferrer" aria-label="Abrir PayPal">Abrir</a>
               <button type="button" class="pay-btn" data-copy="paypal.me/LuzianMe" aria-label="Copiar enlace de PayPal">Copiar</button>
-            </div>
-          </div>
-        </div>
+            </span>
+          </li>
+        </ul>
       </section>
     </main>
     <!-- Modals live outside #links: its backdrop-filter would trap position:fixed inside the card -->
@@ -101,7 +98,7 @@
       <div class="modal-content">
         <button type="button" id="close-modal" class="close" aria-label="Cerrar">&times;</button>
         <div class="qr-container">
-          <img src="/assets/zelle-qr.svg?v=20261007v" alt="Código QR de Zelle para me@luzian.net" class="qr-image qr-share">
+          <img src="/assets/zelle-qr.svg?v=20261007x" alt="Código QR de Zelle para me@luzian.net" class="qr-image qr-share">
           <p class="qr-legend">Escanea esto con tu app de Zelle para pagar a <b>me@luzian.net</b></p>
         </div>
       </div>
@@ -114,13 +111,13 @@
       <p>&copy; <span class="current-year">2026</span> Luzian. Todos los derechos reservados. <span class="footer-links"><span class="footer-sep" aria-hidden="true">&middot;</span> <a href="/es/?calm">Modo tranquilo</a></span></p>
     </footer>
     <!-- /shared:footer -->
-    <script src="/assets/copy.js?v=20261007v"></script>
-    <script src="/assets/modal.js?v=20261007v"></script>
-    <script src="/payment/script.js?v=20261007v"></script>
+    <script src="/assets/copy.js?v=20261007x"></script>
+    <script src="/assets/modal.js?v=20261007x"></script>
+    <script src="/payment/script.js?v=20261007x"></script>
     <!-- shared:scripts -->
-    <script src="/assets/effects.js?v=20261007v"></script>
-    <script src="/assets/water.js?v=20261007v"></script>
-    <script src="/assets/lang.js?v=20261007v"></script>
+    <script src="/assets/effects.js?v=20261007x"></script>
+    <script src="/assets/water.js?v=20261007x"></script>
+    <script src="/assets/lang.js?v=20261007x"></script>
     <!-- /shared:scripts -->
   </div>
 </body>
