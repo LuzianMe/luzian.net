@@ -294,9 +294,14 @@ def behaviours(browser, base):
             # the card is not wider than it needs to be, and not taller than its rows
             page.set_viewport_size({'width': 1280, 'height': 900})
             page.wait_for_timeout(200)
-            size = page.evaluate("(() => { const card = document.querySelector('.pay-card').getBoundingClientRect(); const last = [...document.querySelectorAll('.pay-item')].pop().getBoundingClientRect(); return [card.width, card.bottom - last.bottom]; })()")
-            if size[0] > 600 or size[1] > 60:
-                fail(f'rows {path}', f'the payment card is too wide or too tall (width {size[0]:.0f}, space under the last row {size[1]:.0f})')
+            for width in (1280, 800):
+                page.set_viewport_size({'width': width, 'height': 900})
+                page.wait_for_timeout(200)
+                size = page.evaluate("(() => { const card = document.querySelector('.pay-card').getBoundingClientRect(); const last = [...document.querySelectorAll('.pay-item')].pop().getBoundingClientRect(); return [card.width, card.bottom - last.bottom, (card.left + card.right) / 2 - window.innerWidth / 2]; })()")
+                if size[0] > 600 or size[1] > 60:
+                    fail(f'rows {path}', f'the payment card is too wide or too tall at {width}px (width {size[0]:.0f}, space under the last row {size[1]:.0f})')
+                if abs(size[2]) > 2:
+                    fail(f'rows {path}', f'the payment card is not centred at {width}px (off by {size[2]:.0f}px)')
             # the buttons stay to the right of the name, even on a phone
             page.set_viewport_size({'width': 360, 'height': 800})
             page.wait_for_timeout(200)
