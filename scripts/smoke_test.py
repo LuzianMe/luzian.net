@@ -95,8 +95,10 @@ def sweep(browser, base):
                 if path not in ('/pay/', '/home/'):
                     if page.evaluate("document.documentElement.getAttribute('data-theme')") != theme:
                         problems.append('wrong theme')
-                    if not page.query_selector('.theme-switch'):
-                        problems.append('no theme switch')
+                    if not page.query_selector('footer .theme-switch'):
+                        problems.append('no theme switch in the footer')
+                    if path != '/404.html' and not page.query_selector('footer .lang-switch'):
+                        problems.append('no language switch in the footer')
                     if page.evaluate("document.querySelectorAll('h1').length") != 1:
                         problems.append('does not have exactly one h1')
                 for p in problems:
@@ -142,6 +144,19 @@ def behaviours(browser, base):
     page.wait_for_timeout(300)
     if not page.evaluate("document.body.classList.contains('calm-show')"):
         fail('calm view', 'a mouse move, click or the wheel ended the calm view')
+    # in the calm view the logo is the theme switch (and a click on it does not end the view)
+    before = page.evaluate("document.documentElement.dataset.theme")
+    page.click('img.logo')
+    page.wait_for_timeout(500)
+    after = page.evaluate("document.documentElement.dataset.theme")
+    if after == before:
+        fail('calm view', 'clicking the logo did not change the theme')
+    if not page.evaluate("document.body.classList.contains('calm-show')"):
+        fail('calm view', 'clicking the logo ended the calm view')
+    page.click('img.logo')
+    page.wait_for_timeout(500)
+    if page.evaluate("document.documentElement.dataset.theme") != before:
+        fail('calm view', 'clicking the logo again did not change the theme back')
     page.keyboard.press('Shift')
     if not page.evaluate("document.body.classList.contains('calm-show')"):
         fail('calm view', 'a lone Shift ended the calm view')
