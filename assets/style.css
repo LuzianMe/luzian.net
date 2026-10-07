@@ -80,7 +80,8 @@
   --bg-edge: 8 10 16;
   --scroll: 30 41 59;
   --particle: 56 189 248;
-  --icon: 255 255 255;   /* the colour of the white icons (Water leaves them white) */
+  --icon: 170 215 250;   /* the colour of the white icons on the contact and payment pages */
+  --icon-tint: url(#icon-tint);   /* an SVG colour filter, built by assets/theme.js from --icon */
 
   --mouse-x: 50vw;
   --mouse-y: 30vh;
@@ -126,7 +127,6 @@ html[data-theme="fire"] {
   --scroll: 60 26 14;
   --particle: 255 100 20;
   --icon: 255 172 84;
-  --icon-tint: url(#icon-tint);   /* an SVG colour filter, built by assets/theme.js from --icon */
 }
 
 
@@ -381,7 +381,6 @@ main {
 }
 
 #about h2,
-#links h1,
 #links h2,
 .setup-card h2 {
   text-align: center;
@@ -824,13 +823,13 @@ main > .grid {
   justify-content: center;
   flex-direction: column;
   text-align: center;
-  background: rgb(var(--surface-3) / 0.6);
+  background: rgb(var(--surface-3) / 0.4);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgb(var(--accent-soft) / 0.15);
-  padding: 1.35rem 0.85rem;
-  border-radius: 14px;
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+  border: 1px solid rgb(var(--accent-soft) / 0.12);
+  padding: 1.05rem 0.75rem;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.22);
   transition: transform 0.18s cubic-bezier(0.2, 0.8, 0.2, 1),
               background 0.25s ease,
               border-color 0.25s ease,
@@ -851,7 +850,7 @@ button.grid-item {
 
 .grid-item p {
   font-family: var(--font-ui);
-  margin: 0.65rem 0 0 0;
+  margin: 0.5rem 0 0 0;
   font-size: var(--fs-label);
   font-weight: 500;
   color: rgb(var(--text));
@@ -860,8 +859,8 @@ button.grid-item {
 
 .grid-item:hover {
   background: rgb(var(--surface-4) / 0.8);
-  border-color: rgb(var(--accent-soft) / 0.55);
-  box-shadow: 0 10px 28px rgb(var(--accent-2) / 0.32), inset 0 0 14px rgb(var(--accent-soft) / 0.18);
+  border-color: rgb(var(--accent-soft) / 0.45);
+  box-shadow: 0 8px 22px rgb(var(--accent-2) / 0.25), inset 0 0 12px rgb(var(--accent-soft) / 0.14);
   color: rgb(var(--white));
 }
 
@@ -870,15 +869,14 @@ button.grid-item {
 }
 
 .grid-icon {
-  width: clamp(26px, 4vw, 42px);
-  height: clamp(26px, 4vw, 42px);
-  filter: var(--icon-tint,);
+  width: clamp(24px, 3.2vw, 32px);
+  height: clamp(24px, 3.2vw, 32px);
   transition: transform 0.22s ease, filter 0.25s ease;
 }
 
-/* Fire: the white icons take the theme's colour, with a faint ember glow like the titles */
-html[data-theme="fire"] .grid-icon {
-  filter: var(--icon-tint) drop-shadow(0 0 6px rgb(var(--accent) / 0.35));
+/* The white icons take the theme's colour (see --icon), with a faint glow like the titles */
+.grid-icon {
+  filter: var(--icon-tint) drop-shadow(0 0 6px rgb(var(--accent) / 0.3));
 }
 
 .grid-item:hover .grid-icon {
@@ -1169,7 +1167,7 @@ footer p {
   }
 
   #links .grid-item {
-    padding: 1rem 0.5rem;
+    padding: 0.85rem 0.5rem;
   }
 
   .pay-btn {
