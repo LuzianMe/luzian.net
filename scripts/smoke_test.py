@@ -264,6 +264,26 @@ def behaviours(browser, base):
         fail('?stats', p)
     context.close()
 
+    # --- Contact and Payment are rows inside cards, like Setup (and keep their working parts)
+    for path, selector, count in (('/contact/', '.link-row', 8), ('/es/contact/', '.link-row', 8), ('/payment/', '.pay-item', 4), ('/es/payment/', '.pay-item', 4)):
+        problems = []
+        context, page = new_page(browser, base, 1024, 'water', problems)
+        page.goto(base + path, wait_until='networkidle')
+        found = page.evaluate(f"document.querySelectorAll('{selector}').length")
+        if found != count:
+            fail(f'rows {path}', f'expected {count} rows, found {found}')
+        if page.evaluate("document.querySelectorAll('main .grid-item').length"):
+            fail(f'rows {path}', 'still has old tiles')
+        if 'payment' in path and page.evaluate("document.querySelectorAll('.pay-btn[data-copy]').length") != 4:
+            fail(f'rows {path}', 'the copy buttons are missing')
+        if path == '/contact/':
+            page.click('#copyEmail')
+            page.wait_for_timeout(300)
+        for p in problems:
+            if 'prompt' not in p:
+                fail(f'rows {path}', p)
+        context.close()
+
     # --- pop-ups: focus moves in, stays in, and comes back; Escape closes
     for path, opener, modal in (('/contact/', '#share-trigger', '#share-modal'), ('/payment/', '#zelle-trigger', '#zelle-modal'),
                                 ('/es/payment/', '#zelle-trigger', '#zelle-modal')):

@@ -6,7 +6,7 @@ if (copyEmailBtn) {
   copyEmailBtn.addEventListener('click', () => {
     const email = 'me@luzian.net';
     copyText(email)
-      .then(() => flashLabel(copyEmailBtn.querySelector('p'), msg.copied || 'Copied!'))
+      .then(() => flashLabel(copyEmailBtn.querySelector('.row-pill'), msg.copied || 'Copied!'))
       .catch(() => prompt(msg.promptEmail || 'Copy this email:', email));
   });
 }

@@ -364,7 +364,6 @@ main {
 }
 
 #about,
-#links,
 .setup-card {
   padding: 1.75rem;
   margin: 1rem auto;
@@ -381,7 +380,6 @@ main {
 }
 
 #about h2,
-#links h2,
 .setup-card h2 {
   text-align: center;
   color: rgb(var(--text-strong));
@@ -1086,6 +1084,118 @@ a[href*="contact.vcf"]:hover .grid-icon {
   border-color: rgb(var(--accent-soft) / 0.6);
 }
 
+/* Contact and Payment: rows inside cards, like the Setup page's gear lists */
+.link-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  text-align: left;
+}
+
+.link-list > li {
+  border-top: 1px solid rgb(var(--accent-soft) / 0.12);
+}
+
+.link-row,
+.pay-item {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.7rem 0.5rem;
+  border-radius: 12px;
+}
+
+.link-row {
+  margin: 0;
+  background: none;
+  border: 0;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.link-row:hover,
+.pay-item:hover {
+  background: rgb(var(--accent-soft) / 0.08);
+}
+
+.link-row:focus-visible {
+  outline: 2px solid rgb(var(--accent-soft));
+  outline-offset: -2px;
+}
+
+.link-row .grid-icon,
+.pay-item .grid-icon {
+  flex-shrink: 0;
+}
+
+.link-row:hover .grid-icon,
+.pay-item:hover .grid-icon {
+  transform: scale(1.12);
+}
+
+.row-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.gear-note.handle {
+  font-family: 'Inter', sans-serif;
+  overflow-wrap: anywhere;
+}
+
+/* The small pill at the end of a row (the Setup page's status pills are the model) */
+.row-pill {
+  flex-shrink: 0;
+  white-space: nowrap;
+  padding: 0.2rem 0.75rem;
+  border-radius: 999px;
+  font-family: var(--font-ui);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: rgb(var(--accent-pale));
+  background: rgb(var(--accent) / 0.15);
+  border: 1px solid rgb(var(--accent-soft) / 0.4);
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.link-row:hover .row-pill {
+  background: rgb(var(--accent) / 0.28);
+  border-color: rgb(var(--accent-soft) / 0.6);
+}
+
+.pay-item .pay-actions {
+  margin: 0;
+  flex-shrink: 0;
+  justify-content: flex-end;
+}
+
+/* On a narrow phone the rows get a little more room, and the payment buttons drop under the name
+   instead of squeezing it */
+@media (max-width: 440px) {
+  .link-row,
+  .pay-item {
+    gap: 0.7rem;
+    padding-left: 0.2rem;
+    padding-right: 0.2rem;
+  }
+
+  .pay-item {
+    flex-wrap: wrap;
+  }
+
+  .pay-item .pay-actions {
+    flex-basis: 100%;
+    justify-content: flex-start;
+    padding-left: calc(clamp(24px, 3.2vw, 32px) + 0.7rem);
+  }
+}
+
 /* ==========================================================================
    404 Page Styles
    ========================================================================== */
@@ -1157,19 +1267,6 @@ footer p {
 
 /* Small Tablets & Large Phones (>= 520px) */
 @media (max-width: 519px) {
-  #links {
-    padding: 1.25rem 0.9rem;
-  }
-
-  #links .grid {
-    grid-template-columns: repeat(2, 1fr);
-    padding: 0;
-  }
-
-  #links .grid-item {
-    padding: 0.85rem 0.5rem;
-  }
-
   .pay-btn {
     padding: 0.3rem 0.6rem;
   }
@@ -1200,11 +1297,6 @@ footer p {
 @media (min-width: 768px) {
   .grid {
     grid-template-columns: repeat(3, 1fr);
-  }
-
-  /* Contact (8 tiles) and Payments (4 cards) fill even rows of four */
-  #links .grid {
-    grid-template-columns: repeat(4, 1fr);
   }
 
   /* Setup: Headset | FBT side by side, Locomotion and PC full width */
