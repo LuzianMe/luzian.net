@@ -21,6 +21,11 @@
   if (/[?&]water=off\b/.test(location.search)) return;
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
+  // ?stats (assets/stats.js) shows how the effect is doing: how many frames, and how long each takes the CPU
+  const telemetry = /[?&]stats\b/.test(location.search)
+    ? (window.__ouroTelemetry = { frames: 0, drawMs: 0, drawMax: 0, state: () => ({ started, logo: logoOn, background: !!bg }) })
+    : null;
+
   const PAD = 0.12;                    // room for the glow on each side, as a fraction of the layer
   const GLOW_BLUR = 70;                // canvas blur that matches the CSS drop-shadow(0 0 35px ...)
   const MAX_RIPPLES = 8;
@@ -839,7 +844,16 @@
       }
     }
     lastDraw = now;
-    draw(now / 1000);
+    if (telemetry) {
+      const began = performance.now();
+      draw(now / 1000);
+      const took = performance.now() - began;
+      telemetry.frames++;
+      telemetry.drawMs += took;
+      if (took > telemetry.drawMax) telemetry.drawMax = took;
+    } else {
+      draw(now / 1000);
+    }
   }
 
   function start() {

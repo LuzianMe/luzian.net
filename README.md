@@ -24,3 +24,7 @@ Test pages used to tune the look go in `water-lab/` (git ignores it and the chec
 The site has two looks, **Water** (default) and **Fire**, switched with the droplet | flame pill under the menu. Colours are CSS variables (`:root` for Water, `html[data-theme="fire"]` for Fire, both in `assets/style.css`); use `rgb(var(--accent) / 0.4)` and friends instead of hard-coded colours. `assets/theme.js` tints the white icons through an SVG colour filter built from `--icon` (no extra image files), and remembers the choice (and `?theme=fire` / `?theme=water` on any link sets it; `?reveal=ring` swaps the spreading circle for just the glowing ring); the water effect's palette is in `assets/water.js` (`THEMES`).
 
 Fire also has its own effects (flickering firelight, heat haze, white-hot veins on the snake, a glow along the bottom, cinders instead of dust, sparks on click, flame-gradient titles); their strengths are the `FIRE` constants in `assets/water.js`, `--ember-glow` and `--heading-fire` in `assets/style.css`.
+
+## Measuring it
+
+Add `?stats` to any address (for example `luzian.net/?calm&stats`) for a small readout in the bottom-left corner: the frames per second the browser really draws (and the lowest a second has been), the water effect's frames per second and the CPU time of one frame, whether the logo and background layers are running, and the battery charge now and since the page was opened. "Copy report" puts it all on the clipboard. `?water=off` switches the effect off, for a baseline to compare with. `?water=debug` exposes test hooks in the console.

@@ -237,6 +237,25 @@ def behaviours(browser, base):
         fail('?reveal=ring', p)
     context.close()
 
+    # --- ?stats: the readout appears, shows numbers, and tapping it does not touch the page
+    problems = []
+    context, page = new_page(browser, base, 375, 'water', problems)
+    page.goto(base + '/?calm&stats', wait_until='networkidle')
+    page.wait_for_timeout(2500)
+    text = page.inner_text('#stats-overlay pre') if page.query_selector('#stats-overlay') else ''
+    if 'page' not in text or 'fps' not in text or 'battery' not in text:
+        fail('?stats', f'the readout is missing or incomplete: {text!r}')
+    if not page.query_selector('#stats-overlay button'):
+        fail('?stats', 'no Copy report button')
+    else:
+        page.click('#stats-overlay button')
+        page.wait_for_timeout(300)
+        if not page.evaluate("document.body.classList.contains('calm-show')"):
+            fail('?stats', 'tapping the readout ended the calm view')
+    for p in problems:
+        fail('?stats', p)
+    context.close()
+
     # --- pop-ups: focus moves in, stays in, and comes back; Escape closes
     for path, opener, modal in (('/contact/', '#share-trigger', '#share-modal'), ('/payment/', '#zelle-trigger', '#zelle-modal'),
                                 ('/es/payment/', '#zelle-trigger', '#zelle-modal')):
