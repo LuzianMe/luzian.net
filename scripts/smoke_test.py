@@ -268,6 +268,7 @@ def behaviours(browser, base):
     for path, selector, count in (('/contact/', '.link-row', 8), ('/es/contact/', '.link-row', 8), ('/payment/', '.pay-item', 4), ('/es/payment/', '.pay-item', 4)):
         problems = []
         context, page = new_page(browser, base, 1024, 'water', problems)
+        page.on('dialog', lambda d: d.dismiss())
         page.goto(base + path, wait_until='networkidle')
         found = page.evaluate(f"document.querySelectorAll('{selector}').length")
         if found != count:
@@ -276,9 +277,43 @@ def behaviours(browser, base):
             fail(f'rows {path}', 'still has old tiles')
         if 'payment' in path and page.evaluate("document.querySelectorAll('.pay-btn[data-copy]').length") != 4:
             fail(f'rows {path}', 'the copy buttons are missing')
-        if path == '/contact/':
+        if 'payment' in path:
+            # the copy buttons are icons; a click shows a check mark, then the icon comes back
+            context.grant_permissions(['clipboard-read', 'clipboard-write'])
+            if page.evaluate("document.querySelectorAll('.pay-btn[data-copy] svg').length") != 4:
+                fail(f'rows {path}', 'the copy buttons should hold an icon')
+            page.click('.pay-btn[data-copy]')
+            page.wait_for_timeout(400)
+            if page.evaluate("document.querySelector('.pay-btn[data-copy] svg path').getAttribute('d')") != 'M5 12.5l4.5 4.5L19 7.5':
+                fail(f'rows {path}', 'no check mark after copying')
+            page.wait_for_timeout(2300)
+            if page.evaluate("document.querySelector('.pay-btn[data-copy] svg rect') === null"):
+                fail(f'rows {path}', 'the copy icon did not come back')
+            if page.evaluate("document.getElementById('live-status') && document.getElementById('live-status').textContent === ''"):
+                fail(f'rows {path}', 'the copy was not announced')
+            # the buttons stay to the right of the name, even on a phone
+            page.set_viewport_size({'width': 360, 'height': 800})
+            page.wait_for_timeout(200)
+            layout = page.evaluate("(() => { const li = document.querySelector('.pay-item'); const t = li.querySelector('.row-text').getBoundingClientRect(); const a = li.querySelector('.pay-actions').getBoundingClientRect(); return [a.left >= t.right - 1, Math.abs((a.top + a.height / 2) - (t.top + t.height / 2)) < 20]; })()")
+            if not (layout[0] and layout[1]):
+                fail(f'rows {path}', 'on a phone the payment buttons are not beside the name')
+        if 'contact' in path:
+            lists = page.evaluate("[...document.querySelectorAll('.link-list')].map(ul => [...ul.querySelectorAll('.gear-name')].map(n => n.textContent))")
+            online = [n for n in lists[0]]
+            if not (len(lists) == 2 and len(online) == 4 and len(lists[1]) == 4):
+                fail(f'rows {path}', f'unexpected lists {lists}')
+            if page.evaluate("!document.querySelector('#share-trigger').closest('.link-list').isSameNode(document.querySelectorAll('.link-list')[0]) || !document.querySelector('a[href*=\"discordapp\"]').closest('.link-list').isSameNode(document.querySelectorAll('.link-list')[1])"):
+                fail(f'rows {path}', 'Share belongs in the first card and Discord in the second')
+            context.grant_permissions(['clipboard-read', 'clipboard-write'])
+            if not page.evaluate("!!document.querySelector('#copyEmail .row-pill svg')"):
+                fail(f'rows {path}', 'the email copy pill should be an icon')
             page.click('#copyEmail')
-            page.wait_for_timeout(300)
+            page.wait_for_timeout(400)
+            if page.evaluate("document.querySelector('#copyEmail .row-pill svg path').getAttribute('d')") != 'M5 12.5l4.5 4.5L19 7.5':
+                fail(f'rows {path}', 'no check mark after copying the email')
+            page.wait_for_timeout(2300)
+            if page.evaluate("document.querySelector('#copyEmail .row-pill svg rect') === null"):
+                fail(f'rows {path}', 'the email copy icon did not come back')
         for p in problems:
             if 'prompt' not in p:
                 fail(f'rows {path}', p)

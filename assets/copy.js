@@ -33,12 +33,17 @@ function announce(message) {
   setTimeout(() => { region.textContent = message; }, 50);
 }
 
-// Briefly swap an element's text to confirm the copy (and tell screen readers)
+// Briefly swap an element's content to confirm the copy (and tell screen readers). A button that
+// holds an icon shows a check mark instead of the words.
+const CHECK_ICON = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
+
 function flashLabel(el, message) {
   announce(message);
-  // Remember the real label once, so repeated clicks don't "restore" to the message
-  if (!el.dataset.label) el.dataset.label = el.textContent;
-  el.textContent = message;
+  // Remember the real content once, so repeated clicks don't "restore" to the message
+  if (el.dataset.original === undefined) el.dataset.original = el.innerHTML;
+  const hasIcon = !!el.querySelector('svg');
+  if (hasIcon) el.innerHTML = CHECK_ICON;
+  else el.textContent = message;
   clearTimeout(el._flashTimer);
-  el._flashTimer = setTimeout(() => { el.textContent = el.dataset.label; }, 2000);
+  el._flashTimer = setTimeout(() => { el.innerHTML = el.dataset.original; }, 2000);
 }
