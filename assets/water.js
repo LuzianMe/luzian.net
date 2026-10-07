@@ -681,7 +681,10 @@
     pulseUnderLogo();
   }
 
-  function onLogoPress() { startClickSpin(); }
+  // (in the calm view a click on the logo changes the theme instead: assets/effects.js)
+  function onLogoPress() {
+    if (!document.body.classList.contains('calm-show')) startClickSpin();
+  }
 
   // Gives the plain logo image back (used when the logo layer fails or the device is slow)
   function dropLogo() {

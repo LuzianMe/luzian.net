@@ -1292,24 +1292,13 @@ footer p {
   background: rgb(var(--accent-soft) / 0.14);
 }
 
-/* Homepage: the switch floats under the nav so the hero stays exactly centered */
-body.home .lang-switch {
-  position: absolute;
-  top: 4.7rem;
-  left: 0;
-  right: 0;
-  margin: 0;
-}
-
-/* Theme switch (assets/theme.js): droplet | flame, in a row with the language switch */
+/* The switches sit in the footer: language (EN | ES) and theme (droplet | flame), side by side */
 .switch-row {
   display: flex;
   justify-content: center;
   align-items: center;
   gap: 0.6rem;
-  margin: 0.35rem 0 0;
-  position: relative;
-  z-index: 5;
+  margin: 0 0 0.9rem;
 }
 
 .switch-row .lang-switch,
@@ -1317,16 +1306,23 @@ body.home .lang-switch {
   margin: 0;
 }
 
-body.home .switch-row {
-  position: absolute;
-  top: 4.7rem;
-  left: 0;
-  right: 0;
-  margin: 0;
+/* The footer's own link style must not reach into the language pills */
+footer .lang-switch a {
+  display: inline-block;
+  color: rgb(var(--muted));
+  border: 1px solid rgb(var(--accent-soft) / 0.25);
+  border-right-width: 1px;
+  transition: color 0.2s ease, background-color 0.2s ease;
 }
 
-body.home .switch-row .lang-switch {
-  position: static;
+footer .lang-switch > :first-child {
+  border-right-width: 0;
+}
+
+footer .lang-switch a:hover {
+  color: rgb(var(--white));
+  background: rgb(var(--accent-soft) / 0.14);
+  border-color: rgb(var(--accent-soft) / 0.25);
 }
 
 .theme-switch > button {
@@ -1524,20 +1520,16 @@ footer a:hover {
   filter: none;
 }
 
-/* Calm mode (home page, assets/effects.js): when nothing has moved for a few seconds the menu, the
-   language switch and the labels fade away, leaving the water, the snake and the logo. Anything
+/* Calm mode (home page, assets/effects.js): when nothing has moved for a few seconds the menu
+   and the labels fade away, leaving the water, the snake and the logo. Anything
    that moves brings them back, a little faster than they left. */
 body.home .nav-container,
-body.home .lang-switch,
-body.home .switch-row,
 body.home .hero-sub,
 body.home .lang-banner {
   transition: opacity 0.5s ease;
 }
 
 body.home.calm .nav-container,
-body.home.calm .lang-switch,
-body.home.calm .switch-row,
 body.home.calm .hero-sub,
 body.home.calm .lang-banner {
   opacity: 0;
@@ -1546,6 +1538,10 @@ body.home.calm .lang-banner {
 }
 
 /* Calm view (/?calm): calm from the start; the pointer hides, it cannot be scrolled, and a quiet hint says how to leave */
+body.calm-show .logo:hover {
+  cursor: pointer;   /* the logo is the theme switch here */
+}
+
 body.calm-show {
   cursor: none;
   overflow: hidden;            /* nothing to scroll: a swipe or the wheel just plays with the water */
@@ -1567,6 +1563,7 @@ body.calm-show {
   font-size: var(--fs-sm);
   letter-spacing: 0.04em;
   color: rgb(var(--muted));
+  padding: 0 1rem;
   pointer-events: none;
   opacity: 0;
   animation: calm-hint 7s ease forwards;

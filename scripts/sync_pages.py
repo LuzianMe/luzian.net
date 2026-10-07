@@ -5,8 +5,8 @@ Each page marks its shared parts with comments:
 
     <!-- shared:head -->      icons, link previews, language links, stylesheet, theme script
     <!-- shared:layers -->    the background layers (snake, particles, spotlight)
-    <!-- shared:nav -->       skip link, menu, language switch
-    <!-- shared:footer -->    copyright and footer links
+    <!-- shared:nav -->       skip link, menu
+    <!-- shared:footer -->    language switch (and the theme switch, added by theme.js), copyright, footer links
     <!-- shared:scripts -->   the scripts every page loads at the end
     <!-- /shared:NAME -->     ends a part
 
@@ -139,13 +139,6 @@ def part_nav(lang, key, tag):
         else:
             lines.append((2, f'<li><a href="{href}" class="nav-pill">{t["nav"][i]}</a></li>'))
     lines += [(1, '</ul>'), (0, '</nav>')]
-    if key != '404':
-        twin = address(other(lang), key)
-        o = other(lang)
-        here = f'<span class="lang-current" aria-current="true">{lang.upper()}</span>'
-        there = f'<a href="{twin}" hreflang="{o}" lang="{o}" title="{t["other_title"]}" data-lang="{o}">{o.upper()}</a>'
-        pair = here + there if lang == 'en' else there + here
-        lines.append((0, f'<div class="lang-switch" role="group" aria-label="{t["language"]}">{pair}</div>'))
     return lines
 
 
@@ -160,15 +153,31 @@ def footer_line(lang, key):
             f'<span class="footer-links">{" ".join(links)}</span>')
 
 
+def switch_row(lang, key):
+    """The language switch (the theme switch is added next to it by assets/theme.js)."""
+    t = TEXT[lang]
+    lines = [(1, '<div class="switch-row">')]
+    if key != '404':
+        twin = address(other(lang), key)
+        o = other(lang)
+        here = f'<span class="lang-current" aria-current="true">{lang.upper()}</span>'
+        there = f'<a href="{twin}" hreflang="{o}" lang="{o}" title="{t["other_title"]}" data-lang="{o}">{o.upper()}</a>'
+        pair = here + there if lang == 'en' else there + here
+        lines.append((2, f'<div class="lang-switch" role="group" aria-label="{t["language"]}">{pair}</div>'))
+    lines.append((1, '</div>'))
+    return lines
+
+
 def part_footer(lang, key, tag):
     if key == '404':
         return [
             (0, '<footer>'),
+            *switch_row(lang, key),
             (1, f'<p data-footer="en">{footer_line("en", key)}</p>'),
             (1, f'<p data-footer="es" lang="es" hidden>{footer_line("es", key)}</p>'),
             (0, '</footer>'),
         ]
-    return [(0, '<footer>'), (1, f'<p>{footer_line(lang, key)}</p>'), (0, '</footer>')]
+    return [(0, '<footer>'), *switch_row(lang, key), (1, f'<p>{footer_line(lang, key)}</p>'), (0, '</footer>')]
 
 
 def part_scripts(lang, key, tag):

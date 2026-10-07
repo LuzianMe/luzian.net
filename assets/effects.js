@@ -378,9 +378,13 @@ document.querySelectorAll('.current-year').forEach((el) => { el.textContent = ne
       hint.className = 'calm-hint';
       const touch = window.matchMedia('(hover: none) and (pointer: coarse)').matches;
       const spanish = document.documentElement.lang === 'es';
-      hint.textContent = touch
-        ? (spanish ? 'Mantén pulsado para volver' : 'Touch and hold to return')
-        : (spanish ? 'Pulsa una tecla para volver' : 'Press any key to return');
+      const theme = touch
+        ? (spanish ? 'Toca el logo para cambiar el tema' : 'Tap the logo to change the theme')
+        : (spanish ? 'Haz clic en el logo para cambiar el tema' : 'Click the logo to change the theme');
+      const leave = touch
+        ? (spanish ? 'mantén pulsado para volver' : 'touch and hold to return')
+        : (spanish ? 'pulsa una tecla para volver' : 'press any key to return');
+      hint.textContent = `${theme} · ${leave}`;
       document.body.appendChild(hint);
     }
 
@@ -395,6 +399,15 @@ document.querySelectorAll('.current-year').forEach((el) => { el.textContent = ne
       document.addEventListener(type, () => { if (!showing) wake(); }, { passive: true });
     });
     window.addEventListener('scroll', () => { if (!showing) wake(); }, { passive: true });
+
+    // In the calm view (not the ordinary idle calm) the logo is the theme switch, since the menus are away
+    const logo = document.querySelector('img.logo');
+    if (logo) {
+      logo.addEventListener('pointerdown', () => {
+        if (!showing || !window.luzianTheme) return;
+        window.luzianTheme.set(window.luzianTheme.get() === 'fire' ? 'water' : 'fire', logo);
+      }, { passive: true });
+    }
 
     // A key press. In the calm view, a lone modifier or a shortcut (Alt+Tab, Ctrl+R, ...) does not count
     document.addEventListener('keydown', (e) => {

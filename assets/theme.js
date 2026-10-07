@@ -2,7 +2,7 @@
 //
 // The page's colours live in CSS variables (assets/style.css); this script only sets
 // <html data-theme="water|fire">, remembers the choice, and builds the little droplet | flame switch
-// next to the language switch. It is loaded in the <head>, so the right colours are there from the
+// in the footer, next to the language switch. It is loaded in the <head>, so the right colours are there from the
 // first paint. The choice is shared between open windows. Open any page with ?theme=fire (or
 // ?theme=water) to switch it from a link.
 //
@@ -154,23 +154,15 @@
       group.appendChild(button);
     });
 
-    // A row that holds the language switch and this one side by side
-    const row = document.createElement('div');
-    row.className = 'switch-row';
-    const language = document.querySelector('.lang-switch');
-    if (language) {
-      language.parentNode.insertBefore(row, language);
-      row.appendChild(language);
-    } else {
-      const nav = document.querySelector('.nav-container');
-      if (!nav) return;
-      nav.insertAdjacentElement('afterend', row);
-    }
+    // The footer has a row for the switches (the language switch is already in it)
+    const row = document.querySelector('.switch-row');
+    if (!row) return;
     row.appendChild(group);
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', build);
   else build();
 
-  window.luzianTheme = { get: current, set: (theme) => change(theme === 'fire' ? 'fire' : 'water', null) };
+  // set(theme, element): the new theme spreads out from that element (the middle of the page without one)
+  window.luzianTheme = { get: current, set: (theme, origin) => change(theme === 'fire' ? 'fire' : 'water', origin || null) };
 })();
