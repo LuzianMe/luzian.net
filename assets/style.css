@@ -255,14 +255,39 @@ h1, h2, h3, .nav-pill {
   width: min(85vw, 820px);
   height: min(85vw, 820px);
   transform: translate(-50%, -50%);
+  opacity: 0.22;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* The plain, still snake: the picture for devices without the water effect. When the effect is going to
+   run it takes over within a second or so, and the plain one would only flash (white, unshaded) until
+   then, so it waits, and shows at once only when it is certain the effect is not coming (water.js adds
+   water-off, or the visitor asked for reduced motion). */
+.ouro-bg-rotator::before {
+  content: '';
+  position: absolute;
+  inset: 0;
   background-image: url('bg_ouro.svg');
   background-repeat: no-repeat;
   background-position: center;
   background-size: contain;
-  opacity: 0.22;
-  pointer-events: none;
-  z-index: 0;
   filter: drop-shadow(0 0 35px rgb(var(--accent) / 0.35));
+  animation: plain-snake-in 0.6s ease 2.5s backwards;
+}
+
+.ouro-bg-rotator.water-off::before {
+  animation: none;
+}
+
+@keyframes plain-snake-in {
+  from { opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ouro-bg-rotator::before {
+    animation: none;
+  }
 }
 
 /* Water effect (assets/water.js): a canvas the size of the layer plus room for the glow */
@@ -273,6 +298,12 @@ h1, h2, h3, .nav-pill {
   width: 124%;
   height: 124%;
   display: block;
+  animation: water-snake-in 0.9s ease-out;
+}
+
+/* The snake is not there at all until the effect is ready, so it comes in softly */
+@keyframes water-snake-in {
+  from { opacity: 0; }
 }
 
 /* Faint caustic light behind the snake (assets/water.js), drawn small and stretched to the page */
@@ -287,9 +318,8 @@ h1, h2, h3, .nav-pill {
 }
 
 /* Once the canvas is drawing it takes over the picture and the glow */
-.ouro-bg-rotator.water-on {
-  background-image: none;
-  filter: none;
+.ouro-bg-rotator.water-on::before {
+  display: none;
 }
 
 /* 3. Floating Dust / Particle Canvas */
