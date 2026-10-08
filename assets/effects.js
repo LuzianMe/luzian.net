@@ -456,16 +456,43 @@ document.querySelectorAll('.current-year').forEach((el) => { el.textContent = ne
     if (showMode) startShow(); else wake();
   }
 
+  // A "back to top" button for long pages (Career on a phone): it appears once the visitor is well down the page
+  function initBackToTop() {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'to-top';
+    button.setAttribute('aria-label', document.documentElement.lang === 'es' ? 'Volver arriba' : 'Back to top');
+    button.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg>';
+    document.body.appendChild(button);
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    button.addEventListener('click', () => {
+      window.scrollTo({ top: 0, behavior: reduceMotion.matches ? 'auto' : 'smooth' });
+    });
+    let queued = false;
+    function update() {
+      queued = false;
+      const view = window.innerHeight;
+      const long = document.documentElement.scrollHeight > 2.2 * view;   // short pages never need it
+      button.classList.toggle('shown', long && window.scrollY > 0.9 * view && !document.body.classList.contains('calm-show'));
+    }
+    const queue = () => { if (!queued) { queued = true; requestAnimationFrame(update); } };
+    window.addEventListener('scroll', queue, { passive: true });
+    window.addEventListener('resize', queue);
+    update();
+  }
+
   // Initialize once DOM is ready
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
       initCardTilt();
       initParticleCanvas();
       initCalmMode();
+      initBackToTop();
     });
   } else {
     initCardTilt();
     initParticleCanvas();
     initCalmMode();
+    initBackToTop();
   }
 })();
