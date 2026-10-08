@@ -293,6 +293,37 @@ def behaviours(browser, base):
         fail('plain snake', p)
     context.close()
 
+    # --- back to top: only on a long page, only once scrolled well down, and it works
+    problems = []
+    context, page = new_page(browser, base, 375, 'water', problems)
+    page.goto(base + '/career/', wait_until='networkidle')
+    page.wait_for_timeout(500)
+    if page.evaluate("document.querySelector('.to-top').classList.contains('shown')"):
+        fail('back to top', 'the button shows at the top of the page')
+    page.evaluate("window.scrollTo(0, document.documentElement.scrollHeight)")
+    try:
+        page.wait_for_function("document.querySelector('.to-top').classList.contains('shown')", timeout=5000)
+        page.click('.to-top')
+        page.wait_for_function("window.scrollY < 5", timeout=8000)
+    except Exception:
+        fail('back to top', 'the button did not appear far down Career, or did not scroll to the top')
+    for address in ('/contact/', '/payment/', '/'):
+        page.goto(base + address, wait_until='networkidle')
+        page.evaluate("window.scrollTo(0, document.documentElement.scrollHeight)")
+        page.wait_for_timeout(400)
+        if page.evaluate("document.querySelector('.to-top').classList.contains('shown')"):
+            fail('back to top', f'the button shows on the short page {address}')
+    page.goto(base + '/es/career/', wait_until='networkidle')
+    if page.evaluate("document.querySelector('.to-top').getAttribute('aria-label')") != 'Volver arriba':
+        fail('back to top', 'the Spanish page does not have a Spanish label on the button')
+    # the menu is (nearly) solid, so text scrolling under it does not show through
+    alpha = page.evaluate("+getComputedStyle(document.querySelector('.nav-pills')).backgroundColor.split(',').pop().replace(')','') || 1")
+    if alpha < 0.9:
+        fail('menu', f'the menu bar is too see-through (alpha {alpha})')
+    for p in problems:
+        fail('back to top', p)
+    context.close()
+
     # --- ?stats: the readout appears, shows numbers, and tapping it does not touch the page
     problems = []
     context, page = new_page(browser, base, 375, 'water', problems)
