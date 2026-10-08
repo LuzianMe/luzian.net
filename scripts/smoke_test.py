@@ -263,6 +263,24 @@ def behaviours(browser, base):
         fail('water clock', p)
     context.close()
 
+    # --- the plain snake never flashes before the water: hidden while the effect is coming, shown at once if it is not
+    problems = []
+    context, page = new_page(browser, base, 375, 'water', problems)
+    page.goto(base + '/', wait_until='domcontentloaded')
+    early = page.evaluate("(() => { const l = document.querySelector('.ouro-bg-rotator'); const b = getComputedStyle(l, '::before'); return l.classList.contains('water-on') ? 'water' : b.display === 'none' ? 'none' : +b.opacity; })()")
+    if early not in ('water', 'none') and early > 0.02:
+        fail('plain snake', f'the unshaded snake is visible before the water effect is ready (opacity {early})')
+    page.wait_for_function("document.querySelector('.ouro-bg-rotator').classList.contains('water-on')", timeout=15000)
+    if page.evaluate("getComputedStyle(document.querySelector('.ouro-bg-rotator'), '::before').display") != 'none':
+        fail('plain snake', 'the plain snake is still drawn under the water effect')
+    page.goto(base + '/?water=off', wait_until='domcontentloaded')
+    shown = page.evaluate("(() => { const b = getComputedStyle(document.querySelector('.ouro-bg-rotator'), '::before'); return [b.display, +b.opacity, b.animationName]; })()")
+    if shown[0] == 'none' or shown[1] < 0.99 or shown[2] != 'none':
+        fail('plain snake', f'with the effect off the plain snake should show at once ({shown})')
+    for p in problems:
+        fail('plain snake', p)
+    context.close()
+
     # --- ?stats: the readout appears, shows numbers, and tapping it does not touch the page
     problems = []
     context, page = new_page(browser, base, 375, 'water', problems)

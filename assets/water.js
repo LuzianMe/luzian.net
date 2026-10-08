@@ -18,8 +18,10 @@
 
   const layer = document.querySelector('.ouro-bg-rotator');
   if (!layer) return;
-  if (/[?&]water=off\b/.test(location.search)) return;
-  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  // The plain snake waits a little in case the effect takes over (see style.css); when it will not, show it now
+  const plainSnake = () => layer.classList.add('water-off');
+  if (/[?&]water=off\b/.test(location.search)) { plainSnake(); return; }
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) { plainSnake(); return; }
 
   // ?stats (assets/stats.js) shows how the effect is doing: how many frames, and how long each takes the CPU
   const telemetry = /[?&]stats\b/.test(location.search)
@@ -371,7 +373,7 @@
   const RING_UNIFORMS = ['u_ringAmp', 'u_ringGlint', 'u_ringSpeed', 'u_ringLife'];
   const snake = makeRenderer(snakeCanvas, SNAKE_FRAGMENT,
     ['u_time', 'u_ripples', 'u_tex', 'u_caustic', 'u_swellAmp', 'u_swellTime', 'u_shimmer', 'u_haze', 'u_cScale', 'u_cLine', 'u_causticTime', 'u_absorb', 'u_body', 'u_vein', ...RING_UNIFORMS]);
-  if (!snake) return;
+  if (!snake) { plainSnake(); return; }
   snake.gl.uniform1i(snake.uniforms.u_tex, 0);
 
   // The page background is an extra, optional layer: if it cannot start, the snake still works
@@ -891,6 +893,7 @@
     window.removeEventListener('resize', onResize);
     window.removeEventListener('themechange', onTheme);
     layer.classList.remove('water-on');
+    plainSnake();
     snakeCanvas.remove();
     bgCanvas.remove();
     dropLogo();
@@ -967,7 +970,7 @@
     window.addEventListener('resize', onResize);
     start();
   };
-  image.onerror = () => { /* keep the CSS version */ };
+  image.onerror = plainSnake;   // keep the CSS version
   image.src = '/assets/bg_ouro.svg';
 
   if (/[?&]water=debug\b/.test(location.search)) {
