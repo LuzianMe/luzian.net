@@ -450,6 +450,24 @@ header p {
   height: auto;
   transition: transform 0.3s ease, filter 0.3s ease;
   filter: drop-shadow(0 0 14px rgb(var(--accent-soft) / 0.25));
+  /* Same idea as the snake: while the water effect is on its way the plain logo waits, so it does not
+     show for a moment and then switch to the shaded one (water.js adds water-off to show it at once) */
+  animation: plain-logo-in 0.6s ease 2.5s backwards;
+}
+
+.logo.water-off,
+.logo.water-over {
+  animation: none;
+}
+
+@keyframes plain-logo-in {
+  from { opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .logo {
+    animation: none;
+  }
 }
 
 .logo:hover {
@@ -1746,6 +1764,11 @@ footer a:hover {
 
 .ouro-logo-water.hover {
   transform: scale(1.04);
+}
+
+/* water.js adds this the moment the logo is first drawn, so it fades in once (and not whenever it is shown again) */
+.ouro-logo-water.arriving {
+  animation: water-snake-in 0.9s ease-out;
 }
 
 .logo.water-over,
