@@ -19,7 +19,11 @@
   const layer = document.querySelector('.ouro-bg-rotator');
   if (!layer) return;
   // The plain snake waits a little in case the effect takes over (see style.css); when it will not, show it now
-  const plainSnake = () => layer.classList.add('water-off');
+  const plainLogoImage = document.querySelector('img.logo');
+  const plainSnake = () => {
+    layer.classList.add('water-off');
+    if (plainLogoImage) plainLogoImage.classList.add('water-off');
+  };
   if (/[?&]water=off\b/.test(location.search)) { plainSnake(); return; }
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) { plainSnake(); return; }
 
@@ -403,6 +407,7 @@
   // click: when a click turn began. shift/hold: only for tests.
   const spin = { half: 0, tick: null, flip: null, click: null, shift: 0, hold: null };
   let logoOn = !!logo;        // switched off alone if the device struggles
+  if (logoImg && !logo) logoImg.classList.add('water-off');   // no logo layer: the plain logo shows at once
   let logoHover = 0;          // 0..1, eased
   let logoHoverGoal = 0;
 
@@ -698,6 +703,7 @@
     if (!logoOn) return;
     logoOn = false;
     logoImg.classList.remove('water-over');
+    logoImg.classList.add('water-off');
     logoImg.removeEventListener('pointerenter', onLogoEnter);
     logoImg.removeEventListener('pointerleave', onLogoLeave);
     logoImg.removeEventListener('pointerdown', onLogoPress);
@@ -822,7 +828,10 @@
       try {
         if (syncLogo(false)) {
           drawLogo(wrapped);
-          if (!logoImg.classList.contains('water-over')) logoImg.classList.add('water-over');
+          if (!logoImg.classList.contains('water-over')) {
+            logoImg.classList.add('water-over');
+            logoCanvas.classList.add('arriving');   // fades in, once
+          }
         }
       } catch (error) {
         dropLogo();   // whatever went wrong, the plain logo image is still there
@@ -945,6 +954,7 @@
 
   snakeCanvas.addEventListener('webglcontextlost', (event) => { event.preventDefault(); dispose(); });
   bgCanvas.addEventListener('webglcontextlost', (event) => { event.preventDefault(); dispose(); });
+  logoCanvas.addEventListener('animationend', () => logoCanvas.classList.remove('arriving'));
   logoCanvas.addEventListener('webglcontextlost', (event) => { event.preventDefault(); dropLogo(); });
 
   // ---------------------------------------------------------------------------------------------

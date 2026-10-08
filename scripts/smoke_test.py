@@ -277,6 +277,18 @@ def behaviours(browser, base):
     shown = page.evaluate("(() => { const b = getComputedStyle(document.querySelector('.ouro-bg-rotator'), '::before'); return [b.display, +b.opacity, b.animationName]; })()")
     if shown[0] == 'none' or shown[1] < 0.99 or shown[2] != 'none':
         fail('plain snake', f'with the effect off the plain snake should show at once ({shown})')
+    # the logo does the same: the plain image waits, the shaded one fades in once and is then left alone
+    page.goto(base + '/', wait_until='domcontentloaded')
+    logo_early = page.evaluate("(() => { const i = document.querySelector('img.logo'); return i.classList.contains('water-over') ? 0 : +getComputedStyle(i).opacity; })()")
+    if logo_early > 0.02:
+        fail('plain logo', f'the unshaded logo is visible before the water logo is ready (opacity {logo_early})')
+    page.wait_for_function("document.querySelector('img.logo').classList.contains('water-over')", timeout=15000)
+    page.wait_for_function("!document.querySelector('.ouro-logo-water').classList.contains('arriving')", timeout=5000)
+    if page.evaluate("+getComputedStyle(document.querySelector('.ouro-logo-water')).opacity") != 1:
+        fail('plain logo', 'the water logo did not end fully visible')
+    page.goto(base + '/?water=off', wait_until='domcontentloaded')
+    if page.evaluate("(i => [+getComputedStyle(i).opacity, getComputedStyle(i).animationName])(document.querySelector('img.logo'))") != [1, 'none']:
+        fail('plain logo', 'with the effect off the plain logo should show at once')
     for p in problems:
         fail('plain snake', p)
     context.close()
