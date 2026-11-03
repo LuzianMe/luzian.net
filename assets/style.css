@@ -2977,10 +2977,11 @@ html.slides .slide.has-art .setup-card {
   }
 }
 
-/* On a phone the drawing sits small above the card; the ruler would only repeat the card's own timeline */
+/* On a phone the drawing sits small under the card (the words first); the ruler would only repeat
+   the card's own timeline */
 @media (max-width: 767px) {
   html.slides .slide.has-art .slide-art {
-    order: -1;
+    order: 2;
   }
 
   html.slides .slide-art svg {
@@ -3004,9 +3005,31 @@ html.slides .slide.has-art .setup-card {
     font-size: 24px;
   }
 
-  html.slides .art-ruler,
-  html.slides .art-wide {
+  /* the pipeline has seven names side by side: drawn the width of the screen at its own type size */
+  html.slides .art-pipeline svg {
+    max-height: 46vh;
+  }
+
+  html.slides .art-pipeline .art-label {
+    font-size: 15px;
+  }
+
+  html.slides .art-ruler {
     display: none !important;
+  }
+
+  /* Home: the orbit goes under the list and tags too */
+  html.slides #about .slide-panel {
+    display: flex;
+    flex-direction: column;
+  }
+
+  html.slides #about .art-orbit {
+    order: 2;
+  }
+
+  html.slides #about .art-orbit svg {
+    margin: 1.25rem auto 0;
   }
 }
 
