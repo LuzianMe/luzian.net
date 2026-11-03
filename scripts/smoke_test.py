@@ -13,7 +13,15 @@ and, once, the things scripts do: the theme switch and its memory, ?calm and lea
 the pop-ups' keyboard focus, the skip link, the Spanish 404 footer, and the copyright year.
 
 It needs a browser, which scripts/check_site.py does not; GitHub runs both on every pull request.
+
+To be quick it runs several browsers side by side (--workers, 3 by default), and the water effect,
+which a computer without a graphics card draws slowly in software, runs only where it is being
+tested: the pages with their own water (Home, Career) and the water checks; elsewhere ?water=off.
+Those water checks take turns in one of the browsers, so they do not starve each other.
+--only sweep,behaviours,slides runs just those parts (e.g. --only slides while working on slides).
 """
+import argparse
+import queue
 import datetime
 import http.server
 import os
@@ -24,6 +32,14 @@ from pathlib import Path
 from playwright.sync_api import sync_playwright
 
 ROOT = Path(__file__).resolve().parent.parent
+# Software WebGL, so the water effect also runs on a computer without a graphics card (such as GitHub's)
+BROWSER_ARGS = ['--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist']
+# pages whose water differs (the logo above the water on Home, the slides' depth on Career): checked with it
+# on (the Spanish pages run the same code)
+WATER_PAGES = ('/', '/career/')
+# checks that need the water running: drawn in software it takes about 2.5 processor cores per browser, so
+# these take turns in one browser while the others share the rest
+HEAVY = {'theme switch', 'calm view', 'reveal ring', 'water clock', 'plain snake', 'stats readout'}
 PAGES = ['/', '/career/', '/setup/', '/contact/', '/payment/', '/es/', '/es/career/', '/es/setup/',
          '/es/contact/', '/es/payment/', '/404.html', '/pay/', '/home/']
 failures = []
@@ -87,43 +103,44 @@ def wait_for_theme_animation(page, was):
         timeout=15000)
 
 
-def sweep(browser, base):
-    for width in (1024, 375):
-        for theme in ('water', 'fire'):
-            for path in PAGES:
-                where = f'{theme} {width}px {path}'
-                problems = []
-                context, page = new_page(browser, base, width, theme, problems)
-                page.goto(base + path, wait_until='networkidle')
-                page.wait_for_timeout(700)
-                if path in ('/pay/', '/home/'):
-                    # redirect pages: they must have sent the visitor on (to the payments or contact page)
-                    destination = page.url.split(base)[-1]
-                    if destination.strip('/') in ('pay', 'home'):
-                        problems.append(f'the redirect did not happen (still at {destination})')
-                if path != '/404.html':
-                    problems = [p for p in problems if 'HTTP 404' not in p]
-                overflow = page.evaluate('document.documentElement.scrollWidth - window.innerWidth')
-                if overflow > 0:
-                    problems.append(f'sticks out sideways by {overflow}px')
-                if path not in ('/pay/', '/home/'):
-                    if page.evaluate("document.documentElement.getAttribute('data-theme')") != theme:
-                        problems.append('wrong theme')
-                    if not page.query_selector('footer .theme-switch'):
-                        problems.append('no theme switch in the footer')
-                    if path != '/404.html' and not page.query_selector('footer .lang-switch'):
-                        problems.append('no language switch in the footer')
-                    if page.evaluate("document.querySelectorAll('h1').length") != 1:
-                        problems.append('does not have exactly one h1')
-                for p in problems:
-                    fail(where, p)
-                context.close()
-    print('sweep done')
+def check_page(browser, base, width, theme, path):
+    where = f'{theme} {width}px {path}'
+    problems = []
+    context, page = new_page(browser, base, width, theme, problems)
+    page.goto(base + path + ('' if path in WATER_PAGES else '?water=off'), wait_until='networkidle')
+    page.wait_for_timeout(700)
+    if path in ('/pay/', '/home/'):
+        # redirect pages: they must have sent the visitor on (to the payments or contact page)
+        destination = page.url.split(base)[-1]
+        if destination.split('?')[0].strip('/') in ('pay', 'home'):
+            problems.append(f'the redirect did not happen (still at {destination})')
+    if path != '/404.html':
+        problems = [p for p in problems if 'HTTP 404' not in p]
+    overflow = page.evaluate('document.documentElement.scrollWidth - window.innerWidth')
+    if overflow > 0:
+        problems.append(f'sticks out sideways by {overflow}px')
+    if path not in ('/pay/', '/home/'):
+        if page.evaluate("document.documentElement.getAttribute('data-theme')") != theme:
+            problems.append('wrong theme')
+        if not page.query_selector('footer .theme-switch'):
+            problems.append('no theme switch in the footer')
+        if path != '/404.html' and not page.query_selector('footer .lang-switch'):
+            problems.append('no language switch in the footer')
+        if page.evaluate("document.querySelectorAll('h1').length") != 1:
+            problems.append('does not have exactly one h1')
+    for p in problems:
+        fail(where, p)
+    context.close()
 
 
-def behaviours(browser, base):
-    year = str(datetime.date.today().year)
+def sweep(base):
+    """Every page, in both themes, at desktop and phone width: one task each."""
+    return [(f'sweep {theme} {width}px {path}', lambda browser, w=width, t=theme, p=path: check_page(browser, base, w, t, p))
+            for width in (1024, 375) for theme in ('water', 'fire') for path in PAGES]
 
+
+def theme_switch(browser, base):
+    """Theme switch, its memory, and ?theme="""
     # --- theme switch, its memory, and ?theme=
     problems = []
     context, page = new_page(browser, base, 1024, 'water', problems)
@@ -144,6 +161,9 @@ def behaviours(browser, base):
         fail('theme switch', p)
     context.close()
 
+
+def calm_view(browser, base):
+    """Calm view: ?calm, mouse and click do not end it, a key does"""
     # --- calm view: ?calm, mouse and click do not end it, a key does
     problems = []
     context, page = new_page(browser, base, 1024, 'water', problems)
@@ -220,6 +240,9 @@ def behaviours(browser, base):
         fail('calm view', p)
     context.close()
 
+
+def reveal_ring(browser, base):
+    """?reveal=ring: no page-picture animation at all, just the glowing ring from the tap"""
     # --- ?reveal=ring: no page-picture animation at all, just the glowing ring from the tap
     problems = []
     context, page = new_page(browser, base, 1024, 'water', problems)
@@ -237,6 +260,9 @@ def behaviours(browser, base):
         fail('?reveal=ring', p)
     context.close()
 
+
+def water_clock(browser, base):
+    """The water follows the real clock: a refresh or another page continues the pattern"""
     # --- the water follows the real clock: a refresh or another page continues the pattern
     problems = []
     context, page = new_page(browser, base, 1024, 'water', problems)
@@ -263,6 +289,9 @@ def behaviours(browser, base):
         fail('water clock', p)
     context.close()
 
+
+def plain_snake(browser, base):
+    """The plain snake never flashes before the water: hidden while the effect is coming, shown at once if it is not"""
     # --- the plain snake never flashes before the water: hidden while the effect is coming, shown at once if it is not
     problems = []
     context, page = new_page(browser, base, 375, 'water', problems)
@@ -293,10 +322,13 @@ def behaviours(browser, base):
         fail('plain snake', p)
     context.close()
 
+
+def back_to_top(browser, base):
+    """Back to top: only on a long page, only once scrolled well down, and it works"""
     # --- back to top: only on a long page, only once scrolled well down, and it works
     problems = []
     context, page = new_page(browser, base, 375, 'water', problems)
-    page.goto(base + '/career/', wait_until='networkidle')
+    page.goto(base + '/career/?water=off', wait_until='networkidle')
     page.wait_for_timeout(500)
     if page.evaluate("document.querySelector('.to-top').classList.contains('shown')"):
         fail('back to top', 'the button shows at the top of the page')
@@ -308,12 +340,12 @@ def behaviours(browser, base):
     except Exception:
         fail('back to top', 'the button did not appear far down Career, or did not scroll to the top')
     for address in ('/contact/', '/payment/', '/'):
-        page.goto(base + address, wait_until='networkidle')
+        page.goto(base + address + ('&' if '?' in address else '?') + 'water=off', wait_until='networkidle')
         page.evaluate("window.scrollTo(0, document.documentElement.scrollHeight)")
         page.wait_for_timeout(400)
         if page.evaluate("document.querySelector('.to-top').classList.contains('shown')"):
             fail('back to top', f'the button shows on the short page {address}')
-    page.goto(base + '/es/career/', wait_until='networkidle')
+    page.goto(base + '/es/career/?water=off', wait_until='networkidle')
     if page.evaluate("document.querySelector('.to-top').getAttribute('aria-label')") != 'Volver arriba':
         fail('back to top', 'the Spanish page does not have a Spanish label on the button')
     # the menu is (nearly) solid, so text scrolling under it does not show through
@@ -324,6 +356,9 @@ def behaviours(browser, base):
         fail('back to top', p)
     context.close()
 
+
+def stats_readout(browser, base):
+    """?stats: the readout appears, shows numbers, and tapping it does not touch the page"""
     # --- ?stats: the readout appears, shows numbers, and tapping it does not touch the page
     problems = []
     context, page = new_page(browser, base, 375, 'water', problems)
@@ -351,12 +386,15 @@ def behaviours(browser, base):
         fail('?stats', p)
     context.close()
 
+
+def rows_in_cards(browser, base):
+    """Contact and Payment are rows inside cards, like Setup (and keep their working parts)"""
     # --- Contact and Payment are rows inside cards, like Setup (and keep their working parts)
     for path, selector, count in (('/contact/', '.link-row', 8), ('/es/contact/', '.link-row', 8), ('/payment/', '.pay-item', 4), ('/es/payment/', '.pay-item', 4)):
         problems = []
         context, page = new_page(browser, base, 1024, 'water', problems)
         page.on('dialog', lambda d: d.dismiss())
-        page.goto(base + path, wait_until='networkidle')
+        page.goto(base + path + ('&' if '?' in path else '?') + 'water=off', wait_until='networkidle')
         found = page.evaluate(f"document.querySelectorAll('{selector}').length")
         if found != count:
             fail(f'rows {path}', f'expected {count} rows, found {found}')
@@ -417,12 +455,15 @@ def behaviours(browser, base):
                 fail(f'rows {path}', p)
         context.close()
 
+
+def popups(browser, base):
+    """Pop-ups: focus moves in, stays in, and comes back; Escape closes"""
     # --- pop-ups: focus moves in, stays in, and comes back; Escape closes
     for path, opener, modal in (('/contact/', '#share-trigger', '#share-modal'), ('/payment/', '#zelle-trigger', '#zelle-modal'),
                                 ('/es/payment/', '#zelle-trigger', '#zelle-modal')):
         problems = []
         context, page = new_page(browser, base, 1024, 'water', problems)
-        page.goto(base + path, wait_until='networkidle')
+        page.goto(base + path + ('&' if '?' in path else '?') + 'water=off', wait_until='networkidle')
         page.focus(opener)
         page.keyboard.press('Enter')
         page.wait_for_timeout(300)
@@ -443,10 +484,14 @@ def behaviours(browser, base):
             fail(f'pop-up {path}', p)
         context.close()
 
+
+def skip_link_and_year(browser, base):
+    """Skip link and the copyright year"""
+    year = str(datetime.date.today().year)
     # --- skip link and the copyright year
     problems = []
     context, page = new_page(browser, base, 1024, 'water', problems)
-    page.goto(base + '/career/', wait_until='networkidle')
+    page.goto(base + '/career/?water=off', wait_until='networkidle')
     page.keyboard.press('Tab')
     if not page.evaluate("document.activeElement && document.activeElement.classList.contains('skip-link')"):
         fail('skip link', 'is not the first thing Tab reaches')
@@ -460,20 +505,26 @@ def behaviours(browser, base):
         fail('footer', f'does not show the year {year}')
     context.close()
 
+
+def not_found_pages(browser, base):
+    """The Spanish 404"""
     # --- the Spanish 404
     problems = []
     context, page = new_page(browser, base, 1024, 'water', problems)
-    page.goto(base + '/es/nope', wait_until='networkidle')
+    page.goto(base + '/es/nope?water=off', wait_until='networkidle')
     visible = page.evaluate("[...document.querySelectorAll('footer p')].filter(p => !p.hidden).map(p => p.innerText).join(' ')")
     if 'Todos los derechos reservados' not in visible or 'Modo tranquilo' not in visible:
         fail('404 (Spanish)', f'the footer is not in Spanish: {visible!r}')
     context.close()
     page_en = browser.new_context().new_page()
-    page_en.goto(base + '/nope', wait_until='networkidle')
+    page_en.goto(base + '/nope?water=off', wait_until='networkidle')
     visible = page_en.evaluate("[...document.querySelectorAll('footer p')].filter(p => !p.hidden).map(p => p.innerText).join(' ')")
     if 'All rights reserved' not in visible:
         fail('404 (English)', f'the footer is not in English: {visible!r}')
 
+
+def search_files(browser, base):
+    """Search files"""
     # --- search files
     for name in ('/robots.txt', '/sitemap.xml'):
         context = browser.new_context()
@@ -481,43 +532,71 @@ def behaviours(browser, base):
         if response.status != 200:
             fail(name, f'answers {response.status}')
         context.close()
-    print('behaviours done')
 
 
-def slides(browser, base):
-    """The slides layout of Home and Career (?slides while it is tried out): every slide is a full screen,
-    the gauge follows, keys move one slide, the water hears about it, and the fallbacks scroll plainly."""
-    expect = {'/': (4, 4), '/es/': (4, 4), '/career/': (10, 12), '/es/career/': (10, 12),
+SLIDE_COUNTS = {'/': (4, 4), '/es/': (4, 4), '/career/': (10, 12), '/es/career/': (10, 12),
               '/contact/': (2, 3), '/es/contact/': (2, 3), '/setup/': (5, 5), '/es/setup/': (5, 5)}   # slides at desktop, phone width
-    for address, counts in expect.items():
-        for width, count in ((1280, counts[0]), (390, counts[1])):
-            for theme in ('water', 'fire'):
-                problems = []
-                context, page = new_page(browser, base, width, theme, problems)
-                page.goto(base + address + '?slides&water=off', wait_until='networkidle')
-                page.wait_for_timeout(400)
-                where = f'{address} at {width}px, {theme}'
-                got = page.evaluate("""() => ({
-                    on: document.documentElement.classList.contains('slides'),
-                    units: [...document.querySelectorAll('.slide-unit')].map(u => Math.round(u.getBoundingClientRect().height)),
-                    steps: document.querySelectorAll('.gauge-step').length,
-                    snap: getComputedStyle(document.documentElement).scrollSnapType,
-                    wide: document.documentElement.scrollWidth > innerWidth + 1,
-                })""")
-                if not got['on']:
-                    fail('slides', f'{where}: ?slides did not turn the layout on')
-                if len(got['units']) != count or got['steps'] != count:
-                    fail('slides', f'{where}: expected {count} slides and gauge marks, found {len(got["units"])} and {got["steps"]}')
-                if any(h < 600 for h in got['units'][:-1]):
-                    fail('slides', f'{where}: a slide is shorter than the screen ({got["units"]})')
-                if 'mandatory' not in got['snap']:
-                    fail('slides', f'{where}: the page does not snap from slide to slide ({got["snap"]})')
-                if got['wide']:
-                    fail('slides', f'{where}: the page is wider than the screen')
-                for p in problems:
-                    fail('slides', f'{where}: {p}')
-                context.close()
 
+
+def behaviours(base):
+    """The things scripts do, one task each so they can run side by side."""
+    return [
+        ('theme switch', lambda browser, f=theme_switch: f(browser, base)),
+        ('calm view', lambda browser, f=calm_view: f(browser, base)),
+        ('reveal ring', lambda browser, f=reveal_ring: f(browser, base)),
+        ('water clock', lambda browser, f=water_clock: f(browser, base)),
+        ('plain snake', lambda browser, f=plain_snake: f(browser, base)),
+        ('back to top', lambda browser, f=back_to_top: f(browser, base)),
+        ('stats readout', lambda browser, f=stats_readout: f(browser, base)),
+        ('rows in cards', lambda browser, f=rows_in_cards: f(browser, base)),
+        ('popups', lambda browser, f=popups: f(browser, base)),
+        ('skip link and year', lambda browser, f=skip_link_and_year: f(browser, base)),
+        ('not found pages', lambda browser, f=not_found_pages: f(browser, base)),
+        ('search files', lambda browser, f=search_files: f(browser, base)),
+    ]
+
+
+
+def slides(base):
+    """The slides layout (?slides while it is tried out): every slide is a full screen, the gauge follows,
+    keys move one slide, the water hears about it, and the fallbacks scroll plainly."""
+    tasks = [(f'slides {address} {width}px {theme}', lambda browser, a=address, w=width, c=count, t=theme: slide_page(browser, base, a, w, c, t))
+             for address, counts in SLIDE_COUNTS.items()
+             for width, count in ((1280, counts[0]), (390, counts[1]))
+             for theme in ('water', 'fire')]
+    tasks.append(('slides moving', lambda browser: slides_moving(browser, base)))
+    return tasks
+
+
+def slide_page(browser, base, address, width, count, theme):
+    problems = []
+    context, page = new_page(browser, base, width, theme, problems)
+    page.goto(base + address + '?slides&water=off', wait_until='networkidle')
+    page.wait_for_timeout(400)
+    where = f'{address} at {width}px, {theme}'
+    got = page.evaluate("""() => ({
+        on: document.documentElement.classList.contains('slides'),
+        units: [...document.querySelectorAll('.slide-unit')].map(u => Math.round(u.getBoundingClientRect().height)),
+        steps: document.querySelectorAll('.gauge-step').length,
+        snap: getComputedStyle(document.documentElement).scrollSnapType,
+        wide: document.documentElement.scrollWidth > innerWidth + 1,
+    })""")
+    if not got['on']:
+        fail('slides', f'{where}: ?slides did not turn the layout on')
+    if len(got['units']) != count or got['steps'] != count:
+        fail('slides', f'{where}: expected {count} slides and gauge marks, found {len(got["units"])} and {got["steps"]}')
+    if any(h < 600 for h in got['units'][:-1]):
+        fail('slides', f'{where}: a slide is shorter than the screen ({got["units"]})')
+    if 'mandatory' not in got['snap']:
+        fail('slides', f'{where}: the page does not snap from slide to slide ({got["snap"]})')
+    if got['wide']:
+        fail('slides', f'{where}: the page is wider than the screen')
+    for p in problems:
+        fail('slides', f'{where}: {p}')
+    context.close()
+
+
+def slides_moving(browser, base):
     # keys move one slide at a time; the gauge, the depth and the water's event follow; the gauge goes back
     problems = []
     context, page = new_page(browser, base, 1280, 'water', problems)
@@ -553,11 +632,11 @@ def slides(browser, base):
         fail('slides', 'the back-to-top button is there too (the gauge replaces it)')
     # a page without slides keeps its own layout (the menu above the title, not over it)
     for path in ('/payment/', '/es/payment/'):
-        page.goto(base + path, wait_until='networkidle')
+        page.goto(base + path + '?water=off', wait_until='networkidle')
         if page.evaluate("document.documentElement.classList.contains('slides') || document.querySelector('h1').getBoundingClientRect().top < document.querySelector('.nav-container').getBoundingClientRect().bottom"):
             fail(f'slides {path}', 'the slides layout reached a page without slides (title under the menu)')
 
-    page.goto(base + '/career/?slides=off', wait_until='networkidle')
+    page.goto(base + '/career/?slides=off&water=off', wait_until='networkidle')
     if page.evaluate("document.documentElement.classList.contains('slides') || !!document.querySelector('.depth-gauge')"):
         fail('slides', '?slides=off did not turn the layout off')
     for p in problems:
@@ -578,20 +657,65 @@ def slides(browser, base):
         context.close()
 
 
+def is_heavy(name):
+    return name in HEAVY or any(name == f'sweep {t} {w}px {p}' for t in ('water', 'fire') for w in (1024, 375) for p in WATER_PAGES)
+
+
+def run(tasks, workers):
+    """Several browsers side by side, each taking the next task until none are left. The checks with
+    the water running go to the first browser only, one after another."""
+    heavy, light = queue.Queue(), queue.Queue()
+    for task in tasks:
+        (heavy if is_heavy(task[0]) else light).put(task)
+
+    def worker(queues):
+        with sync_playwright() as p:
+            browser = p.chromium.launch(args=BROWSER_ARGS)
+            while True:
+                for todo in queues:
+                    try:
+                        name, task = todo.get_nowait()
+                        break
+                    except queue.Empty:
+                        continue
+                else:
+                    break
+                try:
+                    task(browser)
+                except Exception as e:   # a check that could not even run counts as a failure
+                    fail(name, f'could not run: {str(e).splitlines()[0][:200]}')
+            browser.close()
+
+    workers = max(1, workers)
+    threads = [threading.Thread(target=worker, args=([heavy, light],))]
+    threads += [threading.Thread(target=worker, args=([light],)) for _ in range(workers - 1)]
+    for t in threads:
+        t.start()
+    for t in threads:
+        t.join()
+
+
 def main():
+    parser = argparse.ArgumentParser(description=__doc__.split('\n')[0])
+    parser.add_argument('--workers', type=int, default=3, help='browsers side by side (default 3; everything here is drawn in software, so more only queue for the processor)')
+    parser.add_argument('--only', default='sweep,behaviours,slides', help='which parts: sweep, behaviours, slides')
+    args = parser.parse_args()
+    parts = set(args.only.split(','))
     server, base = serve()
-    with sync_playwright() as p:
-        # Software WebGL, so the water effect also runs on a computer without a graphics card (such as GitHub's)
-        browser = p.chromium.launch(args=['--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'])
-        sweep(browser, base)
-        behaviours(browser, base)
-        slides(browser, base)
-        browser.close()
+    tasks = []
+    # the long single tasks first, so they run while the short ones share the other browsers
+    if 'behaviours' in parts:
+        tasks += behaviours(base)
+    if 'slides' in parts:
+        tasks += slides(base)
+    if 'sweep' in parts:
+        tasks += sweep(base)
+    run(tasks, args.workers)
     server.shutdown()
     if failures:
         print(f'\n{len(failures)} problem(s) found')
         return 1
-    print('OK: every page works in both themes at desktop and phone width, and the behaviours pass')
+    print(f'OK: {len(tasks)} checks passed ({args.only})')
     return 0
 
 
