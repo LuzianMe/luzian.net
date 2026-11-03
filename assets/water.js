@@ -240,12 +240,12 @@
       // from: a thin band that lights and bends the web as it passes (so the screen as a whole never pulses)
       float wave = 0.0;
       float age = u_time - u_wave.z;
-      if (age > 0.0 && age < 2.5 && u_wave.w > 0.0) {
+      if (age > 0.0 && age < 1.6 && u_wave.w > 0.0) {
         vec2 dv = p - u_wave.xy;
         float dist = length(dv);
-        float x = dist - age * 0.85;
-        float width = 0.06 + age * 0.04;
-        wave = exp(-(x * x) / (width * width)) * exp(-age * 0.8) * u_wave.w;
+        float x = dist - age * 1.9;
+        float width = 0.06 + age * 0.06;
+        wave = exp(-(x * x) / (width * width)) * exp(-age * 1.5) * u_wave.w;
         disp += (dv / max(dist, 0.0005)) * wave * 0.03;
       }
 
@@ -991,7 +991,7 @@
     slideDepthGoal = Math.max(0, Math.min(1, Number(detail.depth) || 0));
     if (detail.first) return;
     // the wave starts just off the edge the new slide came in from (below going down, above going up)
-    const y = detail.direction < 0 ? -0.15 * window.innerHeight : 1.15 * window.innerHeight;
+    const y = detail.direction < 0 ? -0.04 * window.innerHeight : 1.04 * window.innerHeight;
     slideWave = [window.innerWidth / 2000, y / 1000, (performance.now() / 1000) % TIME_WRAP, 1];
   });
 
