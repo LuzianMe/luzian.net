@@ -156,7 +156,7 @@
   // address turns it on in this browser, ?slides=off turns it off again. Set here, in the <head>, so the
   // first paint already has the right layout; only on the pages cut into slides, so the others keep theirs.
   const SLIDES_KEY = 'luzian-slides';
-  const slidesPage = /^\/(es\/)?(career\/)?(index\.html)?$/.test(location.pathname);
+  const slidesPage = /^\/(es\/)?((career|setup|contact)\/)?(index\.html)?$/.test(location.pathname);
   const slidesLink = /[?&]slides(=off)?(?:&|#|$)/.exec(location.search);
   try {
     if (slidesLink) {
