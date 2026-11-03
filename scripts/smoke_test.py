@@ -487,7 +487,8 @@ def behaviours(browser, base):
 def slides(browser, base):
     """The slides layout of Home and Career (?slides while it is tried out): every slide is a full screen,
     the gauge follows, keys move one slide, the water hears about it, and the fallbacks scroll plainly."""
-    expect = {'/': (4, 4), '/es/': (4, 4), '/career/': (9, 12), '/es/career/': (9, 12)}   # slides at desktop, phone width
+    expect = {'/': (4, 4), '/es/': (4, 4), '/career/': (9, 12), '/es/career/': (9, 12),
+              '/contact/': (2, 3), '/es/contact/': (2, 3), '/setup/': (4, 5), '/es/setup/': (4, 5)}   # slides at desktop, phone width
     for address, counts in expect.items():
         for width, count in ((1280, counts[0]), (390, counts[1])):
             for theme in ('water', 'fire'):
@@ -550,8 +551,8 @@ def slides(browser, base):
         fail('slides', 'the first gauge mark did not go back to the first slide')
     if page.query_selector('.to-top'):
         fail('slides', 'the back-to-top button is there too (the gauge replaces it)')
-    # the other pages keep their own layout (the menu above the title, not over it)
-    for path in ('/contact/', '/setup/', '/payment/', '/es/contact/'):
+    # a page without slides keeps its own layout (the menu above the title, not over it)
+    for path in ('/payment/', '/es/payment/'):
         page.goto(base + path, wait_until='networkidle')
         if page.evaluate("document.documentElement.classList.contains('slides') || document.querySelector('h1').getBoundingClientRect().top < document.querySelector('.nav-container').getBoundingClientRect().bottom"):
             fail(f'slides {path}', 'the slides layout reached a page without slides (title under the menu)')

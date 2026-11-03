@@ -2239,20 +2239,20 @@ html.slides .slide-intro h1 {
   color: rgb(var(--text));
 }
 
-/* Career: the cards of a slide share a grid (two columns on wider screens) */
-html.slides .career-grid .slide-panel {
+/* Career, Setup, Contact: the cards of a slide share a grid (two columns on wider screens) */
+html.slides .setup-grid .slide-panel {
   display: grid;
   gap: 1rem;
   align-items: start;
 }
 
 @media (min-width: 768px) {
-  html.slides .career-grid .slide-panel {
+  html.slides .setup-grid .slide-panel {
     grid-template-columns: repeat(2, 1fr);
   }
 }
 
-html.slides .career-grid .slide-closing .slide-panel {
+html.slides .setup-grid .slide-closing .slide-panel {
   display: block;
 }
 
@@ -2315,45 +2315,45 @@ html.slides .slide-timeline .gear-list li:first-child::after {
 /* Room to breathe: on a wider screen a slide holds little, so it is given space rather than packed.
    Narrower text columns, more padding inside the cards, more space between lines and entries. */
 @media (min-width: 768px) {
-  html.slides .career-grid .slide:not(.split) .slide-panel {
+  html.slides .setup-grid .slide:not(.split) .slide-panel {
     max-width: 780px;
   }
 
-  html.slides .career-grid .slide.split .slide-panel {
+  html.slides .setup-grid .slide.split .slide-panel {
     max-width: 960px;
   }
 
-  html.slides .career-grid .slide-panel {
+  html.slides .setup-grid .slide-panel {
     gap: 1.75rem;
   }
 
-  html.slides .career-grid .setup-card {
+  html.slides .setup-grid .setup-card {
     padding: clamp(2rem, 3.5vw, 2.75rem);
   }
 
-  html.slides .career-grid .setup-card h2 {
+  html.slides .setup-grid .setup-card h2 {
     margin-bottom: 1.75rem;
   }
 
-  html.slides .career-grid .setup-card p {
+  html.slides .setup-grid .setup-card p {
     line-height: 1.8;
     margin-bottom: 1.25rem;
   }
 
-  html.slides .career-grid .gear-list li {
+  html.slides .setup-grid .gear-list li {
     padding-top: 1.05rem;
     padding-bottom: 1.05rem;
   }
 
-  html.slides .career-grid .gear-list li:first-child {
+  html.slides .setup-grid .gear-list li:first-child {
     padding-top: 0;
   }
 
-  html.slides .career-grid .gear-list li:last-child {
+  html.slides .setup-grid .gear-list li:last-child {
     padding-bottom: 0;
   }
 
-  html.slides .career-grid .gear-note {
+  html.slides .setup-grid .gear-note {
     margin-top: 0.2rem;
   }
 
@@ -2362,7 +2362,7 @@ html.slides .slide-timeline .gear-list li:first-child::after {
     margin-bottom: 0.85rem;
   }
 
-  html.slides .career-grid .tags {
+  html.slides .setup-grid .tags {
     gap: 0.65rem;
   }
 
