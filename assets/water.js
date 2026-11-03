@@ -976,7 +976,8 @@
   window.addEventListener('themechange', onTheme);
 
   // Moving to another slide (assets/slides.js): the water goes deeper (its brightness only ever eases
-  // one way, so nothing flickers), and a wave front sweeps across from the side the new slide came from
+  // one way, so nothing flickers), and as soon as the page starts to move a wave front sweeps across
+  // from the side the new slide is coming from
   let slideDepth = 0;
   let slideDepthGoal = 0;
   let slideWave = [0, 0, -100, 0];
@@ -989,9 +990,11 @@
   window.addEventListener('slidechange', (event) => {
     const detail = event.detail || {};
     slideDepthGoal = Math.max(0, Math.min(1, Number(detail.depth) || 0));
-    if (detail.first) return;
-    // the wave starts just off the edge the new slide came in from (below going down, above going up)
-    const y = detail.direction < 0 ? -0.04 * window.innerHeight : 1.04 * window.innerHeight;
+  });
+  // the wave goes the moment the page starts to move, from the side the new slide is coming in from
+  window.addEventListener('slidemove', (event) => {
+    const up = (event.detail || {}).direction < 0;
+    const y = up ? -0.04 * window.innerHeight : 1.04 * window.innerHeight;
     slideWave = [window.innerWidth / 2000, y / 1000, (performance.now() / 1000) % TIME_WRAP, 1];
   });
 

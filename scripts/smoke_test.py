@@ -613,7 +613,7 @@ def slides_moving(browser, base):
     problems = []
     context, page = new_page(browser, base, 1280, 'water', problems)
     page.goto(base + '/?slides&water=off', wait_until='networkidle')
-    page.evaluate("window.__changes = []; addEventListener('slidechange', e => __changes.push(e.detail.index))")
+    page.evaluate("window.__changes = []; addEventListener('slidechange', e => __changes.push(e.detail.index)); window.__moves = []; addEventListener('slidemove', e => __moves.push(e.detail.direction))")
     tops = page.evaluate("[...document.querySelectorAll('.slide-unit')].map(u => Math.round(u.getBoundingClientRect().top + scrollY))")
     for i in (1, 2):
         page.keyboard.press('PageDown')
@@ -629,6 +629,9 @@ def slides_moving(browser, base):
         logo: document.documentElement.classList.contains('past-hero'),
         arrived: document.querySelectorAll('.slide-unit.arrived').length,
     })""")
+    moves = page.evaluate("window.__moves")
+    if not moves or any(d != 1 for d in moves):
+        fail('slides', f'the water was not told the page started moving down ({moves})')
     if state['current'] != 2 or state['depth'] != '0.667' or state['changes'][-1:] != [2]:
         fail('slides', f'the gauge, depth or water event did not follow the slides ({state})')
     if not state['logo']:
