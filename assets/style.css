@@ -2876,11 +2876,6 @@ html.slides .slide-art svg {
   stroke-dasharray: 3 4;
 }
 
-.art-foot {
-  fill: rgb(var(--accent) / 0.55);
-}
-
-.art-walker,
 .art-flow {
   fill: rgb(var(--accent-light));
   filter: drop-shadow(0 0 6px rgb(var(--accent)));
@@ -2899,11 +2894,57 @@ html.slides .slide-art svg {
   stroke-width: 1.2;
 }
 
+/* Setup, Locomotion: a treadmill seen from the side. The band runs, and two feet walk on it: each one
+   lands at the front, rides back with the band (at the band's own speed), then lifts and swings forward,
+   half a step apart. */
+.art-belt {
+  fill: none;
+  stroke: rgb(var(--accent));
+  stroke-width: 2;
+  stroke-dasharray: 16 8;
+  filter: drop-shadow(0 0 4px rgb(var(--accent) / 0.6));
+}
+
+.art-step {
+  fill: rgb(var(--accent-light));
+  filter: drop-shadow(0 0 6px rgb(var(--accent)));
+  transform: translate(60px, 0);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  /* the band's top runs backwards at 200 units a second: the same as a planted foot */
+  .art-belt {
+    animation: belt-run 1.2s linear infinite;
+  }
+
+  .art-step {
+    animation: foot-step 1.2s linear infinite;
+  }
+
+  .art-step-2 {
+    animation-delay: -0.6s;
+  }
+}
+
+@keyframes belt-run {
+  to { stroke-dashoffset: 240; }
+}
+
+@keyframes foot-step {
+  0% { transform: translate(60px, 0); }
+  50% { transform: translate(-60px, 0); animation-timing-function: ease-out; }
+  75% { transform: translate(0, -30px); animation-timing-function: ease-in; }
+  100% { transform: translate(60px, 0); }
+}
+
 /* with less motion the moving points stay home (the drawing still says it all) */
 @media (prefers-reduced-motion: reduce) {
-  .art-walker,
   .art-flow {
     display: none;
+  }
+
+  .art-step-2 {
+    transform: translate(-40px, 0);
   }
 }
 
@@ -3045,11 +3086,11 @@ html.slides .slide.has-art .setup-card {
     animation-delay: calc(var(--d, 0) * 160ms + 250ms);
   }
 
-  html.slides-anim .slide-unit :is(.art-dot, .art-ring, .art-hand, .art-label, .art-big, .art-muted, .art-span, .art-seg, .art-foot, .art-node, .art-leader, .art-faint, .art-flow, .art-walker) {
+  html.slides-anim .slide-unit :is(.art-dot, .art-ring, .art-hand, .art-label, .art-big, .art-muted, .art-span, .art-seg, .art-node, .art-leader, .art-faint, .art-flow) {
     opacity: 0;
   }
 
-  html.slides-anim .slide-unit.arrived :is(.art-dot, .art-ring, .art-hand, .art-label, .art-big, .art-muted, .art-span, .art-seg, .art-foot, .art-node, .art-leader, .art-faint, .art-flow, .art-walker) {
+  html.slides-anim .slide-unit.arrived :is(.art-dot, .art-ring, .art-hand, .art-label, .art-big, .art-muted, .art-span, .art-seg, .art-node, .art-leader, .art-faint, .art-flow) {
     animation: art-light 0.6s ease forwards;
     animation-delay: calc(var(--d, 0) * 90ms + 900ms);
   }
