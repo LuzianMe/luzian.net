@@ -2832,6 +2832,10 @@ html.slides .slide-art svg {
   font-size: 17px;
 }
 
+.art-gauge .art-big {
+  font-size: 40px;
+}
+
 .art-label {
   font-family: var(--font-ui);
   font-weight: 600;
@@ -2860,6 +2864,56 @@ html.slides .slide-art svg {
   filter: drop-shadow(0 0 6px rgb(var(--accent) / 0.6));
 }
 
+/* the second set: headset sensors, walking loop, memory gauge, study route, data pipeline, orbit (Home) */
+.art-faint {
+  stroke: rgb(var(--accent) / 0.25);
+}
+
+.art-leader {
+  fill: none;
+  stroke: rgb(var(--muted) / 0.7);
+  stroke-width: 1;
+  stroke-dasharray: 3 4;
+}
+
+.art-foot {
+  fill: rgb(var(--accent) / 0.55);
+}
+
+.art-walker,
+.art-flow {
+  fill: rgb(var(--accent-light));
+  filter: drop-shadow(0 0 6px rgb(var(--accent)));
+}
+
+.art-seg {
+  stroke: rgb(var(--accent));
+  stroke-width: 7;
+  stroke-linecap: round;
+  filter: drop-shadow(0 0 5px rgb(var(--accent) / 0.8));
+}
+
+.art-node {
+  fill: rgb(var(--surface-1) / 0.85);
+  stroke: rgb(var(--accent) / 0.8);
+  stroke-width: 1.2;
+}
+
+/* with less motion the moving points stay home (the drawing still says it all) */
+@media (prefers-reduced-motion: reduce) {
+  .art-walker,
+  .art-flow {
+    display: none;
+  }
+}
+
+/* Home: the orbit sits small at the top of its card */
+html.slides #about .art-orbit svg {
+  max-width: 300px;
+  max-height: 16vh;
+  margin-bottom: 0.5rem;
+}
+
 /* The card and its drawing share the slide: side by side on wider screens */
 html.slides .slide.has-art .slide-panel {
   display: grid;
@@ -2875,17 +2929,41 @@ html.slides .slide.has-art .setup-card {
 @media (min-width: 768px) {
   html.slides .setup-grid .slide.has-art .slide-panel {
     max-width: 1060px;
-    grid-template-columns: minmax(0, 0.85fr) minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1fr) minmax(0, 0.85fr);
     gap: clamp(2rem, 5vw, 4.5rem);
+  }
+
+  /* the card keeps the wider column, whichever side the drawing is on */
+  html.slides .setup-grid .slide.has-art:has(.art-left) .slide-panel {
+    grid-template-columns: minmax(0, 0.85fr) minmax(0, 1fr);
+  }
+
+  /* the PC card's spec table needs the room; the gauge is compact */
+  html.slides .setup-grid .slide.has-art:has(.art-gauge) .slide-panel {
+    grid-template-columns: minmax(0, 1.7fr) minmax(0, 0.7fr);
+  }
+
+  html.slides .art-gauge svg {
+    max-width: 280px;
   }
 
   html.slides .slide.has-art .setup-card-wide {
     grid-column: auto;
   }
 
-  html.slides .slide.has-art .art-rings,
-  html.slides .slide.has-art .art-body {
+  /* the drawing on the right, unless it reads better on the left (the ruler, the route) */
+  html.slides .slide.has-art .slide-art {
     order: 2;
+  }
+
+  html.slides .slide.has-art .slide-art.art-left {
+    order: 0;
+  }
+
+  /* Setup, PC: the date line runs under both */
+  html.slides .slide.has-art .setup-updated {
+    order: 3;
+    grid-column: 1 / -1;
   }
 
   /* beside the ruler the list needs no line of its own */
@@ -2926,7 +3004,8 @@ html.slides .slide.has-art .setup-card {
     font-size: 24px;
   }
 
-  html.slides .art-ruler {
+  html.slides .art-ruler,
+  html.slides .art-wide {
     display: none !important;
   }
 }
@@ -2943,11 +3022,11 @@ html.slides .slide.has-art .setup-card {
     animation-delay: calc(var(--d, 0) * 160ms + 250ms);
   }
 
-  html.slides-anim .slide-unit :is(.art-dot, .art-ring, .art-hand, .art-label, .art-big, .art-muted, .art-span) {
+  html.slides-anim .slide-unit :is(.art-dot, .art-ring, .art-hand, .art-label, .art-big, .art-muted, .art-span, .art-seg, .art-foot, .art-node, .art-leader, .art-faint, .art-flow, .art-walker) {
     opacity: 0;
   }
 
-  html.slides-anim .slide-unit.arrived :is(.art-dot, .art-ring, .art-hand, .art-label, .art-big, .art-muted, .art-span) {
+  html.slides-anim .slide-unit.arrived :is(.art-dot, .art-ring, .art-hand, .art-label, .art-big, .art-muted, .art-span, .art-seg, .art-foot, .art-node, .art-leader, .art-faint, .art-flow, .art-walker) {
     animation: art-light 0.6s ease forwards;
     animation-delay: calc(var(--d, 0) * 90ms + 900ms);
   }

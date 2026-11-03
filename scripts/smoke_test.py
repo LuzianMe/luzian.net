@@ -487,7 +487,7 @@ def behaviours(browser, base):
 def slides(browser, base):
     """The slides layout of Home and Career (?slides while it is tried out): every slide is a full screen,
     the gauge follows, keys move one slide, the water hears about it, and the fallbacks scroll plainly."""
-    expect = {'/': (4, 4), '/es/': (4, 4), '/career/': (9, 12), '/es/career/': (9, 12),
+    expect = {'/': (4, 4), '/es/': (4, 4), '/career/': (10, 12), '/es/career/': (10, 12),
               '/contact/': (2, 3), '/es/contact/': (2, 3), '/setup/': (5, 5), '/es/setup/': (5, 5)}   # slides at desktop, phone width
     for address, counts in expect.items():
         for width, count in ((1280, counts[0]), (390, counts[1])):
