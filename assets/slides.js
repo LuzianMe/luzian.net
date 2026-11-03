@@ -5,8 +5,9 @@
 //  - the text of a slide arriving with it, a line at a time, the first time it is reached
 //  - the small logo in the menu once past the first slide (Home)
 //  - how deep the visitor is: --depth on <html> (0 at the top, 1 at the last slide) for the veil that
-//    darkens the water, and a "slidechange" event on window ({ index, count, depth }) that the water
-//    effect answers with a ripple and a surge of light
+//    darkens the water, and a "slidechange" event on window ({ index, count, depth }) for the water's depth
+//  - the moment the page starts to move after resting, a "slidemove" event ({ direction }) that the water
+//    answers at once with a wave from that side
 // It only runs on a page with slides, when html.slides is set (assets/theme.js).
 (function () {
   'use strict';
@@ -193,8 +194,24 @@
     queue();
   }
 
+  // The first movement after the page has rested: tell the water which way, straight away (before the
+  // new slide has even arrived). The page counts as resting again after a short quiet spell.
+  let restY = window.scrollY;
+  let moving = false;
+  let restTimer = 0;
+  function onMove() {
+    const y = window.scrollY;
+    if (!moving && Math.abs(y - restY) >= 1) {
+      moving = true;
+      window.dispatchEvent(new CustomEvent('slidemove', { detail: { direction: y > restY ? 1 : -1 } }));
+    }
+    clearTimeout(restTimer);
+    restTimer = setTimeout(() => { moving = false; restY = window.scrollY; }, 180);
+  }
+
   setUp();
   window.addEventListener('scroll', queue, { passive: true });
+  window.addEventListener('scroll', onMove, { passive: true });
   let resizeTimer = 0;
   window.addEventListener('resize', () => { clearTimeout(resizeTimer); resizeTimer = setTimeout(setUp, 150); });
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(setUp);
