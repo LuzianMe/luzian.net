@@ -227,6 +227,7 @@
     uniform vec3 u_tint;       // the colour of the light (the theme)
     uniform vec3 u_tintHot;    // ...and of its brightest lines (the same in Water)
     uniform float u_flicker;   // Fire's firelight: 1 is steady
+    uniform float u_scroll;    // how far the light web has drifted up as the page scrolled (slides)
 
     void main() {
       vec2 p = v_uv * u_size / 1000.0;      // same pixel scale on every screen
@@ -234,7 +235,7 @@
       float light = 0.0;
       rings(p, disp, light);
 
-      float web = caustic(p + disp * 1.5, u_cScale, u_cLine, ${BG_FEEL.gain.toFixed(2)});
+      float web = caustic(p + disp * 1.5 + vec2(0.0, u_scroll), u_cScale, u_cLine, ${BG_FEEL.gain.toFixed(2)});
       float depth = mix(1.0, 0.45, v_uv.y);   // a little brighter toward the top, like light from the surface
       float a = clamp(u_caustic * (0.45 * web * depth + 0.10 * max(light, 0.0)) * u_flicker, 0.0, 0.5);
       gl_FragColor = vec4((u_tint + (u_tintHot - u_tint) * (web * web)) * a, a);   // the colour of the light comes from the theme
@@ -384,7 +385,7 @@
   const bgCanvas = document.createElement('canvas');
   bgCanvas.className = 'ouro-caustics';
   bgCanvas.setAttribute('aria-hidden', 'true');
-  const bg = makeRenderer(bgCanvas, BACKGROUND_FRAGMENT, ['u_time', 'u_ripples', 'u_size', 'u_caustic', 'u_cScale', 'u_cLine', 'u_causticTime', 'u_tint', 'u_tintHot', 'u_flicker', ...RING_UNIFORMS]);
+  const bg = makeRenderer(bgCanvas, BACKGROUND_FRAGMENT, ['u_time', 'u_ripples', 'u_size', 'u_caustic', 'u_cScale', 'u_cLine', 'u_causticTime', 'u_tint', 'u_tintHot', 'u_flicker', 'u_scroll', ...RING_UNIFORMS]);
 
   // The logo is another optional layer: if it cannot start, the plain logo image stays as it is
   const logoImg = document.querySelector('img.logo');
@@ -818,6 +819,7 @@
         g.uniform3fv(bg.uniforms.u_tint, palette.tint);
         g.uniform3fv(bg.uniforms.u_tintHot, palette.tintHot);
         g.uniform1f(bg.uniforms.u_flicker, fx.flick);
+        g.uniform1f(bg.uniforms.u_scroll, slidesPage ? window.scrollY * SCROLL_DRIFT / 1000 : 0);
         g.uniform1f(bg.uniforms.u_ringAmp, fx.ringAmp);
         g.uniform1f(bg.uniforms.u_ringGlint, level.ringGlint);
         g.uniform1f(bg.uniforms.u_ringSpeed, fx.ringSpeed);
@@ -867,7 +869,9 @@
 
   function frame(now) {
     rafId = requestAnimationFrame(frame);
-    if (now - lastDraw < FRAME_MS - 1) return;
+    // while the slides are moving the light moves with them, so it is drawn every frame to stay smooth
+    const moving = slidesPage && now - lastScroll < 300;
+    if (now - lastDraw < FRAME_MS - 1 && !moving) return;
 
     // If the device cannot keep up, give the page back to the plain CSS version
     if (lastDraw) {
@@ -961,6 +965,12 @@
   let slideDepth = 0;
   let slideDepthGoal = 0;
   let slideSurge = 0;
+  // Slides: the light web drifts up as the page goes down, slower than the cards (parallax), so the
+  // water feels like it is being passed on the way down
+  const SCROLL_DRIFT = 0.35;
+  const slidesPage = document.documentElement.classList.contains('slides') && !!document.querySelector('.slide');
+  let lastScroll = 0;
+  if (slidesPage) window.addEventListener('scroll', () => { lastScroll = performance.now(); }, { passive: true });
   window.addEventListener('slidechange', (event) => {
     const detail = event.detail || {};
     slideDepthGoal = Math.max(0, Math.min(1, Number(detail.depth) || 0));
