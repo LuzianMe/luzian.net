@@ -2544,6 +2544,74 @@ html.slides .slide-timeline .gear-list li:first-child::after {
   }
 }
 
+/* Where the browser can tie an animation to scrolling, the slides move with the finger instead: the
+   cards of the next slide come up out of the depth (the lower lines a little later, so they catch up),
+   and the cards of the slide being left sink back and fade. Each slide is the clock of its own cards. */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    html.slides-anim .slide-unit {
+      view-timeline: --slide block;
+    }
+
+    html.slides-anim .slide-unit:not(.arrived) .rise,
+    html.slides-anim .slide-unit.arrived .rise {
+      opacity: 1;
+      animation: slide-through linear both;
+      animation-delay: 0s;
+      animation-timeline: --slide;
+    }
+  }
+}
+
+@keyframes slide-through {
+  entry 0% {
+    opacity: 0;
+    transform: translateY(calc(4rem + var(--i, 0) * 1.5rem)) scale(0.92);
+  }
+  entry 85% {
+    opacity: 1;
+    transform: none;
+  }
+  exit 15% {
+    opacity: 1;
+    transform: none;
+  }
+  exit 100% {
+    opacity: 0;
+    transform: translateY(-3rem) scale(0.9);
+  }
+}
+
+/* The snake belongs to the first screen: it rises away with it, so the slides after it have only the
+   water behind them. Where scrolling cannot drive it, it fades out once past the first slide. */
+@media (prefers-reduced-motion: no-preference) {
+  html.slides .ouro-bg-rotator {
+    transition: opacity 0.8s ease;
+  }
+
+  html.slides.past-hero .ouro-bg-rotator {
+    opacity: 0;
+  }
+
+  @supports (animation-timeline: scroll()) {
+    html.slides .ouro-bg-rotator,
+    html.slides.past-hero .ouro-bg-rotator {
+      opacity: 0.22;
+      transition: none;
+      animation: snake-away linear both;
+      animation-timeline: scroll(root);
+      animation-range: 0 100lvh;
+    }
+  }
+}
+
+@keyframes snake-away {
+  to {
+    translate: 0 -75lvh;
+    opacity: 0;
+  }
+}
+
 /* The depth gauge: a mark for each slide down the right edge; the bright one is where you are */
 .depth-gauge {
   position: fixed;

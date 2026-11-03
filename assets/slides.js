@@ -6,7 +6,7 @@
 //  - the small logo in the menu once past the first slide (Home)
 //  - how deep the visitor is: --depth on <html> (0 at the top, 1 at the last slide) for the veil that
 //    darkens the water, and a "slidechange" event on window ({ index, count, depth }) that the water
-//    effect answers with a ripple
+//    effect answers with a ripple and a surge of light
 // It only runs on a page with slides, when html.slides is set (assets/theme.js).
 (function () {
   'use strict';
@@ -105,6 +105,7 @@
     units.forEach((unit, i) => { if (unit.getBoundingClientRect().top <= middle) index = i; });
     if (index === current) return;
     const first = current === -1;
+    const direction = index > current ? 1 : -1;
     current = index;
     const steps = list.querySelectorAll('.gauge-step');
     steps.forEach((step, i) => {
@@ -121,7 +122,7 @@
     root.style.setProperty('--depth', depth.toFixed(3));
     root.classList.toggle('past-hero', index > 0);
     if (navLogo) navLogo.tabIndex = index > 0 ? 0 : -1;
-    window.dispatchEvent(new CustomEvent('slidechange', { detail: { index, count: units.length, depth, first } }));
+    window.dispatchEvent(new CustomEvent('slidechange', { detail: { index, count: units.length, depth, first, direction } }));
   }
   let queued = false;
   const queue = () => { if (!queued) { queued = true; requestAnimationFrame(update); } };
