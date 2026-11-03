@@ -782,7 +782,10 @@
     const gl = snake.gl;
     gl.clear(gl.COLOR_BUFFER_BIT);
     gl.uniform1f(snake.uniforms.u_time, wrapped);
-    gl.uniform1f(snake.uniforms.u_caustic, level.snake);
+    // Deeper slides (assets/slides.js): the light fades in Water, and the fire burns brighter
+    slideDepth += (slideDepthGoal - slideDepth) * Math.min(1, dt * 1.5);
+    const depthLight = fire ? 1 + 0.5 * slideDepth : 1 - 0.5 * slideDepth;
+    gl.uniform1f(snake.uniforms.u_caustic, level.snake * (fire ? 1 : 1 - 0.25 * slideDepth));
     gl.uniform1f(snake.uniforms.u_cScale, SNAKE_FEEL.size);
     gl.uniform1f(snake.uniforms.u_cLine, SNAKE_FEEL.line);
     gl.uniform1f(snake.uniforms.u_causticTime, snakeCausticClock);
@@ -807,7 +810,7 @@
       if (level.background > 0) {
         g.uniform1f(bg.uniforms.u_time, wrapped);
         g.uniform2f(bg.uniforms.u_size, window.innerWidth, window.innerHeight);
-        g.uniform1f(bg.uniforms.u_caustic, level.background);
+        g.uniform1f(bg.uniforms.u_caustic, level.background * depthLight);
         g.uniform1f(bg.uniforms.u_cScale, BG_FEEL.size);
         g.uniform1f(bg.uniforms.u_cLine, BG_FEEL.line);
         g.uniform1f(bg.uniforms.u_causticTime, bgCausticClock);
@@ -951,6 +954,15 @@
   }
   // Listen from the start: a switch made while the snake picture is still loading must not be missed
   window.addEventListener('themechange', onTheme);
+
+  // Moving to another slide (assets/slides.js): the water goes deeper, and a soft ring crosses it
+  let slideDepth = 0;
+  let slideDepthGoal = 0;
+  window.addEventListener('slidechange', (event) => {
+    const detail = event.detail || {};
+    slideDepthGoal = Math.max(0, Math.min(1, Number(detail.depth) || 0));
+    if (!detail.first) addRipple(window.innerWidth / 2, window.innerHeight * 0.55, 0.7);
+  });
 
   snakeCanvas.addEventListener('webglcontextlost', (event) => { event.preventDefault(); dispose(); });
   bgCanvas.addEventListener('webglcontextlost', (event) => { event.preventDefault(); dispose(); });

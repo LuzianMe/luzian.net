@@ -184,7 +184,7 @@ def part_footer(lang, key, tag):
 
 
 def part_scripts(lang, key, tag):
-    return [(0, f'<script src="/assets/{name}.js?v={tag}"></script>') for name in ('effects', 'water', 'lang')]
+    return [(0, f'<script src="/assets/{name}.js?v={tag}"></script>') for name in ('effects', 'water', 'slides', 'lang')]
 
 
 PARTS = {

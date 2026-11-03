@@ -152,6 +152,20 @@
     growing.onfinish = () => ring.remove();
   }
 
+  // The slides layout of Home and Career (assets/slides.js), while it is being tried out: ?slides on any
+  // address turns it on in this browser, ?slides=off turns it off again. Set here, in the <head>, so the
+  // first paint already has the right layout.
+  const SLIDES_KEY = 'luzian-slides';
+  const slidesLink = /[?&]slides(=off)?(?:&|#|$)/.exec(location.search);
+  try {
+    if (slidesLink) {
+      if (slidesLink[1]) localStorage.removeItem(SLIDES_KEY); else localStorage.setItem(SLIDES_KEY, 'on');
+    }
+    if (localStorage.getItem(SLIDES_KEY) === 'on') root.classList.add('slides');
+  } catch (e) {
+    if (slidesLink && !slidesLink[1]) root.classList.add('slides');   // private window: just this page
+  }
+
   // The first paint already has the right colours
   root.setAttribute('data-theme', initial());
   paintBrowserBar(current());
