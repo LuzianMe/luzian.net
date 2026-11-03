@@ -39,6 +39,16 @@ BROWSER_ARGS = ['--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ign
 WATER_PAGES = ('/', '/career/')
 # checks that need the water running: drawn in software it takes about 2.5 processor cores per browser, so
 # these take turns in one browser while the others share the rest
+# Everything here is drawn in software, and with several browsers side by side a moment can be slow: every
+# wait for something to happen gets this much more patience than it should need (a wait that is met
+# returns at once, so a passing run is no slower)
+PATIENCE = 3
+
+
+def patient(ms):
+    return ms * PATIENCE
+
+
 HEAVY = {'theme switch', 'calm view', 'reveal ring', 'water clock', 'plain snake', 'stats readout'}
 PAGES = ['/', '/career/', '/setup/', '/contact/', '/payment/', '/es/', '/es/career/', '/es/setup/',
          '/es/contact/', '/es/payment/', '/404.html', '/pay/', '/home/']
@@ -82,6 +92,7 @@ def new_page(browser, base, width, theme, problems):
     context.add_init_script(
         f"try {{ if (!sessionStorage.getItem('seeded')) {{ sessionStorage.setItem('seeded', '1'); localStorage.setItem('luzian-theme', '{theme}'); }} }} catch (e) {{}}")
     page = context.new_page()
+    page.set_default_timeout(patient(30000))
     page.on('pageerror', lambda e: problems.append(f'script error: {e}'))
     page.on('console', lambda m: problems.append(f'console {m.type}: {m.text[:140]}') if m.type in ('error', 'warning') else None)
     page.on('requestfailed', lambda r: problems.append(f'request failed: {r.url}'))
@@ -93,14 +104,14 @@ def wait_for_theme_animation(page, was):
     """After a click that changes the theme from `was`: wait for the change, then for its animation to be over.
     (While the animation plays the page underneath cannot be clicked, and the software-rendered browser
     used here and on GitHub draws slowly, so it can take a while.)"""
-    page.wait_for_function("t => document.documentElement.dataset.theme !== t", arg=was, timeout=15000)
+    page.wait_for_function("t => document.documentElement.dataset.theme !== t", arg=was, timeout=patient(15000))
     try:
-        page.wait_for_selector('.theme-rim', state='attached', timeout=5000)
+        page.wait_for_selector('.theme-rim', state='attached', timeout=patient(5000))
     except Exception:
         pass
     page.wait_for_function(
         "!document.querySelector('.theme-rim') && !document.getAnimations().some(a => a.effect && String(a.effect.pseudoElement).startsWith('::view-transition'))",
-        timeout=15000)
+        timeout=patient(15000))
 
 
 def check_page(browser, base, width, theme, path):
@@ -169,7 +180,7 @@ def calm_view(browser, base):
     context, page = new_page(browser, base, 1024, 'water', problems)
     page.goto(base + '/?calm', wait_until='networkidle')
     try:
-        page.wait_for_function("document.body.classList.contains('calm-show')", timeout=5000)
+        page.wait_for_function("document.body.classList.contains('calm-show')", timeout=patient(5000))
     except Exception:
         fail('calm view', '?calm did not start the calm view')
     page.mouse.move(300, 300)
@@ -184,7 +195,7 @@ def calm_view(browser, base):
     box = page.evaluate("(r => [r.left + r.width * 0.2, r.top + r.height * 0.3])(document.querySelector('img.logo').getBoundingClientRect())")
     page.mouse.click(box[0], box[1])
     try:
-        page.wait_for_function("!!document.querySelector('.theme-rim')", timeout=15000)
+        page.wait_for_function("!!document.querySelector('.theme-rim')", timeout=patient(15000))
         rim = page.evaluate("(el => [parseFloat(el.style.getPropertyValue('--rim-x')), parseFloat(el.style.getPropertyValue('--rim-y'))])(document.querySelector('.theme-rim'))")
         if abs(rim[0] - box[0]) > 2 or abs(rim[1] - box[1]) > 2:
             fail('calm view', f'the theme change did not start where the logo was clicked (clicked {box}, started {rim})')
@@ -251,7 +262,7 @@ def reveal_ring(browser, base):
     page.wait_for_timeout(500)
     box = page.evaluate("(r => [r.left + r.width * 0.7, r.top + r.height * 0.6])(document.querySelector('img.logo').getBoundingClientRect())")
     page.mouse.click(box[0], box[1])
-    page.wait_for_function("document.documentElement.dataset.theme === 'fire'", timeout=5000)
+    page.wait_for_function("document.documentElement.dataset.theme === 'fire'", timeout=patient(5000))
     rim = page.evaluate("(el => el && [parseFloat(el.style.getPropertyValue('--rim-x')), parseFloat(el.style.getPropertyValue('--rim-y'))])(document.querySelector('.theme-rim'))")
     if not rim or abs(rim[0] - box[0]) > 2 or abs(rim[1] - box[1]) > 2:
         fail('?reveal=ring', f'the ring did not start at the tap (tapped {box}, ring {rim})')
@@ -269,7 +280,7 @@ def water_clock(browser, base):
     context, page = new_page(browser, base, 1024, 'water', problems)
     def clock_offsets():
         # how far each clock is from where the real clock says it should be (in clock units, around the wrap)
-        page.wait_for_function("window.__ouroWater && window.__ouroWater.clocks().snake > 0", timeout=15000)
+        page.wait_for_function("window.__ouroWater && window.__ouroWater.clocks().snake > 0", timeout=patient(15000))
         return page.evaluate("""() => {
             const c = window.__ouroWater.clocks(); const wall = Date.now() / 1000;
             const off = (a, b) => { const d = Math.abs(a - b) % 600; return Math.min(d, 600 - d); };
@@ -300,7 +311,7 @@ def plain_snake(browser, base):
     early = page.evaluate("(() => { const l = document.querySelector('.ouro-bg-rotator'); const b = getComputedStyle(l, '::before'); return l.classList.contains('water-on') ? 'water' : b.display === 'none' ? 'none' : +b.opacity; })()")
     if early not in ('water', 'none') and early > 0.02:
         fail('plain snake', f'the unshaded snake is visible before the water effect is ready (opacity {early})')
-    page.wait_for_function("document.querySelector('.ouro-bg-rotator').classList.contains('water-on')", timeout=15000)
+    page.wait_for_function("document.querySelector('.ouro-bg-rotator').classList.contains('water-on')", timeout=patient(15000))
     if page.evaluate("getComputedStyle(document.querySelector('.ouro-bg-rotator'), '::before').display") != 'none':
         fail('plain snake', 'the plain snake is still drawn under the water effect')
     page.goto(base + '/?water=off', wait_until='domcontentloaded')
@@ -312,8 +323,8 @@ def plain_snake(browser, base):
     logo_early = page.evaluate("(() => { const i = document.querySelector('img.logo'); return i.classList.contains('water-over') ? 0 : +getComputedStyle(i).opacity; })()")
     if logo_early > 0.02:
         fail('plain logo', f'the unshaded logo is visible before the water logo is ready (opacity {logo_early})')
-    page.wait_for_function("document.querySelector('img.logo').classList.contains('water-over')", timeout=15000)
-    page.wait_for_function("!document.querySelector('.ouro-logo-water').classList.contains('arriving')", timeout=5000)
+    page.wait_for_function("document.querySelector('img.logo').classList.contains('water-over')", timeout=patient(15000))
+    page.wait_for_function("!document.querySelector('.ouro-logo-water').classList.contains('arriving')", timeout=patient(5000))
     if page.evaluate("+getComputedStyle(document.querySelector('.ouro-logo-water')).opacity") != 1:
         fail('plain logo', 'the water logo did not end fully visible')
     page.goto(base + '/?water=off', wait_until='domcontentloaded')
@@ -335,9 +346,9 @@ def back_to_top(browser, base):
         fail('back to top', 'the button shows at the top of the page')
     page.evaluate("window.scrollTo(0, document.documentElement.scrollHeight)")
     try:
-        page.wait_for_function("document.querySelector('.to-top').classList.contains('shown')", timeout=5000)
+        page.wait_for_function("document.querySelector('.to-top').classList.contains('shown')", timeout=patient(5000))
         page.click('.to-top')
-        page.wait_for_function("window.scrollY < 5", timeout=8000)
+        page.wait_for_function("window.scrollY < 5", timeout=patient(8000))
     except Exception:
         fail('back to top', 'the button did not appear far down Career, or did not scroll to the top')
     for address in ('/contact/?slides=off', '/payment/', '/?slides=off'):
@@ -607,7 +618,7 @@ def slides_moving(browser, base):
     for i in (1, 2):
         page.keyboard.press('PageDown')
         try:
-            page.wait_for_function(f"Math.abs(scrollY - {tops[i]}) < 2", timeout=20000)   # the software-drawn browser scrolls slowly
+            page.wait_for_function(f"Math.abs(scrollY - {tops[i]}) < 2", timeout=patient(20000))   # the software-drawn browser scrolls slowly
         except Exception:
             fail('slides', f'Page Down did not land on slide {i + 1} (at {page.evaluate("scrollY")}, expected {tops[i]})')
     page.wait_for_timeout(300)
@@ -626,7 +637,7 @@ def slides_moving(browser, base):
         fail('slides', 'the text of the slides reached did not arrive')
     page.click('.gauge-step >> nth=0')
     try:
-        page.wait_for_function("scrollY < 2 && !document.documentElement.classList.contains('past-hero')", timeout=5000)
+        page.wait_for_function("scrollY < 2 && !document.documentElement.classList.contains('past-hero')", timeout=patient(5000))
     except Exception:
         fail('slides', 'the first gauge mark did not go back to the first slide')
     if page.query_selector('.to-top'):

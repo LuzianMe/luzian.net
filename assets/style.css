@@ -2726,8 +2726,8 @@ body.home.calm .depth-gauge {
 }
 
 html[data-theme="fire"] .depth-veil {
-  background: radial-gradient(ellipse 95% 70% at 50% 105%, rgb(255 84 12 / 0.5) 0%, rgb(170 34 6 / 0.26) 45%, transparent 75%);
-  opacity: calc(var(--depth, 0) * 0.75);
+  background: radial-gradient(ellipse 150% 120% at 50% 115%, rgb(255 120 24 / 0.6) 0%, rgb(230 70 12 / 0.38) 35%, rgb(160 34 8 / 0.18) 65%, transparent 95%);
+  opacity: var(--depth, 0);
 }
 
 /* Home: once past the first slide, the logo has a small place at the start of the menu */
