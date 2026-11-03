@@ -2312,6 +2312,107 @@ html.slides .slide-timeline .gear-list li:first-child::after {
   box-shadow: 0 0 10px rgb(var(--accent) / 0.7);
 }
 
+/* Room to breathe: on a wider screen a slide holds little, so it is given space rather than packed.
+   Narrower text columns, more padding inside the cards, more space between lines and entries. */
+@media (min-width: 768px) {
+  html.slides .career-grid .slide:not(.split) .slide-panel {
+    max-width: 780px;
+  }
+
+  html.slides .career-grid .slide.split .slide-panel {
+    max-width: 960px;
+  }
+
+  html.slides .career-grid .slide-panel {
+    gap: 1.75rem;
+  }
+
+  html.slides .career-grid .setup-card {
+    padding: clamp(2rem, 3.5vw, 2.75rem);
+  }
+
+  html.slides .career-grid .setup-card h2 {
+    margin-bottom: 1.75rem;
+  }
+
+  html.slides .career-grid .setup-card p {
+    line-height: 1.8;
+    margin-bottom: 1.25rem;
+  }
+
+  html.slides .career-grid .gear-list li {
+    padding-top: 1.05rem;
+    padding-bottom: 1.05rem;
+  }
+
+  html.slides .career-grid .gear-list li:first-child {
+    padding-top: 0;
+  }
+
+  html.slides .career-grid .gear-list li:last-child {
+    padding-bottom: 0;
+  }
+
+  html.slides .career-grid .gear-note {
+    margin-top: 0.2rem;
+  }
+
+  html.slides .bullet-list li,
+  html.slides #about .now-list li {
+    margin-bottom: 0.85rem;
+  }
+
+  html.slides .career-grid .tags {
+    gap: 0.65rem;
+  }
+
+  html.slides #about .slide-panel {
+    max-width: 720px;
+    padding: clamp(2.25rem, 4.5vw, 3.5rem);
+  }
+
+  html.slides #about .tags {
+    margin-top: 2rem;
+  }
+
+  html.slides .slide-intro .big-stat {
+    margin: 2.25rem 0 2rem !important;
+  }
+
+  html.slides .slide-intro .setup-chips {
+    margin-top: 1.5rem;
+  }
+
+  html.slides .slide-intro .cta {
+    margin-top: 2rem;
+  }
+
+  html.slides .slide-next .slide-panel {
+    max-width: 860px;
+  }
+
+  html.slides .slide-next h2 {
+    margin-bottom: 2.5rem;
+  }
+
+  .next-tiles {
+    gap: 1.5rem;
+  }
+
+  .next-tile {
+    padding: 2rem 1.9rem;
+    min-height: 13rem;
+  }
+
+  .closing-title {
+    margin-bottom: 1.5rem;
+  }
+
+  html.slides .slide-closing .cta {
+    margin-top: 1.5rem;
+  }
+}
+
 /* Phones: two or three cards are too much for one screen, so each card is a slide of its own */
 @media (max-width: 767px) {
   html.slides .slide.split,
