@@ -48,6 +48,45 @@
     });
   }
 
+  // ---- the years ruler (Career, Experience) -------------------------------------------------------
+  // Drawn from the list beside it: each role's data-span ("2016-2022", "2022-" for still going) and
+  // data-short label, and data-mark for a role held within another. Runs to the current year.
+  function drawRuler(svg, list) {
+    const NS = 'http://www.w3.org/2000/svg';
+    const now = new Date().getFullYear() + 1;
+    const roles = [...list.querySelectorAll('li[data-span]')].map((li) => {
+      const [from, to] = li.dataset.span.split('-');
+      return { from: Number(from), to: to ? Number(to) : now, name: li.dataset.short || '' };
+    }).sort((a, b) => a.from - b.from);
+    const marks = [...list.querySelectorAll('li[data-mark]')].map((li) => Number(li.dataset.mark));
+    if (!roles.length) return;
+    const first = roles[0].from;
+    const y = (year) => 20 + (year - first) * (500 / (now - first));
+    const add = (tag, attrs, text) => {
+      const el = document.createElementNS(NS, tag);
+      Object.entries(attrs).forEach(([k, v]) => el.setAttribute(k, v));
+      if (text) el.textContent = text;
+      svg.appendChild(el);
+      return el;
+    };
+    add('line', { class: 'art-axis', x1: 150, y1: y(first), x2: 150, y2: y(now) });
+    for (let year = first; year <= now; year++) {
+      add('line', { class: 'art-tick', x1: year % 2 ? 142 : 136, y1: y(year), x2: 150, y2: y(year) });
+      if (year % 2 === 0) add('text', { class: 'art-muted', x: 128, y: y(year) + 5, 'text-anchor': 'end' }, String(year));
+    }
+    roles.forEach((role, i) => {
+      const top = y(role.from) + 2;
+      const height = Math.max(8, y(role.to) - y(role.from) - 4);
+      add('rect', { class: 'art-span', x: 156, y: top, width: 12, height, rx: 6, style: `--d:${i};--o:${(0.35 + 0.65 * (i + 1) / roles.length).toFixed(2)}` });
+      add('text', { class: 'art-label', x: 182, y: top + height / 2 + 5, style: `--d:${i + 2}` }, role.name);
+    });
+    marks.forEach((year) => add('circle', { class: 'art-dot', cx: 162, cy: y(year), r: 5, style: `--d:${roles.length + 2}` }));
+  }
+  document.querySelectorAll('.art-ruler svg').forEach((svg) => {
+    const list = svg.closest('.slide-panel').querySelector('.gear-list');
+    if (list) drawRuler(svg, list);
+  });
+
   // ---- the depth gauge --------------------------------------------------------------------------
   const gauge = document.createElement('nav');
   gauge.className = 'depth-gauge';
