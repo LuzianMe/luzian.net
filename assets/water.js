@@ -228,6 +228,7 @@
     uniform vec3 u_tintHot;    // ...and of its brightest lines (the same in Water)
     uniform float u_flicker;   // Fire's firelight: 1 is steady
     uniform float u_scroll;    // how far the light web has drifted up as the page scrolled (slides)
+    uniform vec4 u_wave;       // a slide change: the wave's origin (x, y), start time, strength
 
     void main() {
       vec2 p = v_uv * u_size / 1000.0;      // same pixel scale on every screen
@@ -235,9 +236,22 @@
       float light = 0.0;
       rings(p, disp, light);
 
+      // A slide change sends one wide wave front across the whole screen from the side the new slide came
+      // from: a thin band that lights and bends the web as it passes (so the screen as a whole never pulses)
+      float wave = 0.0;
+      float age = u_time - u_wave.z;
+      if (age > 0.0 && age < 2.5 && u_wave.w > 0.0) {
+        vec2 dv = p - u_wave.xy;
+        float dist = length(dv);
+        float x = dist - age * 0.85;
+        float width = 0.06 + age * 0.04;
+        wave = exp(-(x * x) / (width * width)) * exp(-age * 0.8) * u_wave.w;
+        disp += (dv / max(dist, 0.0005)) * wave * 0.03;
+      }
+
       float web = caustic(p + disp * 1.5 + vec2(0.0, u_scroll), u_cScale, u_cLine, ${BG_FEEL.gain.toFixed(2)});
       float depth = mix(1.0, 0.45, v_uv.y);   // a little brighter toward the top, like light from the surface
-      float a = clamp(u_caustic * (0.45 * web * depth + 0.10 * max(light, 0.0)) * u_flicker, 0.0, 0.5);
+      float a = clamp((u_caustic * (0.45 * web * depth + 0.10 * max(light, 0.0)) + 0.34 * wave * (0.3 + web)) * u_flicker, 0.0, 0.5);
       gl_FragColor = vec4((u_tint + (u_tintHot - u_tint) * (web * web)) * a, a);   // the colour of the light comes from the theme
     }`;
 
@@ -385,7 +399,7 @@
   const bgCanvas = document.createElement('canvas');
   bgCanvas.className = 'ouro-caustics';
   bgCanvas.setAttribute('aria-hidden', 'true');
-  const bg = makeRenderer(bgCanvas, BACKGROUND_FRAGMENT, ['u_time', 'u_ripples', 'u_size', 'u_caustic', 'u_cScale', 'u_cLine', 'u_causticTime', 'u_tint', 'u_tintHot', 'u_flicker', 'u_scroll', ...RING_UNIFORMS]);
+  const bg = makeRenderer(bgCanvas, BACKGROUND_FRAGMENT, ['u_time', 'u_ripples', 'u_size', 'u_caustic', 'u_cScale', 'u_cLine', 'u_causticTime', 'u_tint', 'u_tintHot', 'u_flicker', 'u_scroll', 'u_wave', ...RING_UNIFORMS]);
 
   // The logo is another optional layer: if it cannot start, the plain logo image stays as it is
   const logoImg = document.querySelector('img.logo');
@@ -785,8 +799,8 @@
     gl.uniform1f(snake.uniforms.u_time, wrapped);
     // Deeper slides (assets/slides.js): the light fades in Water, and the fire burns brighter
     slideDepth += (slideDepthGoal - slideDepth) * Math.min(1, dt * 1.5);
-    slideSurge *= Math.exp(-dt * 1.6);
-    const depthLight = fire ? 1 + 0.5 * slideDepth : 1 - 0.5 * slideDepth;
+    // deeper water is dimmer; deeper into Fire is closer to the flames, so brighter
+    const depthLight = fire ? 1 + 2.4 * slideDepth : 1 - 0.5 * slideDepth;
     gl.uniform1f(snake.uniforms.u_caustic, level.snake * (fire ? 1 : 1 - 0.25 * slideDepth));
     gl.uniform1f(snake.uniforms.u_cScale, SNAKE_FEEL.size);
     gl.uniform1f(snake.uniforms.u_cLine, SNAKE_FEEL.line);
@@ -812,7 +826,7 @@
       if (level.background > 0) {
         g.uniform1f(bg.uniforms.u_time, wrapped);
         g.uniform2f(bg.uniforms.u_size, window.innerWidth, window.innerHeight);
-        g.uniform1f(bg.uniforms.u_caustic, level.background * depthLight * (1 + slideSurge));
+        g.uniform1f(bg.uniforms.u_caustic, level.background * depthLight);
         g.uniform1f(bg.uniforms.u_cScale, BG_FEEL.size);
         g.uniform1f(bg.uniforms.u_cLine, BG_FEEL.line);
         g.uniform1f(bg.uniforms.u_causticTime, bgCausticClock);
@@ -820,6 +834,7 @@
         g.uniform3fv(bg.uniforms.u_tintHot, palette.tintHot);
         g.uniform1f(bg.uniforms.u_flicker, fx.flick);
         g.uniform1f(bg.uniforms.u_scroll, slidesPage ? window.scrollY * SCROLL_DRIFT / 1000 : 0);
+        g.uniform4fv(bg.uniforms.u_wave, slideWave);
         g.uniform1f(bg.uniforms.u_ringAmp, fx.ringAmp);
         g.uniform1f(bg.uniforms.u_ringGlint, level.ringGlint);
         g.uniform1f(bg.uniforms.u_ringSpeed, fx.ringSpeed);
@@ -960,11 +975,11 @@
   // Listen from the start: a switch made while the snake picture is still loading must not be missed
   window.addEventListener('themechange', onTheme);
 
-  // Moving to another slide (assets/slides.js): the water goes deeper, the light on it surges and
-  // fades, and rings spread from the side the new slide came from
+  // Moving to another slide (assets/slides.js): the water goes deeper (its brightness only ever eases
+  // one way, so nothing flickers), and a wave front sweeps across from the side the new slide came from
   let slideDepth = 0;
   let slideDepthGoal = 0;
-  let slideSurge = 0;
+  let slideWave = [0, 0, -100, 0];
   // Slides: the light web drifts up as the page goes down, slower than the cards (parallax), so the
   // water feels like it is being passed on the way down
   const SCROLL_DRIFT = 0.35;
@@ -975,11 +990,9 @@
     const detail = event.detail || {};
     slideDepthGoal = Math.max(0, Math.min(1, Number(detail.depth) || 0));
     if (detail.first) return;
-    slideSurge = 2.2;
-    const y = window.innerHeight * (detail.direction < 0 ? 0.2 : 0.8);
-    addRipple(window.innerWidth * 0.5, y, 1.6);
-    addRipple(window.innerWidth * 0.22, y + window.innerHeight * 0.06, 0.9);
-    addRipple(window.innerWidth * 0.78, y - window.innerHeight * 0.04, 0.9);
+    // the wave starts just off the edge the new slide came in from (below going down, above going up)
+    const y = detail.direction < 0 ? -0.15 * window.innerHeight : 1.15 * window.innerHeight;
+    slideWave = [window.innerWidth / 2000, y / 1000, (performance.now() / 1000) % TIME_WRAP, 1];
   });
 
   snakeCanvas.addEventListener('webglcontextlost', (event) => { event.preventDefault(); dispose(); });
@@ -1017,6 +1030,8 @@
     window.__ouroWater = {
       draw: (seconds) => draw(seconds),
       ripple: (x, y, strength) => addRipple(x, y, strength === undefined ? 1 : strength),
+      // set a slide-change wave by hand: origin in page pixels, its start on the shader clock (for tests)
+      wave: (x, y, start, strength) => { slideWave = [x / 1000, y / 1000, start, strength === undefined ? 1 : strength]; },
       stop: () => { running = false; cancelAnimationFrame(rafId); },
       activeRipples: () => { let n = 0; for (let i = 0; i < MAX_RIPPLES; i++) if (ripplesSnake[i * 4 + 3] > 0 || ripplesBg[i * 4 + 3] > 0) n++; return n; },
       // average milliseconds per frame (all pictures), including waiting for the GPU to finish
