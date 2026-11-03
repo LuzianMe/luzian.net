@@ -550,6 +550,12 @@ def slides(browser, base):
         fail('slides', 'the first gauge mark did not go back to the first slide')
     if page.query_selector('.to-top'):
         fail('slides', 'the back-to-top button is there too (the gauge replaces it)')
+    # the other pages keep their own layout (the menu above the title, not over it)
+    for path in ('/contact/', '/setup/', '/payment/', '/es/contact/'):
+        page.goto(base + path, wait_until='networkidle')
+        if page.evaluate("document.documentElement.classList.contains('slides') || document.querySelector('h1').getBoundingClientRect().top < document.querySelector('.nav-container').getBoundingClientRect().bottom"):
+            fail(f'slides {path}', 'the slides layout reached a page without slides (title under the menu)')
+
     page.goto(base + '/career/?slides=off', wait_until='networkidle')
     if page.evaluate("document.documentElement.classList.contains('slides') || !!document.querySelector('.depth-gauge')"):
         fail('slides', '?slides=off did not turn the layout off')
