@@ -458,6 +458,7 @@ document.querySelectorAll('.current-year').forEach((el) => { el.textContent = ne
 
   // A "back to top" button for long pages (Career on a phone): it appears once the visitor is well down the page
   function initBackToTop() {
+    if (document.documentElement.classList.contains('slides') && document.querySelector('.slide')) return;   // the depth gauge does this
     const button = document.createElement('button');
     button.type = 'button';
     button.className = 'to-top';

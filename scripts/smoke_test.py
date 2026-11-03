@@ -484,6 +484,93 @@ def behaviours(browser, base):
     print('behaviours done')
 
 
+def slides(browser, base):
+    """The slides layout of Home and Career (?slides while it is tried out): every slide is a full screen,
+    the gauge follows, keys move one slide, the water hears about it, and the fallbacks scroll plainly."""
+    expect = {'/': (4, 4), '/es/': (4, 4), '/career/': (9, 12), '/es/career/': (9, 12)}   # slides at desktop, phone width
+    for address, counts in expect.items():
+        for width, count in ((1280, counts[0]), (390, counts[1])):
+            for theme in ('water', 'fire'):
+                problems = []
+                context, page = new_page(browser, base, width, theme, problems)
+                page.goto(base + address + '?slides&water=off', wait_until='networkidle')
+                page.wait_for_timeout(400)
+                where = f'{address} at {width}px, {theme}'
+                got = page.evaluate("""() => ({
+                    on: document.documentElement.classList.contains('slides'),
+                    units: [...document.querySelectorAll('.slide-unit')].map(u => Math.round(u.getBoundingClientRect().height)),
+                    steps: document.querySelectorAll('.gauge-step').length,
+                    snap: getComputedStyle(document.documentElement).scrollSnapType,
+                    wide: document.documentElement.scrollWidth > innerWidth + 1,
+                })""")
+                if not got['on']:
+                    fail('slides', f'{where}: ?slides did not turn the layout on')
+                if len(got['units']) != count or got['steps'] != count:
+                    fail('slides', f'{where}: expected {count} slides and gauge marks, found {len(got["units"])} and {got["steps"]}')
+                if any(h < 600 for h in got['units'][:-1]):
+                    fail('slides', f'{where}: a slide is shorter than the screen ({got["units"]})')
+                if 'mandatory' not in got['snap']:
+                    fail('slides', f'{where}: the page does not snap from slide to slide ({got["snap"]})')
+                if got['wide']:
+                    fail('slides', f'{where}: the page is wider than the screen')
+                for p in problems:
+                    fail('slides', f'{where}: {p}')
+                context.close()
+
+    # keys move one slide at a time; the gauge, the depth and the water's event follow; the gauge goes back
+    problems = []
+    context, page = new_page(browser, base, 1280, 'water', problems)
+    page.goto(base + '/?slides&water=off', wait_until='networkidle')
+    page.evaluate("window.__changes = []; addEventListener('slidechange', e => __changes.push(e.detail.index))")
+    tops = page.evaluate("[...document.querySelectorAll('.slide-unit')].map(u => Math.round(u.getBoundingClientRect().top + scrollY))")
+    for i in (1, 2):
+        page.keyboard.press('PageDown')
+        try:
+            page.wait_for_function(f"Math.abs(scrollY - {tops[i]}) < 2", timeout=20000)   # the software-drawn browser scrolls slowly
+        except Exception:
+            fail('slides', f'Page Down did not land on slide {i + 1} (at {page.evaluate("scrollY")}, expected {tops[i]})')
+    page.wait_for_timeout(300)
+    state = page.evaluate("""() => ({
+        current: [...document.querySelectorAll('.gauge-step')].findIndex(s => s.getAttribute('aria-current') === 'true'),
+        depth: getComputedStyle(document.documentElement).getPropertyValue('--depth').trim(),
+        changes: window.__changes,
+        logo: document.documentElement.classList.contains('past-hero'),
+        arrived: document.querySelectorAll('.slide-unit.arrived').length,
+    })""")
+    if state['current'] != 2 or state['depth'] != '0.667' or state['changes'][-1:] != [2]:
+        fail('slides', f'the gauge, depth or water event did not follow the slides ({state})')
+    if not state['logo']:
+        fail('slides', 'the small logo did not come into the menu past the first slide')
+    if state['arrived'] < 3:
+        fail('slides', 'the text of the slides reached did not arrive')
+    page.click('.gauge-step >> nth=0')
+    try:
+        page.wait_for_function("scrollY < 2 && !document.documentElement.classList.contains('past-hero')", timeout=5000)
+    except Exception:
+        fail('slides', 'the first gauge mark did not go back to the first slide')
+    if page.query_selector('.to-top'):
+        fail('slides', 'the back-to-top button is there too (the gauge replaces it)')
+    page.goto(base + '/career/?slides=off', wait_until='networkidle')
+    if page.evaluate("document.documentElement.classList.contains('slides') || !!document.querySelector('.depth-gauge')"):
+        fail('slides', '?slides=off did not turn the layout off')
+    for p in problems:
+        fail('slides', p)
+    context.close()
+
+    # a phone held sideways, and less motion: the slides simply scroll, and nothing waits to arrive
+    for label, options in (('phone on its side', {'viewport': {'width': 844, 'height': 390}}),
+                           ('reduced motion', {'viewport': {'width': 1280, 'height': 800}, 'reduced_motion': 'reduce'})):
+        context = browser.new_context(**options)
+        page = context.new_page()
+        page.goto(base + '/career/?slides&water=off', wait_until='networkidle')
+        snap = page.evaluate("getComputedStyle(document.documentElement).scrollSnapType")
+        if snap not in ('none', ''):
+            fail('slides', f'{label}: the page still snaps ({snap})')
+        if label == 'reduced motion' and page.evaluate("[...document.querySelectorAll('.rise')].some(e => getComputedStyle(e).opacity === '0')"):
+            fail('slides', 'reduced motion: some text is hidden waiting to arrive')
+        context.close()
+
+
 def main():
     server, base = serve()
     with sync_playwright() as p:
@@ -491,6 +578,7 @@ def main():
         browser = p.chromium.launch(args=['--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'])
         sweep(browser, base)
         behaviours(browser, base)
+        slides(browser, base)
         browser.close()
     server.shutdown()
     if failures:
