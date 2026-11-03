@@ -99,7 +99,7 @@ def wait_for_theme_animation(page, was):
     except Exception:
         pass
     page.wait_for_function(
-        "!document.querySelector('.theme-rim') && !document.getAnimations().some(a => a.effect && a.effect.pseudoElement)",
+        "!document.querySelector('.theme-rim') && !document.getAnimations().some(a => a.effect && String(a.effect.pseudoElement).startsWith('::view-transition'))",
         timeout=15000)
 
 
@@ -168,8 +168,9 @@ def calm_view(browser, base):
     problems = []
     context, page = new_page(browser, base, 1024, 'water', problems)
     page.goto(base + '/?calm', wait_until='networkidle')
-    page.wait_for_timeout(500)
-    if not page.evaluate("document.body.classList.contains('calm-show')"):
+    try:
+        page.wait_for_function("document.body.classList.contains('calm-show')", timeout=5000)
+    except Exception:
         fail('calm view', '?calm did not start the calm view')
     page.mouse.move(300, 300)
     page.mouse.move(120, 600)
@@ -254,7 +255,7 @@ def reveal_ring(browser, base):
     rim = page.evaluate("(el => el && [parseFloat(el.style.getPropertyValue('--rim-x')), parseFloat(el.style.getPropertyValue('--rim-y'))])(document.querySelector('.theme-rim'))")
     if not rim or abs(rim[0] - box[0]) > 2 or abs(rim[1] - box[1]) > 2:
         fail('?reveal=ring', f'the ring did not start at the tap (tapped {box}, ring {rim})')
-    if page.evaluate("document.getAnimations().some(a => a.effect && a.effect.pseudoElement)"):
+    if page.evaluate("document.getAnimations().some(a => a.effect && String(a.effect.pseudoElement).startsWith('::view-transition'))"):
         fail('?reveal=ring', 'the page-picture animation ran anyway')
     for p in problems:
         fail('?reveal=ring', p)
@@ -324,11 +325,11 @@ def plain_snake(browser, base):
 
 
 def back_to_top(browser, base):
-    """Back to top: only on a long page, only once scrolled well down, and it works"""
+    """Back to top, in the plain layout (?slides=off; the slides have their gauge instead)"""
     # --- back to top: only on a long page, only once scrolled well down, and it works
     problems = []
     context, page = new_page(browser, base, 375, 'water', problems)
-    page.goto(base + '/career/?water=off', wait_until='networkidle')
+    page.goto(base + '/career/?slides=off&water=off', wait_until='networkidle')
     page.wait_for_timeout(500)
     if page.evaluate("document.querySelector('.to-top').classList.contains('shown')"):
         fail('back to top', 'the button shows at the top of the page')
@@ -339,13 +340,13 @@ def back_to_top(browser, base):
         page.wait_for_function("window.scrollY < 5", timeout=8000)
     except Exception:
         fail('back to top', 'the button did not appear far down Career, or did not scroll to the top')
-    for address in ('/contact/', '/payment/', '/'):
+    for address in ('/contact/?slides=off', '/payment/', '/?slides=off'):
         page.goto(base + address + ('&' if '?' in address else '?') + 'water=off', wait_until='networkidle')
         page.evaluate("window.scrollTo(0, document.documentElement.scrollHeight)")
         page.wait_for_timeout(400)
         if page.evaluate("document.querySelector('.to-top').classList.contains('shown')"):
             fail('back to top', f'the button shows on the short page {address}')
-    page.goto(base + '/es/career/?water=off', wait_until='networkidle')
+    page.goto(base + '/es/career/?slides=off&water=off', wait_until='networkidle')
     if page.evaluate("document.querySelector('.to-top').getAttribute('aria-label')") != 'Volver arriba':
         fail('back to top', 'the Spanish page does not have a Spanish label on the button')
     # the menu is (nearly) solid, so text scrolling under it does not show through
@@ -558,7 +559,7 @@ def behaviours(base):
 
 
 def slides(base):
-    """The slides layout (?slides while it is tried out): every slide is a full screen, the gauge follows,
+    """The slides layout (the default; ?slides=off for the plain one): every slide is a full screen, the gauge follows,
     keys move one slide, the water hears about it, and the fallbacks scroll plainly."""
     tasks = [(f'slides {address} {width}px {theme}', lambda browser, a=address, w=width, c=count, t=theme: slide_page(browser, base, a, w, c, t))
              for address, counts in SLIDE_COUNTS.items()

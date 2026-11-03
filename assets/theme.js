@@ -152,20 +152,23 @@
     growing.onfinish = () => ring.remove();
   }
 
-  // The slides layout of Home and Career (assets/slides.js), while it is being tried out: ?slides on any
-  // address turns it on in this browser, ?slides=off turns it off again. Set here, in the <head>, so the
-  // first paint already has the right layout; only on the pages cut into slides, so the others keep theirs.
+  // The slides layout of Home, Career, Setup and Contact (assets/slides.js) is the default; ?slides=off on
+  // any address goes back to the plain scrolling layout in this browser, ?slides brings the slides back.
+  // Set here, in the <head>, so the first paint already has the right layout; only on the pages cut into
+  // slides, so the others keep theirs.
   const SLIDES_KEY = 'luzian-slides';
   const slidesPage = /^\/(es\/)?((career|setup|contact)\/)?(index\.html)?$/.test(location.pathname);
   const slidesLink = /[?&]slides(=off)?(?:&|#|$)/.exec(location.search);
+  let slidesOff = !!(slidesLink && slidesLink[1]);
   try {
     if (slidesLink) {
-      if (slidesLink[1]) localStorage.removeItem(SLIDES_KEY); else localStorage.setItem(SLIDES_KEY, 'on');
+      if (slidesOff) localStorage.setItem(SLIDES_KEY, 'off'); else localStorage.removeItem(SLIDES_KEY);
     }
-    if (slidesPage && localStorage.getItem(SLIDES_KEY) === 'on') root.classList.add('slides');
+    slidesOff = localStorage.getItem(SLIDES_KEY) === 'off';
   } catch (e) {
-    if (slidesPage && slidesLink && !slidesLink[1]) root.classList.add('slides');   // private window: just this page
+    // private window: ?slides=off holds for just this page
   }
+  if (slidesPage && !slidesOff) root.classList.add('slides');
 
   // The first paint already has the right colours
   root.setAttribute('data-theme', initial());
