@@ -141,7 +141,9 @@ def part_nav(lang, key, tag):
             lines.append((2, f'<li><a href="{href}" class="nav-pill active">{t["nav"][i]}</a></li>'))
         else:
             lines.append((2, f'<li><a href="{href}" class="nav-pill">{t["nav"][i]}</a></li>'))
-    lines += [(1, '</ul>'), (0, '</nav>')]
+    lines.append((1, '</ul>'))
+    lines += [(1, line) for _, line in lang_switch(lang, key)]
+    lines.append((0, '</nav>'))
     return lines
 
 
@@ -156,19 +158,22 @@ def footer_line(lang, key):
             f'<span class="footer-links">{" ".join(links)}</span>')
 
 
-def switch_row(lang, key):
-    """The language switch (the theme switch is added next to it by assets/theme.js)."""
+def lang_switch(lang, key):
+    """The language switch (EN | ES), at the top in the menu's row; none on the 404 page."""
+    if key == '404':
+        return []
     t = TEXT[lang]
-    lines = [(1, '<div class="switch-row">')]
-    if key != '404':
-        twin = address(other(lang), key)
-        o = other(lang)
-        here = f'<span class="lang-current" aria-current="true">{lang.upper()}</span>'
-        there = f'<a href="{twin}" hreflang="{o}" lang="{o}" title="{t["other_title"]}" data-lang="{o}">{o.upper()}</a>'
-        pair = here + there if lang == 'en' else there + here
-        lines.append((2, f'<div class="lang-switch" role="group" aria-label="{t["language"]}">{pair}</div>'))
-    lines.append((1, '</div>'))
-    return lines
+    twin = address(other(lang), key)
+    o = other(lang)
+    here = f'<span class="lang-current" aria-current="true">{lang.upper()}</span>'
+    there = f'<a href="{twin}" hreflang="{o}" lang="{o}" title="{t["other_title"]}" data-lang="{o}">{o.upper()}</a>'
+    pair = here + there if lang == 'en' else there + here
+    return [(0, f'<div class="lang-switch" role="group" aria-label="{t["language"]}">{pair}</div>')]
+
+
+def switch_row(lang, key):
+    """The footer's row for the theme switch (added by assets/theme.js)."""
+    return [(1, '<div class="switch-row">'), (1, '</div>')]
 
 
 def part_footer(lang, key, tag):

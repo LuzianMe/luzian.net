@@ -1593,7 +1593,7 @@ html.slides footer {
   background: rgb(var(--accent-soft) / 0.14);
 }
 
-/* The switches sit in the footer: language (EN | ES) and theme (droplet | flame), side by side */
+/* The theme switch (droplet | flame) sits in the footer; the language switch is at the top, in the menu's row */
 .switch-row {
   display: flex;
   justify-content: center;
@@ -1607,23 +1607,51 @@ html.slides footer {
   margin: 0;
 }
 
-/* The footer's own link style must not reach into the language pills */
-footer .lang-switch a {
+/* The language switch, at the top: in the top-right corner, level with the menu. On a phone the menu
+   fills the width, so it is a small pill at the menu's end instead, with just the other language. */
+.nav-container .lang-switch {
+  position: absolute;
+  top: calc(50% + 0.5rem);   /* the middle of the menu (the row has more room above it than below) */
+  right: max(1.25rem, env(safe-area-inset-right));
+  transform: translateY(-50%);
+  margin: 0;
+}
+
+.nav-container .lang-switch a {
   display: inline-block;
-  color: rgb(var(--muted));
-  border: 1px solid rgb(var(--accent-soft) / 0.25);
-  border-right-width: 1px;
   transition: color 0.2s ease, background-color 0.2s ease;
 }
 
-footer .lang-switch > :first-child {
-  border-right-width: 0;
+@media (max-height: 520px) and (orientation: landscape) {
+  .nav-container .lang-switch {
+    top: calc(50% + 0.2rem);
+  }
 }
 
-footer .lang-switch a:hover {
-  color: rgb(var(--white));
-  background: rgb(var(--accent-soft) / 0.14);
-  border-color: rgb(var(--accent-soft) / 0.25);
+@media (max-width: 767px) {
+  .nav-container {
+    align-items: center;
+    gap: 0.3rem;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
+
+  .nav-container .lang-switch {
+    position: static;
+    transform: none;
+  }
+
+  .nav-container .lang-switch .lang-current {
+    display: none;
+  }
+
+  .nav-container .lang-switch a {
+    padding: 0.62rem 0.7rem;
+    border-radius: 999px;
+    border-right-width: 1px;
+    background: rgb(var(--surface-1) / 0.93);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+  }
 }
 
 .theme-switch > button {
@@ -1788,18 +1816,22 @@ html.fire-drawn[data-theme="fire"] :is(.ember-glow, .depth-veil) {
 
 /* Spanish labels are longer, so the three nav buttons get slightly tighter spacing on phones */
 @media (max-width: 480px) {
+  .nav-pill {
+    padding: 0.45rem 0.9rem;
+  }
+
   html[lang="es"] .nav-pills {
     gap: 0.2rem;
   }
 
   html[lang="es"] .nav-pill {
-    padding: 0.45rem 0.8rem;
+    padding: 0.45rem 0.6rem;
   }
 }
 
 @media (max-width: 340px) {
   html[lang="es"] .nav-pill {
-    padding: 0.45rem 0.6rem;
+    padding: 0.45rem 0.5rem;
     font-size: 0.75rem;
   }
 }
@@ -2911,39 +2943,7 @@ html[data-theme="fire"] .depth-veil {
   opacity: var(--depth, 0);
 }
 
-/* Home: once past the first slide, the logo has a small place at the start of the menu */
-.nav-logo-item {
-  display: flex;
-  align-items: center;
-  max-width: 0;
-  margin-right: -0.35rem;   /* takes back the menu's gap while it is folded away */
-  opacity: 0;
-  overflow: hidden;
-  transition: max-width 0.45s ease, opacity 0.35s ease, margin 0.45s ease;
-}
-
-html.past-hero .nav-logo-item {
-  max-width: 6rem;
-  margin-right: 0;
-  opacity: 1;
-}
-
-.nav-logo {
-  display: flex;
-  align-items: center;
-  padding: 0.25rem 0.5rem 0.25rem 0.7rem;
-  border-radius: 9999px;
-}
-
-.nav-logo img {
-  display: block;
-  height: 1.5rem;
-  width: auto;
-  filter: drop-shadow(0 0 8px rgb(var(--accent-soft) / 0.35));
-}
-
 @media (prefers-reduced-motion: reduce) {
-  .nav-logo-item,
   .depth-veil {
     transition: none;
   }
