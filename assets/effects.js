@@ -99,6 +99,10 @@ document.querySelectorAll('.current-year').forEach((el) => { el.textContent = ne
     let fire = document.documentElement.getAttribute('data-theme') === 'fire';
     const PARTICLE_COUNT = 32;
     const CINDER_COUNT = 46;
+    // Fire: further down the page is deeper in the fire (assets/water.js), so there are more embers, and they
+    // rise faster; it is as deep as it goes 'at' screens down the page (the same as the flames)
+    const CINDER_DEEP = { count: 90, rise: 0.8, at: 7 };
+    let deep = 0;   // 0 at the top of the page, 1 that far down
 
     // The dust takes the theme's colour (Water: blue specks)
     let tint = '56, 189, 248';
@@ -201,7 +205,7 @@ document.querySelectorAll('.current-year').forEach((el) => { el.textContent = ne
         this.age += dt;
         const heat = this.heat();
         // Hot, it rises; cold, it is heavier than the air and sinks
-        this.y += (-this.rise * heat * heat + 0.3 * (1 - heat) * (1 - heat)) * step;
+        this.y += (-this.rise * (1 + CINDER_DEEP.rise * deep) * heat * heat + 0.3 * (1 - heat) * (1 - heat)) * step;
         this.x += (this.sway + Math.sin(this.age * 1.4 + this.phase) * 0.22) * step;
         if (Math.random() < 0.012 * step) this.spark = 1;
         this.spark *= Math.pow(0.9, step);
@@ -279,7 +283,7 @@ document.querySelectorAll('.current-year').forEach((el) => { el.textContent = ne
 
     function populate() {
       particles = [];
-      const count = fire ? CINDER_COUNT : PARTICLE_COUNT;
+      const count = fire ? CINDER_DEEP.count : PARTICLE_COUNT;
       for (let i = 0; i < count; i++) {
         particles.push(fire ? new Cinder(true) : new Particle());
       }
@@ -306,7 +310,11 @@ document.querySelectorAll('.current-year').forEach((el) => { el.textContent = ne
       const dt = last ? Math.min((now - last) / 1000, 0.1) : 1 / 60;
       last = now;
       ctx.clearRect(0, 0, width, height);
-      particles.forEach((p) => {
+      deep = fire ? Math.min(1, Math.max(0, window.scrollY / (CINDER_DEEP.at * window.innerHeight))) : 0;
+      // the embers past this many wait their turn (all of them burn at the bottom of the page)
+      const shown = fire ? Math.round(CINDER_COUNT + (CINDER_DEEP.count - CINDER_COUNT) * deep) : particles.length;
+      particles.forEach((p, i) => {
+        if (i >= shown) return;
         if (!reduceMotion) p.update(dt);
         p.draw();
       });

@@ -73,15 +73,17 @@
   const FIRE = { flicker: 0.4, haze: 0.75, veins: 1.4 };
   let palette = THEMES[document.documentElement.getAttribute('data-theme') === 'fire' ? 'fire' : 'water'];
   // Fire's own pictures (the shaders below the water's):
-  //   start : how strongly it burns on the first screen (0..1); deeper slides build it up to 1
-  //   flameH: how high the flames reach up the screen, from the first screen to the deepest slide
-  //   smoke : how much smoke rises off them      haze : how much the hot air ripples the snake and the logo
+  //   view  : the screen is a window into one tall fire, and scrolling down lowers it into the fire. At the
+  //           top of the page the bottom of the screen is this far up the fire (screen heights), so only
+  //           the tips show; 'deepAt' screens down the page it is 'foot' above the fire's foot, as deep as it goes
+  //           (the same on every page, so a short page only gets part of the way)
+  //   tall  : how tall the fire is (screen heights; more at the sides)     speedUp : how much faster it burns at the bottom
+  //   smoke : how much smoke rises off it      haze : how much the hot air ripples the snake and the logo
   //   flames: how tall the flames off the snake are      inner : the blur (px) that finds the thick of its body
   //   maxDpr: the snake is drawn at no more than this many pixels per CSS pixel
   //   scale : the background is drawn at this fraction of the screen's size
-  const FIRE_START = /[?&]fire=strong\b/.test(location.search) ? 1 : 0.3;   // the demo tries both
-  const FIRE_BG = { start: FIRE_START, flameH: [0.11, 0.26], smoke: 0.35, scale: 0.6, maxWidth: 960 };
-  const FIRE_SNAKE = { haze: 1, flames: 0.9, inner: 14, glow: 0.4, maxDpr: 1, crust: /[?&]coal=white\b/.test(location.search) ? 0 : 1 };   // the demo tries both
+  const FIRE_BG = { view: 0.7, foot: 0.12, deepAt: 7, tall: 0.7, smoke: 0.35, speedUp: 0.6, scale: 0.6, maxWidth: 960 };
+  const FIRE_SNAKE = { haze: 1, flames: 0.9, inner: 14, glow: 0.4, maxDpr: 1 };
 
   const SNAKE_FEEL = { size: 1.25, line: 0.08, gain: 2.3, rate: 1.25 };
   const BG_FEEL = { size: 0.6, line: 0.32, gain: 1.7, rate: 0.5 };   // softer lines: the void is out of focus
@@ -411,7 +413,6 @@
     uniform float u_flames;     // how tall the flames off it are (0 = none)
     uniform float u_flicker;    // firelight: 1 is steady
     uniform float u_glow;       // how strongly it lights the dark round it
-    uniform float u_crust;      // how much of the coal has gone dark (0: white-hot all over)
 
     void main() {
       vec2 p = v_uv;
@@ -433,9 +434,9 @@
       vec3 coal = vec3(0.0);
       if (body > 0.004) {
 
-      // A burning coal: a crust broken into lumps by cracks that glow white-hot, with hot patches that
-      // drift slowly across it and lumps that brighten and dim on their own. u_crust is how much of it
-      // has gone dark (0: white-hot all over). The lumps are bent by turbulence so they are not a mosaic.
+      // A burning coal: a dark crust broken into lumps by cracks that glow white-hot, with hot patches
+      // that drift slowly across it and lumps that brighten and dim on their own. The lumps are bent by
+      // turbulence so they are not a mosaic.
       vec2 c = s * 60.0 + (vec2(noise(s * 6.0), noise(s * 6.0 + 3.7)) - 0.5) * 3.0;
       vec2 cell = floor(c);
       float f1 = 8.0;
@@ -453,8 +454,7 @@
       float breathe = 0.5 + 0.5 * sin(t * (0.4 + 0.9 * hash(id)) + 6.2832 * hash(id + 3.1));
       float hot = smoothstep(0.33, 0.66, fbm3(s * 4.0 + vec2(0.11 * t, -0.07 * t)));   // slow, smooth patches of heat
       float glow = hot * (0.75 + 0.25 * breathe);
-      float heat = mix(0.80 + 0.12 * glow + 0.06 * breathe, 0.12 + 0.62 * glow, u_crust);   // the lumps
-      heat = max(heat, crack * mix(1.0, 0.55 + 0.45 * hot, u_crust));                      // the cracks
+      float heat = max(0.12 + 0.62 * glow, crack * (0.55 + 0.45 * hot));   // the lumps, and the cracks
       heat *= mix(0.72, 1.0, smoothstep(0.3, 0.8, inner));      // the edges are cooler
       heat += 0.5 * max(light, 0.0);                            // a tap fans it
       vec3 ash = mix(vec3(0.07, 0.035, 0.025), vec3(0.17, 0.15, 0.14), 0.6 * hash(id + 9.1));
@@ -488,52 +488,60 @@
   const FIRE_BACKGROUND_FRAGMENT = `${COMMON}${NOISE}
     varying vec2 v_uv;
     uniform vec2 u_size;       // the page in CSS pixels
-    uniform float u_flameH;    // how high the flames reach, as a share of the screen's height
-    uniform float u_bright;    // how strongly they burn, 0..1
-    uniform float u_smoke;     // how much smoke rises off them
+    uniform float u_depth;     // how far down the page is scrolled, 0..1
+    uniform float u_view;      // where the bottom of the screen is in the fire at the top of the page (screen heights)
+    uniform float u_foot;      // ...and at its deepest
+    uniform float u_tall;      // how tall the fire is (screen heights)
+    uniform float u_smoke;     // how much smoke rises off it
     uniform float u_flicker;   // firelight: 1 is steady
+    uniform float u_flameTime; // the flames' own clock: they burn faster the deeper you are
     uniform vec4 u_wave;       // a slide change: start time and strength in z and w (a gust)
 
     void main() {
       vec2 px = v_uv * u_size / 1000.0;            // same pixel scale on every screen
-      float h = (1.0 - v_uv.y) * u_size.y / 1000.0;   // height above the bottom of the screen
-      float t = u_time;
+      float screen = u_size.y / 1000.0;            // the screen's height, in the same units
+      float t = u_flameTime;
       vec2 disp = vec2(0.0);
       float light = 0.0;
       rings(px, disp, light);
 
+      // The screen is a window into one tall fire. At the top of the page it shows only the tips of the
+      // flames; going down the page lowers it into the fire, so the brighter, hotter part comes into
+      // view. The flames reach higher at the sides than in the middle, so they close round the page.
+      float w = mix(u_view, u_foot, u_depth) + 1.0 - v_uv.y;   // height in the fire, in screen heights
+      float side = abs(v_uv.x - 0.5) * 2.0;
+
       // A slide change is a gust: the flames jump up and settle
       float age = u_time - u_wave.z;
       float gust = age > 0.0 && age < 3.0 ? u_wave.w * age * exp(1.0 - age * 2.5) * 2.5 : 0.0;
-      float top = u_flameH * u_size.y / 1000.0 * (1.0 + 0.35 * gust);
-
-      // Turbulence that rises: the pattern is read further down as time goes on, so it moves up. It is
-      // finer across than up, which makes tongues, and a second, slower turbulence twists them. Each
-      // flame is cut off sharply where the turbulence no longer beats the height, so it has an edge.
-      vec2 q = vec2(px.x, h) + disp * 2.0;
-      top *= 0.65 + 0.7 * noise(vec2(q.x * 1.6 + 0.07 * t, 0.25 * t));   // taller in some places than others
-      // Above the smoke there is nothing to draw (most of the screen)
-      if (h > top * 4.0 + 0.05 && light <= 0.0) {
+      vec2 q = vec2(px.x, w * screen) + disp * 2.0;
+      float tall = u_tall * (1.0 + 0.45 * side * side) * (1.0 + 0.25 * gust) * (0.8 + 0.4 * noise(vec2(q.x * 1.6 + 0.07 * t, 0.25 * t)));
+      float rise = w / tall;
+      // Above the smoke there is nothing to draw
+      if (rise > 2.3 && light <= 0.0) {
         gl_FragColor = vec4(0.0);
         return;
       }
+
+      // Turbulence that rises: the pattern is read further down as time goes on, so it moves up. It is
+      // finer across than up, which makes tongues, and a second, slower turbulence twists them. Solid
+      // at the base, torn into tongues higher up: the turbulence counts for more the higher it is.
       vec2 twist = vec2(fbm3(q * 2.5 + vec2(0.0, -0.8 * t)), fbm3(q * 2.5 + vec2(4.3, -1.0 * t))) - 0.44;
       float n = fbm(vec2(q.x * 4.0, q.y * 2.2 - 1.8 * t) + twist * 2.0);
-      float rise = h / top;
-      // Solid at the base, torn into tongues higher up: the turbulence counts for more the higher it is
-      float heat = 1.05 - rise + (n - 0.47) * (0.6 + 1.4 * rise) + 0.8 * max(light, 0.0);
-      heat *= u_flicker;
-      float fa = smoothstep(0.0, 0.35, heat) * mix(0.55, 0.9, u_bright);   // the tips are thin, the base solid
-      vec3 flame = heatColor(min(heat * mix(0.72, 0.95, u_bright), 0.8));   // burning harder, it burns yellower (never white: see-through white is grey)
+      float heat = (1.05 - rise + (n - 0.47) * (0.6 + 1.4 * rise) + 0.8 * max(light, 0.0)) * u_flicker;
+      // the tips are thin and dark, so the fire fades into the page; the base is solid and bright
+      // (never white: see-through white is grey)
+      float fa = smoothstep(0.0, 0.45, heat) * 0.82;
+      vec3 flame = heatColor(min(heat * 0.95, 0.78)) * mix(0.3, 1.0, smoothstep(0.0, 0.5, heat));
 
       // Smoke: slower, softer and grey, from where the flames give out to well above them
-      float band = smoothstep(top * 0.5, top * 1.3, h) * (1.0 - smoothstep(top * 1.6, top * 4.0, h));
+      float band = smoothstep(0.75, 1.1, rise) * (1.0 - smoothstep(1.4, 2.3, rise));
       float sa = 0.0;
       vec3 smoke = vec3(0.0);
       if (band > 0.0 && u_smoke > 0.0) {
         float drift = fbm3(vec2(q.x * 2.2 + 0.05 * t, q.y * 1.6 - 0.35 * t) + twist * 0.8);
         sa = smoothstep(0.40, 0.70, drift) * band * u_smoke * 0.12;
-        smoke = mix(vec3(0.62, 0.30, 0.14), vec3(0.34, 0.32, 0.31), smoothstep(top, top * 2.0, h));
+        smoke = mix(vec3(0.62, 0.30, 0.14), vec3(0.34, 0.32, 0.31), smoothstep(0.9, 1.5, rise));
       }
 
       gl_FragColor = vec4(flame * fa + smoke * sa * (1.0 - fa), fa + sa * (1.0 - fa));
@@ -980,6 +988,8 @@
   let swellLast = null;
   let snakeCausticClock = 0;
   let bgCausticClock = 0;
+  let fireClock = 0;
+  let fireDepth = 0;
 
   // The water follows the real clock, so a refresh or another page picks the pattern up where it was
   // instead of starting over. Every wave speed is a whole multiple of 2*pi/TIME_WRAP (in clock units),
@@ -1053,10 +1063,13 @@
     gl.uniform1f(snake.uniforms.u_ringLife, level.ringLife);
     gl.uniform4fv(snake.uniforms.u_ripples, ripplesSnake);
     // Fire's own dials (Water's program has none of these, so they are skipped there)
-    const burn = FIRE_BG.start + (1 - FIRE_BG.start) * slideDepth;
-    gl.uniform1f(snake.uniforms.u_flames, FIRE_SNAKE.flames * (0.6 + 0.4 * burn));
+    // Fire: how deep into the fire the page has gone (eased, so a jump to another slide still lowers the view smoothly),
+    // and the flames' clock, which runs faster down there
+    const depthGoal = Math.min(1, Math.max(0, window.scrollY / (FIRE_BG.deepAt * window.innerHeight)));
+    fireDepth = gap > 2 ? depthGoal : fireDepth + (depthGoal - fireDepth) * Math.min(1, dt * 2.5);
+    fireClock = (fireClock + dt * (1 + FIRE_BG.speedUp * fireDepth)) % TIME_WRAP;
+    gl.uniform1f(snake.uniforms.u_flames, FIRE_SNAKE.flames);
     gl.uniform1f(snake.uniforms.u_glow, FIRE_SNAKE.glow);
-    gl.uniform1f(snake.uniforms.u_crust, FIRE_SNAKE.crust);
     gl.uniform1f(snake.uniforms.u_flicker, fx.flick);
     if (snake.burning) gl.uniform1f(snake.uniforms.u_haze, FIRE_SNAKE.haze);
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
@@ -1082,9 +1095,12 @@
         g.uniform1f(bg.uniforms.u_ringSpeed, fx.ringSpeed);
         g.uniform1f(bg.uniforms.u_ringLife, level.ringLife);
         g.uniform4fv(bg.uniforms.u_ripples, ripplesBg);
-        g.uniform1f(bg.uniforms.u_flameH, FIRE_BG.flameH[0] + (FIRE_BG.flameH[1] - FIRE_BG.flameH[0]) * burn);
-        g.uniform1f(bg.uniforms.u_bright, burn);
+        g.uniform1f(bg.uniforms.u_depth, fireDepth);
+        g.uniform1f(bg.uniforms.u_view, FIRE_BG.view);
+        g.uniform1f(bg.uniforms.u_foot, FIRE_BG.foot);
+        g.uniform1f(bg.uniforms.u_tall, FIRE_BG.tall);
         g.uniform1f(bg.uniforms.u_smoke, FIRE_BG.smoke);
+        g.uniform1f(bg.uniforms.u_flameTime, fireClock);
         g.drawArrays(g.TRIANGLE_STRIP, 0, 4);
       }
     }
@@ -1308,7 +1324,7 @@
         return (performance.now() - t) / frames;
       },
       // stop following the real clock, forget the clocks and rings, so tests can compare two versions from the same starting point
-      reset: () => { followClock = false; swellClock = 0; swellLast = null; snakeCausticClock = 0; bgCausticClock = 0; ripplesSnake.fill(0); ripplesBg.fill(0); },
+      reset: () => { followClock = false; swellClock = 0; swellLast = null; snakeCausticClock = 0; bgCausticClock = 0; fireClock = 0; ripplesSnake.fill(0); ripplesBg.fill(0); },
       backgroundChecksum: (seconds) => {
         if (!bg) return 0;
         draw(seconds);
