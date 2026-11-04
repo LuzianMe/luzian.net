@@ -3059,10 +3059,29 @@ html.slides .slide-art svg {
   filter: drop-shadow(0 0 5px rgb(var(--accent) / 0.8));
 }
 
-.art-node {
-  fill: rgb(var(--surface-1) / 0.85);
-  stroke: rgb(var(--accent) / 0.8);
-  stroke-width: 1.2;
+/* Career, Tools: raw data of every shape goes into the gear, the same clean dot comes out */
+.art-raw {
+  fill: rgb(var(--accent-light) / 0.75);
+}
+
+.art-gear {
+  fill: rgb(var(--accent) / 0.08);
+  stroke: rgb(var(--accent));
+  stroke-width: 1.6;
+  stroke-linejoin: round;
+  filter: drop-shadow(0 0 6px rgb(var(--accent) / 0.6));
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .art-gear {
+    animation: gear-turn 9s linear infinite;
+  }
+}
+
+@keyframes gear-turn {
+  to { transform: rotate(360deg); }
 }
 
 /* Setup, Locomotion: a treadmill seen from the side. The band runs, and two feet walk on it: each one
@@ -3261,14 +3280,10 @@ html.slides .slide.has-art .setup-card {
     font-size: 24px;
   }
 
-  /* the pipeline has seven names side by side: drawn the width of the screen at its own type size */
   html.slides .art-pipeline svg {
-    max-height: 46vh;
+    max-height: 40vh;
   }
 
-  html.slides .art-pipeline .art-label {
-    font-size: 15px;
-  }
 
   html.slides .art-ruler {
     display: none !important;
@@ -3301,11 +3316,11 @@ html.slides .slide.has-art .setup-card {
     animation-delay: calc(var(--d, 0) * 160ms + 250ms);
   }
 
-  html.slides-anim .slide-unit :is(.art-dot, .art-ring, .art-hand, .art-label, .art-big, .art-muted, .art-span, .art-seg, .art-node, .art-leader, .art-faint, .art-flow) {
+  html.slides-anim .slide-unit :is(.art-dot, .art-ring, .art-hand, .art-label, .art-big, .art-muted, .art-span, .art-seg, .art-fade, .art-leader, .art-faint, .art-flow) {
     opacity: 0;
   }
 
-  html.slides-anim .slide-unit.arrived :is(.art-dot, .art-ring, .art-hand, .art-label, .art-big, .art-muted, .art-span, .art-seg, .art-node, .art-leader, .art-faint, .art-flow) {
+  html.slides-anim .slide-unit.arrived :is(.art-dot, .art-ring, .art-hand, .art-label, .art-big, .art-muted, .art-span, .art-seg, .art-fade, .art-leader, .art-faint, .art-flow) {
     animation: art-light 0.6s ease forwards;
     animation-delay: calc(var(--d, 0) * 90ms + 900ms);
   }
