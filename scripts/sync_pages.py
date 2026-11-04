@@ -5,8 +5,8 @@ Each page marks its shared parts with comments:
 
     <!-- shared:head -->      icons, link previews, language links, stylesheet, theme script
     <!-- shared:layers -->    the background layers (snake, particles, spotlight)
-    <!-- shared:nav -->       skip link, menu
-    <!-- shared:footer -->    language switch (and the theme switch, added by theme.js), copyright, footer links
+    <!-- shared:nav -->       skip link, menu, language switch
+    <!-- shared:footer -->    the theme switch (added by theme.js), copyright, footer links
     <!-- shared:scripts -->   the scripts every page loads at the end
     <!-- /shared:NAME -->     ends a part
 
@@ -114,6 +114,7 @@ def part_head(lang, key, tag):
         *(f'<link rel="preload" href="/assets/fonts/{name}.woff2" as="font" type="font/woff2" crossorigin>' for name in PRELOAD_FONTS),
         f'<link rel="stylesheet" href="/assets/style.css?v={tag}">',
         f'<script src="/assets/theme.js?v={tag}"></script>',
+        f'<script src="/assets/swipe.js?v={tag}"></script>',
     ]
     return [(0, line) for line in lines]
 
