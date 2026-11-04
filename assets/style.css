@@ -255,7 +255,7 @@ h1, h2, h3, .nav-pill {
   width: min(85vw, 820px);
   height: min(85vw, 820px);
   transform: translate(-50%, -50%);
-  opacity: 0.22;
+  opacity: var(--snake-opacity, 0.22);
   pointer-events: none;
   z-index: 0;
 }
@@ -304,6 +304,11 @@ h1, h2, h3, .nav-pill {
 /* The snake is not there at all until the effect is ready, so it comes in softly */
 @keyframes water-snake-in {
   from { opacity: 0; }
+}
+
+/* Fire's snake is a white-hot coal (assets/water.js), so it shows more than the faint watermark */
+html[data-theme="fire"] .ouro-bg-rotator.water-on {
+  --snake-opacity: 0.5;
 }
 
 /* Faint caustic light behind the snake (assets/water.js), drawn small and stretched to the page */
@@ -1704,6 +1709,11 @@ html[data-theme="fire"] .ember-glow {
   display: block;
 }
 
+/* ...unless the flames are drawn (assets/water.js), which make their own light */
+html.fire-drawn[data-theme="fire"] :is(.ember-glow, .depth-veil) {
+  display: none;
+}
+
 @keyframes ember-breathe {
   0%, 100% { opacity: 0.78; }
   11% { opacity: 0.94; }
@@ -2767,7 +2777,7 @@ html.slides .slide-timeline .gear-list li:first-child::after {
   @supports (animation-timeline: scroll()) {
     html.slides .ouro-bg-rotator,
     html.slides.past-hero .ouro-bg-rotator {
-      opacity: 0.22;
+      opacity: var(--snake-opacity, 0.22);
       transition: none;
       animation: snake-away linear both;
       animation-timeline: scroll(root);
@@ -2947,6 +2957,34 @@ html.past-hero .nav-logo-item {
 html.slides .slide-art {
   display: block;
   width: 100%;
+}
+
+/* Deep in Fire the flames behind are as bright as the drawings, so each drawing has a soft patch of
+   shade behind it, like smoke, and its lines burn brighter */
+html.fire-drawn[data-theme="fire"].slides .slide-art {
+  position: relative;
+  isolation: isolate;
+}
+
+html.fire-drawn[data-theme="fire"].slides .slide-art::before {
+  content: '';
+  position: absolute;
+  inset: -18% -14%;
+  z-index: -1;
+  pointer-events: none;
+  /* a smoky red-brown, not black: thin black over yellow flames looks olive */
+  background: radial-gradient(closest-side, rgb(30 6 2 / 0.84) 0%, rgb(30 6 2 / 0.62) 45%, rgb(30 6 2 / 0.26) 75%, transparent 100%);
+}
+
+/* on a phone the drawing is as wide as the screen, so the shade stays within it */
+@media (max-width: 767px) {
+  html.fire-drawn[data-theme="fire"].slides .slide-art::before {
+    inset: -18% 0;
+  }
+}
+
+html.fire-drawn[data-theme="fire"] :is(.art-line, .art-faint) {
+  stroke: rgb(var(--accent-light) / 0.8);
 }
 
 html.slides .slide-art svg {
