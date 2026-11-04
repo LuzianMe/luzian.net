@@ -1406,6 +1406,41 @@ footer p {
   margin: 0;
 }
 
+/* the footer is a stop of its own, so it can be reached even when the last slide fills the screen */
+html.slides footer {
+  scroll-snap-align: end;
+}
+
+/* Career, Tools: the tools' own marks, drawn in the theme colour (Fire recolours them), each named
+   small underneath */
+.tool-logos {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1.5rem 1rem;
+  margin: 0 auto;
+  padding: 0;
+  max-width: 420px;
+}
+
+.tool-logos li {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.55rem;
+  font-family: var(--font-ui);
+  font-size: var(--fs-sm);
+  color: rgb(var(--muted));
+  text-align: center;
+}
+
+.tool-logos svg {
+  width: 2.6rem;
+  height: 2.6rem;
+  fill: rgb(var(--accent-light));
+  filter: drop-shadow(0 0 6px rgb(var(--accent) / 0.55));
+}
+
 /* ==========================================================================
    Scrollbar Styles
    ========================================================================== */
@@ -2452,11 +2487,132 @@ html.slides .slide-timeline .gear-list li:first-child::after {
     opacity: 0;
   }
 
-  /* the timeline's dates go under each entry, so the text keeps the whole width */
+  /* the timeline's dates sit beside each title, the note runs the whole width under both, so a whole
+     list fits one screen */
   html.slides .slide-timeline .gear-list li {
-    flex-direction: column;
-    align-items: flex-start;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 0 0.6rem;
+    align-items: start;
+    padding-top: 0.6rem;
+    padding-bottom: 0.6rem;
+  }
+
+  html.slides .slide-timeline .gear-list li > div {
+    display: contents;
+  }
+
+  html.slides .slide-timeline .gear-name {
+    grid-column: 1;
+    grid-row: 1;
+    line-height: 1.35;
+  }
+
+  html.slides .slide-timeline .gear-note {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    margin-top: 0.15rem;
+    line-height: 1.45;
+  }
+
+  html.slides .slide-timeline .status {
+    grid-column: 2;
+    grid-row: 1;
+    padding: 0.05rem 0.55rem;
+    font-size: 0.75rem;
+    white-space: nowrap;
+  }
+
+  html.slides .slide-timeline .gear-list li:first-child {
+    padding-top: 0;
+  }
+
+  html.slides .slide-timeline .gear-list li:last-child {
+    padding-bottom: 0;
+  }
+
+  html.slides .slide-timeline .setup-card h2 {
+    margin-bottom: 1rem;
+  }
+
+  /* Setup, PC: each spec on one line, its label beside it; the gauge small under the card */
+  html.slides .spec-list div {
+    flex-direction: row;
+    align-items: baseline;
+    gap: 0.75rem;
+    padding: 0.5rem 0;
+  }
+
+  html.slides .spec-list dt {
+    flex: 0 0 4.4rem;
+  }
+
+  html.slides .spec-hl {
+    margin-left: 0;
+    font-size: 0.75rem;
+  }
+
+  html.slides .setup-card-wide .setup-card-intro {
+    margin-bottom: 0.75rem;
+  }
+
+  html.slides .setup-updated {
+    margin: 0.75rem 0 0;
+  }
+
+  html.slides .slide-art.art-gauge svg {
+    max-height: 16vh;
+  }
+
+  html.slides .slide-art.art-rings svg {
+    max-height: 19vh;
+  }
+
+  html.slides .slide-art.art-route svg {
+    max-height: 22vh;
+  }
+
+  html.slides #about .slide-panel {
+    width: 100%;
+    padding: 1.5rem 1.15rem;
+  }
+
+  html.slides #about .slide-art.art-orbit svg {
+    max-height: 13vh;
+    margin-top: 0.75rem;
+  }
+
+  html.slides .slide .setup-card {
+    padding: 1.25rem 1.15rem;
+  }
+
+  html.slides .slide .setup-card p {
+    line-height: 1.6;
+  }
+
+  /* Home, Exploring: the tags as a quiet cloud, not a block of buttons */
+  html.slides #about .tags {
     gap: 0.35rem;
+    margin-top: 0.9rem;
+  }
+
+  html.slides #about h3 {
+    font-size: 1.3rem;
+    margin-bottom: 0.9rem;
+  }
+
+  html.slides #about .now-list {
+    margin-bottom: 0;
+  }
+
+  html.slides #about .now-list li {
+    margin-bottom: 0.45rem;
+    line-height: 1.5;
+  }
+
+  html.slides #about .tags li {
+    padding: 0.1rem 0.6rem;
+    font-size: 0.75rem;
   }
 
   /* where to next: compact rows, the arrow at the end */
@@ -2950,6 +3106,50 @@ html.slides .slide-art svg {
   50% { transform: translate(-60px, 0); animation-timing-function: ease-out; }
   75% { transform: translate(0, -30px); animation-timing-function: ease-in; }
   100% { transform: translate(60px, 0); }
+}
+
+/* Career, Projects: a homelab rack, each unit's second light blinking on its own beat.
+   Career, Talks & Panels: a panel of three, the middle one speaking (rings spreading out). */
+.art-wave {
+  fill: none;
+  stroke: rgb(var(--accent) / 0.7);
+  stroke-width: 1.5;
+  opacity: 0;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html.slides-anim .slide-unit.arrived .art-dot.art-blink {
+    animation: art-light 0.6s ease forwards, art-blink 2.4s steps(1) infinite;
+    animation-delay: calc(var(--d, 0) * 90ms + 900ms), var(--b, 0s);
+  }
+
+  html.slides .slide-unit.arrived .art-wave {
+    animation: art-wave 2.7s ease-out infinite;
+    animation-delay: calc(var(--w, 0) * 0.9s + 1.2s);
+  }
+}
+
+@keyframes art-blink {
+  0%, 62% { fill: rgb(var(--accent-light)); }
+  63%, 70% { fill: rgb(var(--accent) / 0.15); }
+  71%, 100% { fill: rgb(var(--accent-light)); }
+}
+
+@keyframes art-wave {
+  0% { opacity: 0.9; transform: scale(1); }
+  100% { opacity: 0; transform: scale(2.6); }
+}
+
+/* the drawing goes under the card of its own part of a shared slide */
+html.slides .sub-slide > .slide-art {
+  order: 2;
+  margin-top: 1.25rem;
+}
+
+html.slides .sub-slide > .slide-art svg {
+  max-height: 22vh;
 }
 
 /* with less motion the moving points stay home (the drawing still says it all) */
