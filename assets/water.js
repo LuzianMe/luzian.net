@@ -11,6 +11,11 @@
 // shadow that falls on the water below and wobbles with the same waves and rings, a faint caustic
 // light playing across the letters, and a small bob on the swell.
 //
+// Fire has pictures of its own, not the water's in other colours: flames that rise from the bottom of the
+// screen (the screen is a window into one tall fire, lowered into it as the page scrolls down), a little
+// smoke above them, and the snake as a burning coal with flames licking off it. Each canvas compiles a
+// second program for them the first time Fire is shown, and switches with the theme.
+//
 // Debugging: add ?water=off to a page's address to switch the effect off, or ?water=debug to
 // expose window.__ouroWater (draw, ripple, dispose, and test helpers).
 (function () {

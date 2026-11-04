@@ -2959,6 +2959,34 @@ html.slides .slide-art {
   width: 100%;
 }
 
+/* Deep in Fire the flames behind are as bright as the drawings, so each drawing has a soft patch of
+   shade behind it, like smoke, and its lines burn brighter */
+html.fire-drawn[data-theme="fire"].slides .slide-art {
+  position: relative;
+  isolation: isolate;
+}
+
+html.fire-drawn[data-theme="fire"].slides .slide-art::before {
+  content: '';
+  position: absolute;
+  inset: -18% -14%;
+  z-index: -1;
+  pointer-events: none;
+  /* a smoky red-brown, not black: thin black over yellow flames looks olive */
+  background: radial-gradient(closest-side, rgb(30 6 2 / 0.84) 0%, rgb(30 6 2 / 0.62) 45%, rgb(30 6 2 / 0.26) 75%, transparent 100%);
+}
+
+/* on a phone the drawing is as wide as the screen, so the shade stays within it */
+@media (max-width: 767px) {
+  html.fire-drawn[data-theme="fire"].slides .slide-art::before {
+    inset: -18% 0;
+  }
+}
+
+html.fire-drawn[data-theme="fire"] :is(.art-line, .art-faint) {
+  stroke: rgb(var(--accent-light) / 0.8);
+}
+
 html.slides .slide-art svg {
   display: block;
   width: 100%;
