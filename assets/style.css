@@ -1691,6 +1691,60 @@ html.slides footer {
   z-index: 1;
 }
 
+/* Swiping between pages (assets/swipe.js): the browser's transition from one page to the next is on, but
+   swipe.js skips it unless a swipe started it. During one, the content (.page-bg) slides across, the menu
+   stays put, and the background (the rest of the picture) fades from the old page to the new, so the
+   water or fire never moves. The names exist only while swiping, so the theme change above still treats
+   the page as one picture. */
+@view-transition {
+  navigation: auto;
+}
+
+html.swipe-moving,
+html.swipe-moving body {
+  overflow-x: clip;
+}
+
+html.swipe-in .page-bg {
+  view-transition-name: swipe-page;   /* the page arriving; on the page leaving, swipe.js names the slide on screen */
+}
+
+html.swiping .nav-container {
+  view-transition-name: swipe-menu;
+}
+
+html.swiping::view-transition-old(root) {
+  z-index: 3;
+  animation: swipe-fade 0.4s ease both;
+}
+
+html.swiping::view-transition-group(swipe-menu) {
+  z-index: 5;
+}
+
+html.swiping::view-transition-group(swipe-page) {
+  z-index: 4;
+  animation-duration: 0s;
+}
+
+html.swiping::view-transition-old(swipe-page),
+html.swiping::view-transition-new(swipe-page) {
+  animation-duration: 0.36s;
+  animation-timing-function: cubic-bezier(0.2, 0.8, 0.2, 1);
+  animation-fill-mode: both;
+}
+
+html.swipe-next::view-transition-old(swipe-page) { animation-name: swipe-out-left; }
+html.swipe-next::view-transition-new(swipe-page) { animation-name: swipe-in-right; }
+html.swipe-prev::view-transition-old(swipe-page) { animation-name: swipe-out-right; }
+html.swipe-prev::view-transition-new(swipe-page) { animation-name: swipe-in-left; }
+
+@keyframes swipe-fade { to { opacity: 0; } }
+@keyframes swipe-out-left { to { transform: translateX(-35%); opacity: 0; } }
+@keyframes swipe-out-right { to { transform: translateX(35%); opacity: 0; } }
+@keyframes swipe-in-right { from { transform: translateX(100%); } }
+@keyframes swipe-in-left { from { transform: translateX(-100%); } }
+
 /* The glowing front of that circle (assets/theme.js): a ring drawn by a gradient whose radius is
    animated, centred on --rim-x / --rim-y */
 @property --rim-r {

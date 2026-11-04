@@ -2,7 +2,7 @@
 //
 // The page's colours live in CSS variables (assets/style.css); this script only sets
 // <html data-theme="water|fire">, remembers the choice, and builds the little droplet | flame switch
-// in the footer, next to the language switch. It is loaded in the <head>, so the right colours are there from the
+// in the footer. It is loaded in the <head>, so the right colours are there from the
 // first paint. The choice is shared between open windows. Open any page with ?theme=fire (or
 // ?theme=water) to switch it from a link. ?reveal=ring on any address swaps the page-wide circle for just
 // the glowing ring (a fallback to try if the circle ever misbehaves on a device).
