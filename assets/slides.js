@@ -3,7 +3,6 @@
 // The browser's own scroll snapping moves from slide to slide; this file adds what CSS cannot:
 //  - the depth gauge on the right (a mark per slide, the bright one is where you are; click to go there)
 //  - the text of a slide arriving with it, a line at a time, the first time it is reached
-//  - the small logo in the menu once past the first slide (Home)
 //  - how deep the visitor is: --depth on <html> (0 at the top, 1 at the last slide) for the veil that
 //    darkens the water, and a "slidechange" event on window ({ index, count, depth }) for the water's depth
 //  - the moment the page starts to move after resting, a "slidemove" event ({ direction }) that the water
@@ -118,22 +117,6 @@
     });
   }
 
-  // ---- the small logo in the menu (Home) ----------------------------------------------------------
-  let navLogo = null;
-  const pills = document.querySelector('.nav-pills');
-  if (document.body.classList.contains('home') && pills) {
-    const item = document.createElement('li');
-    item.className = 'nav-logo-item';
-    navLogo = document.createElement('a');
-    navLogo.className = 'nav-logo';
-    navLogo.href = '#';
-    navLogo.setAttribute('aria-label', spanish ? 'Luzian, volver al inicio' : 'Luzian, back to the start');
-    navLogo.innerHTML = '<img src="/assets/logo.svg" alt="" width="54" height="30">';
-    navLogo.addEventListener('click', (event) => { event.preventDefault(); goTo(0); });
-    item.appendChild(navLogo);
-    pills.insertBefore(item, pills.firstChild);
-  }
-
   // ---- where the visitor is ----------------------------------------------------------------------
   let current = -1;
   let flashTimer = 0;
@@ -161,7 +144,6 @@
     const depth = units.length > 1 ? index / (units.length - 1) : 0;
     root.style.setProperty('--depth', depth.toFixed(3));
     root.classList.toggle('past-hero', index > 0);
-    if (navLogo) navLogo.tabIndex = index > 0 ? 0 : -1;
     window.dispatchEvent(new CustomEvent('slidechange', { detail: { index, count: units.length, depth, first, direction } }));
   }
   let queued = false;

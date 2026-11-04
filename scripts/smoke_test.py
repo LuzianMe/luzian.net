@@ -135,8 +135,8 @@ def check_page(browser, base, width, theme, path):
             problems.append('wrong theme')
         if not page.query_selector('footer .theme-switch'):
             problems.append('no theme switch in the footer')
-        if path != '/404.html' and not page.query_selector('footer .lang-switch'):
-            problems.append('no language switch in the footer')
+        if path != '/404.html' and not page.query_selector('nav .lang-switch'):
+            problems.append('no language switch in the menu')
         if page.evaluate("document.querySelectorAll('h1').length") != 1:
             problems.append('does not have exactly one h1')
     for p in problems:
@@ -633,7 +633,7 @@ def slides_moving(browser, base):
         current: [...document.querySelectorAll('.gauge-step')].findIndex(s => s.getAttribute('aria-current') === 'true'),
         depth: getComputedStyle(document.documentElement).getPropertyValue('--depth').trim(),
         changes: window.__changes,
-        logo: document.documentElement.classList.contains('past-hero'),
+        pastHero: document.documentElement.classList.contains('past-hero'),
         arrived: document.querySelectorAll('.slide-unit.arrived').length,
     })""")
     moves = page.evaluate("window.__moves")
@@ -641,8 +641,8 @@ def slides_moving(browser, base):
         fail('slides', f'the water was not told the page started moving down ({moves})')
     if state['current'] != 2 or state['depth'] != '0.667' or state['changes'][-1:] != [2]:
         fail('slides', f'the gauge, depth or water event did not follow the slides ({state})')
-    if not state['logo']:
-        fail('slides', 'the small logo did not come into the menu past the first slide')
+    if not state['pastHero']:
+        fail('slides', 'the page did not note it was past the first slide (html.past-hero)')
     if state['arrived'] < 3:
         fail('slides', 'the text of the slides reached did not arrive')
     page.click('.gauge-step >> nth=0')
