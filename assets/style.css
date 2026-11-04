@@ -2544,9 +2544,10 @@ html.slides .slide-timeline .gear-list li:first-child::after {
   }
 }
 
-/* Where the browser can tie an animation to scrolling, the slides move with the finger instead: the
-   cards of the next slide come up out of the depth (the lower lines a little later, so they catch up),
-   and the cards of the slide being left sink back and fade. Each slide is the clock of its own cards. */
+/* Where the browser can tie an animation to scrolling, the slides move with the finger instead. A card
+   vanishes as soon as its slide starts to leave, and the next one appears only as its slide settles
+   into place, its lines rising the last stretch (the lower ones a little later, so they catch up).
+   Each slide is the clock of its own cards. */
 @supports (animation-timeline: view()) {
   @media (prefers-reduced-motion: no-preference) {
     html.slides-anim .slide-unit {
@@ -2560,25 +2561,39 @@ html.slides .slide-timeline .gear-list li:first-child::after {
       animation-delay: 0s;
       animation-timeline: --slide;
     }
+
+    html.slides-anim .slide-unit :is(.slide-panel, .sub-slide),
+    html.slides-anim .slide-unit:is(.slide-panel, .sub-slide) {
+      animation: card-through linear both;
+      animation-timeline: --slide;
+    }
   }
 }
 
 @keyframes slide-through {
-  entry 0% {
+  entry 0%, entry 70% {
     opacity: 0;
-    transform: translateY(calc(4rem + var(--i, 0) * 1.5rem)) scale(0.92);
+    transform: translateY(calc(1.5rem + var(--i, 0) * 0.75rem)) scale(0.96);
   }
-  entry 85% {
+  entry 100%, exit 0% {
     opacity: 1;
     transform: none;
   }
-  exit 15% {
-    opacity: 1;
-    transform: none;
-  }
-  exit 100% {
+  exit 18%, exit 100% {
     opacity: 0;
-    transform: translateY(-3rem) scale(0.9);
+    transform: translateY(-1rem) scale(0.96);
+  }
+}
+
+@keyframes card-through {
+  entry 0%, entry 70% {
+    opacity: 0;
+  }
+  entry 100%, exit 0% {
+    opacity: 1;
+  }
+  exit 18%, exit 100% {
+    opacity: 0;
   }
 }
 
