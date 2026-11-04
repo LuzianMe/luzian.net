@@ -574,7 +574,7 @@ def slides(base):
     keys move one slide, the water hears about it, and the fallbacks scroll plainly."""
     tasks = [(f'slides {address} {width}px {theme}', lambda browser, a=address, w=width, c=count, t=theme: slide_page(browser, base, a, w, c, t))
              for address, counts in SLIDE_COUNTS.items()
-             for width, count in ((1280, counts[0]), (390, counts[1]))
+             for width, count in ((1280, counts[0]), (360, counts[1]))
              for theme in ('water', 'fire')]
     tasks.append(('slides moving', lambda browser: slides_moving(browser, base)))
     return tasks
@@ -583,6 +583,8 @@ def slides(base):
 def slide_page(browser, base, address, width, count, theme):
     problems = []
     context, page = new_page(browser, base, width, theme, problems)
+    if width < 768:
+        page.set_viewport_size({'width': width, 'height': 740})   # a small phone with its browser bars showing
     page.goto(base + address + '?slides&water=off', wait_until='networkidle')
     page.wait_for_timeout(400)
     where = f'{address} at {width}px, {theme}'
@@ -592,6 +594,9 @@ def slide_page(browser, base, address, width, count, theme):
         steps: document.querySelectorAll('.gauge-step').length,
         snap: getComputedStyle(document.documentElement).scrollSnapType,
         wide: document.documentElement.scrollWidth > innerWidth + 1,
+        tall: [...document.querySelectorAll('.slide-unit:not(.slide-hero)')]
+            .filter(u => u.getBoundingClientRect().height > innerHeight + 12)
+            .map(u => u.dataset.title + ' ' + Math.round(u.getBoundingClientRect().height)),
     })""")
     if not got['on']:
         fail('slides', f'{where}: ?slides did not turn the layout on')
@@ -603,6 +608,8 @@ def slide_page(browser, base, address, width, count, theme):
         fail('slides', f'{where}: the page does not snap from slide to slide ({got["snap"]})')
     if got['wide']:
         fail('slides', f'{where}: the page is wider than the screen')
+    if got['tall']:
+        fail('slides', f'{where}: a slide does not fit the screen: {", ".join(got["tall"])}')
     for p in problems:
         fail('slides', f'{where}: {p}')
     context.close()
