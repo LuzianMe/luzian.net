@@ -72,6 +72,16 @@
   //   veins   : how white-hot the brightest points of the caustic web get on the snake
   const FIRE = { flicker: 0.4, haze: 0.75, veins: 1.4 };
   let palette = THEMES[document.documentElement.getAttribute('data-theme') === 'fire' ? 'fire' : 'water'];
+  // Fire's own pictures (the shaders below the water's):
+  //   start : how strongly it burns on the first screen (0..1); deeper slides build it up to 1
+  //   flameH: how high the flames reach up the screen, from the first screen to the deepest slide
+  //   smoke : how much smoke rises off them      haze : how much the hot air ripples the snake and the logo
+  //   flames: how tall the flames off the snake are      inner : the blur (px) that finds the thick of its body
+  //   maxDpr: the snake is drawn at no more than this many pixels per CSS pixel
+  //   scale : the background is drawn at this fraction of the screen's size
+  const FIRE_START = /[?&]fire=strong\b/.test(location.search) ? 1 : 0.3;   // the demo tries both
+  const FIRE_BG = { start: FIRE_START, flameH: [0.11, 0.26], smoke: 0.35, scale: 0.6, maxWidth: 960 };
+  const FIRE_SNAKE = { haze: 1, flames: 0.9, inner: 14, glow: 0.4, maxDpr: 1, crust: /[?&]coal=white\b/.test(location.search) ? 0 : 1 };   // the demo tries both
 
   const SNAKE_FEEL = { size: 1.25, line: 0.08, gain: 2.3, rate: 1.25 };
   const BG_FEEL = { size: 0.6, line: 0.32, gain: 1.7, rate: 0.5 };   // softer lines: the void is out of focus
@@ -324,12 +334,22 @@
       float g = texture2D(u_halo, turned(v_uv)).a * 0.25 * u_glow * u_flicker;
       col = vec4(u_haloColor * g, g) + col * (1.0 - g);
 
+      #ifdef FIRE
+      // Fire: no water to cast a shadow on. The air above the flames ripples the letters as it rises,
+      // and they are lit from below, hottest at the bottom.
+      col = vec4(u_haloColor * g, g);
+      vec2 rise = vec2(noise(vec2(v_uv.x * 7.0, v_uv.y * 9.0 + u_time * 2.6)), noise(vec2(v_uv.x * 9.0 + 4.1, v_uv.y * 7.0 + u_time * 2.1))) - 0.5;
+      vec4 L = texture2D(u_tex, turned(v_uv + rise * vec2(0.006, 0.003) * u_haze + vec2(0.0, lift * u_px.y)));
+      if (L.a > 0.004) {
+        float below = smoothstep(u_live.x, u_live.y, v_uv.y);
+        vec3 rgb = L.rgb * u_letters * mix(0.92, 1.12, below) * mix(1.0, u_flicker, 0.3);
+        L = vec4(min(rgb, vec3(L.a)), L.a);
+      }
+      #else
       // Letters, raised by the swell. Caustic light from the water below plays across them: the
       // same light web as under the snake, so it lines up, with the same dim-between-lines look,
       // plus a cool highlight on the lines.
-      // Fire: heat shimmer ripples the letters a little (u_haze is 0 in Water)
-      float wobble = u_haze * 0.0011 * sin(v_uv.y * 130.0 - u_swellTime * 3.2);
-      vec4 L = texture2D(u_tex, turned(v_uv + vec2(wobble, lift * u_px.y)));
+      vec4 L = texture2D(u_tex, turned(v_uv + vec2(0.0, lift * u_px.y)));
       if (L.a > 0.004) {                               // only where there are letters
         float web = caustic(w + disp * 2.0, u_cScale, u_cLine, ${SNAKE_FEEL.gain.toFixed(2)});
         vec3 rgb = L.rgb * u_letters * (vec3(1.0) - u_light * u_absorb * (1.0 - web));
@@ -337,18 +357,207 @@
         rgb *= 1.0 + 0.5 * max(l0, 0.0);               // a passing ring catches a little glint
         L = vec4(min(rgb, vec3(L.a)), L.a);
       }
+      #endif
       gl_FragColor = L + col * (1.0 - L.a);
+    }`;
+
+  // ---------------------------------------------------------------------------------------------
+  // Fire. Its own pictures, not the water's in other colours: flames that rise and break up, a bed of
+  // embers that is brightest at the bottom, a little smoke above, air that ripples with the heat, and
+  // the snake as a white-hot coal with flames licking up off it. Taps and slide changes fan the flames.
+  // ---------------------------------------------------------------------------------------------
+  const NOISE = `
+    float hash(vec2 p) {
+      p = fract(p * vec2(123.34, 456.21));
+      p += dot(p, p + 45.32);
+      return fract(p.x * p.y);
+    }
+    // Smooth value noise, 0..1
+    float noise(vec2 p) {
+      vec2 i = floor(p);
+      vec2 f = fract(p);
+      vec2 u = f * f * (3.0 - 2.0 * f);
+      return mix(mix(hash(i), hash(i + vec2(1.0, 0.0)), u.x), mix(hash(i + vec2(0.0, 1.0)), hash(i + vec2(1.0, 1.0)), u.x), u.y);
+    }
+    // Several layers of it, each finer and fainter: turbulence, about 0..0.94
+    float fbm(vec2 p) {
+      float v = 0.0;
+      float a = 0.5;
+      for (int i = 0; i < 4; i++) {
+        v += a * noise(p);
+        p = p * 2.03 + vec2(1.7, 9.2);
+        a *= 0.5;
+      }
+      return v;
+    }
+    // ...with only three layers, for the slow, soft things (about 0..0.88)
+    float fbm3(vec2 p) {
+      return 0.5 * noise(p) + 0.25 * noise(p * 2.03 + vec2(1.7, 9.2)) + 0.125 * noise(p * 4.12 + vec2(5.2, 20.4));
+    }
+    // The colour of something this hot (0 dull red .. 1 white)
+    vec3 heatColor(float x) {
+      x = clamp(x, 0.0, 1.0);
+      vec3 c = mix(vec3(0.45, 0.04, 0.0), vec3(1.0, 0.32, 0.04), smoothstep(0.0, 0.45, x));
+      c = mix(c, vec3(1.0, 0.70, 0.22), smoothstep(0.40, 0.75, x));
+      return mix(c, vec3(1.0, 0.97, 0.88), smoothstep(0.72, 1.0, x));
+    }`;
+
+  const FIRE_SNAKE_FRAGMENT = `${COMMON}${NOISE}
+    varying vec2 v_uv;
+    uniform sampler2D u_tex;    // the snake, crisp
+    uniform sampler2D u_soft;   // ...a little blurred: high in the thick of the body, which burns hottest
+    uniform sampler2D u_halo;   // ...widely blurred: its glow
+    uniform float u_haze;       // how much the hot air ripples it
+    uniform float u_flames;     // how tall the flames off it are (0 = none)
+    uniform float u_flicker;    // firelight: 1 is steady
+    uniform float u_glow;       // how strongly it lights the dark round it
+    uniform float u_crust;      // how much of the coal has gone dark (0: white-hot all over)
+
+    void main() {
+      vec2 p = v_uv;
+      float t = u_time;
+      vec2 disp = vec2(0.0);
+      float light = 0.0;
+      rings(p, disp, light);
+
+      // Hot air rising in front of it bends it a little
+      vec2 air = vec2(noise(vec2(p.x * 22.0, p.y * 16.0 + t * 3.0)), noise(vec2(p.x * 16.0 + 5.0, p.y * 22.0 + t * 2.4))) - 0.5;
+      vec2 s = p + air * 0.006 * u_haze + disp;
+      float halo = texture2D(u_halo, s).a;
+      if (halo < 0.003) {                 // far from the snake: nothing to draw (most of the canvas)
+        gl_FragColor = vec4(0.0);
+        return;
+      }
+      float body = texture2D(u_tex, s).a;
+      float inner = texture2D(u_soft, s).a;
+      vec3 coal = vec3(0.0);
+      if (body > 0.004) {
+
+      // A burning coal: a crust broken into lumps by cracks that glow white-hot, with hot patches that
+      // drift slowly across it and lumps that brighten and dim on their own. u_crust is how much of it
+      // has gone dark (0: white-hot all over). The lumps are bent by turbulence so they are not a mosaic.
+      vec2 c = s * 60.0 + (vec2(noise(s * 6.0), noise(s * 6.0 + 3.7)) - 0.5) * 3.0;
+      vec2 cell = floor(c);
+      float f1 = 8.0;
+      float f2 = 8.0;
+      vec2 id = vec2(0.0);
+      for (int j = -1; j <= 1; j++) {
+        for (int i = -1; i <= 1; i++) {
+          vec2 g = cell + vec2(float(i), float(j));
+          vec2 o = vec2(hash(g), hash(g + 17.3));
+          float d = length(g + o - c);
+          if (d < f1) { f2 = f1; f1 = d; id = g; } else if (d < f2) { f2 = d; }
+        }
+      }
+      float crack = 1.0 - smoothstep(0.0, 0.14, f2 - f1);
+      float breathe = 0.5 + 0.5 * sin(t * (0.4 + 0.9 * hash(id)) + 6.2832 * hash(id + 3.1));
+      float hot = smoothstep(0.33, 0.66, fbm3(s * 4.0 + vec2(0.11 * t, -0.07 * t)));   // slow, smooth patches of heat
+      float glow = hot * (0.75 + 0.25 * breathe);
+      float heat = mix(0.80 + 0.12 * glow + 0.06 * breathe, 0.12 + 0.62 * glow, u_crust);   // the lumps
+      heat = max(heat, crack * mix(1.0, 0.55 + 0.45 * hot, u_crust));                      // the cracks
+      heat *= mix(0.72, 1.0, smoothstep(0.3, 0.8, inner));      // the edges are cooler
+      heat += 0.5 * max(light, 0.0);                            // a tap fans it
+      vec3 ash = mix(vec3(0.07, 0.035, 0.025), vec3(0.17, 0.15, 0.14), 0.6 * hash(id + 9.1));
+      coal = mix(ash, heatColor(heat), smoothstep(0.18, 0.5, heat));   // dark where it has cooled
+      }
+
+      // Flames licking up off it: look a little way below for the body, and let rising turbulence
+      // tear what comes up into tongues
+      float fa = 0.0;
+      float flame = 0.0;
+      if (body < 0.996) {
+        float wob = (noise(vec2(p.x * 14.0, p.y * 10.0 + t * 2.0)) - 0.5) * 0.02;
+        float fuel = 0.0;
+        for (int i = 1; i <= 4; i++) {
+          float k = float(i);
+          fuel = max(fuel, texture2D(u_soft, vec2(p.x + wob * k / 4.0, p.y + k * 0.016)).a * (1.0 - k / 5.0));
+        }
+        if (fuel > 0.01) {
+          float tongue = fbm3(vec2(p.x * 16.0, p.y * 9.0 + t * 2.2));
+          flame = clamp(fuel * (tongue * 1.6 - 0.25) * u_flames * (1.0 + max(light, 0.0)), 0.0, 1.0) * (1.0 - body);
+          fa = smoothstep(0.05, 0.6, flame);
+        }
+      }
+
+      float ga = halo * u_glow * u_flicker;
+      vec4 col = vec4(vec3(1.0, 0.36, 0.06) * ga, ga);
+      col = vec4(heatColor(0.35 + 0.6 * flame) * fa, fa) + col * (1.0 - fa);
+      gl_FragColor = vec4(coal * body, body) + col * (1.0 - body);
+    }`;
+
+  const FIRE_BACKGROUND_FRAGMENT = `${COMMON}${NOISE}
+    varying vec2 v_uv;
+    uniform vec2 u_size;       // the page in CSS pixels
+    uniform float u_flameH;    // how high the flames reach, as a share of the screen's height
+    uniform float u_bright;    // how strongly they burn, 0..1
+    uniform float u_smoke;     // how much smoke rises off them
+    uniform float u_flicker;   // firelight: 1 is steady
+    uniform vec4 u_wave;       // a slide change: start time and strength in z and w (a gust)
+
+    void main() {
+      vec2 px = v_uv * u_size / 1000.0;            // same pixel scale on every screen
+      float h = (1.0 - v_uv.y) * u_size.y / 1000.0;   // height above the bottom of the screen
+      float t = u_time;
+      vec2 disp = vec2(0.0);
+      float light = 0.0;
+      rings(px, disp, light);
+
+      // A slide change is a gust: the flames jump up and settle
+      float age = u_time - u_wave.z;
+      float gust = age > 0.0 && age < 3.0 ? u_wave.w * age * exp(1.0 - age * 2.5) * 2.5 : 0.0;
+      float top = u_flameH * u_size.y / 1000.0 * (1.0 + 0.35 * gust);
+
+      // Turbulence that rises: the pattern is read further down as time goes on, so it moves up. It is
+      // finer across than up, which makes tongues, and a second, slower turbulence twists them. Each
+      // flame is cut off sharply where the turbulence no longer beats the height, so it has an edge.
+      vec2 q = vec2(px.x, h) + disp * 2.0;
+      top *= 0.65 + 0.7 * noise(vec2(q.x * 1.6 + 0.07 * t, 0.25 * t));   // taller in some places than others
+      // Above the smoke there is nothing to draw (most of the screen)
+      if (h > top * 4.0 + 0.05 && light <= 0.0) {
+        gl_FragColor = vec4(0.0);
+        return;
+      }
+      vec2 twist = vec2(fbm3(q * 2.5 + vec2(0.0, -0.8 * t)), fbm3(q * 2.5 + vec2(4.3, -1.0 * t))) - 0.44;
+      float n = fbm(vec2(q.x * 4.0, q.y * 2.2 - 1.8 * t) + twist * 2.0);
+      float rise = h / top;
+      // Solid at the base, torn into tongues higher up: the turbulence counts for more the higher it is
+      float heat = 1.05 - rise + (n - 0.47) * (0.6 + 1.4 * rise) + 0.8 * max(light, 0.0);
+      heat *= u_flicker;
+      float fa = smoothstep(0.0, 0.35, heat) * mix(0.55, 0.9, u_bright);   // the tips are thin, the base solid
+      vec3 flame = heatColor(min(heat * mix(0.72, 0.95, u_bright), 0.8));   // burning harder, it burns yellower (never white: see-through white is grey)
+
+      // Smoke: slower, softer and grey, from where the flames give out to well above them
+      float band = smoothstep(top * 0.5, top * 1.3, h) * (1.0 - smoothstep(top * 1.6, top * 4.0, h));
+      float sa = 0.0;
+      vec3 smoke = vec3(0.0);
+      if (band > 0.0 && u_smoke > 0.0) {
+        float drift = fbm3(vec2(q.x * 2.2 + 0.05 * t, q.y * 1.6 - 0.35 * t) + twist * 0.8);
+        sa = smoothstep(0.40, 0.70, drift) * band * u_smoke * 0.12;
+        smoke = mix(vec3(0.62, 0.30, 0.14), vec3(0.34, 0.32, 0.31), smoothstep(top, top * 2.0, h));
+      }
+
+      gl_FragColor = vec4(flame * fa + smoke * sa * (1.0 - fa), fa + sa * (1.0 - fa));
     }`;
 
   // ---------------------------------------------------------------------------------------------
   // WebGL helpers (any failure leaves the CSS version in place)
   // ---------------------------------------------------------------------------------------------
-  function makeRenderer(canvas, fragmentSource, names) {
+  function makeContext(canvas) {
     const gl = canvas.getContext('webgl', {
       alpha: true, premultipliedAlpha: true, antialias: false, depth: false, stencil: false,
     });
     if (!gl) return null;
+    const buffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
+    gl.enableVertexAttribArray(0);
+    gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
+    gl.clearColor(0, 0, 0, 0);
+    return gl;
+  }
 
+  // One picture's program, with every uniform it uses found by name (an array is found by its bare name)
+  function makeProgram(gl, fragmentSource) {
     const compile = (type, source) => {
       const shader = gl.createShader(type);
       gl.shaderSource(shader, source);
@@ -366,55 +575,61 @@
     const program = gl.createProgram();
     gl.attachShader(program, vs);
     gl.attachShader(program, fs);
+    gl.bindAttribLocation(program, 0, 'a_pos');   // the same for every program, so they share the one buffer
     gl.linkProgram(program);
     if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
       console.warn('Water effect program failed:', gl.getProgramInfoLog(program));
       return null;
     }
     gl.useProgram(program);
-
-    const buffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
-    const aPos = gl.getAttribLocation(program, 'a_pos');
-    gl.enableVertexAttribArray(aPos);
-    gl.vertexAttribPointer(aPos, 2, gl.FLOAT, false, 0, 0);
-    gl.clearColor(0, 0, 0, 0);
-
     const uniforms = {};
-    names.forEach((name) => { uniforms[name] = gl.getUniformLocation(program, name); });
-    return { gl, uniforms };
+    for (let i = 0; i < gl.getProgramParameter(program, gl.ACTIVE_UNIFORMS); i++) {
+      const name = gl.getActiveUniform(program, i).name.replace(/\[0\]$/, '');
+      uniforms[name] = gl.getUniformLocation(program, name);
+    }
+    // the pictures it reads, in a fixed order of texture units
+    ['u_tex', 'u_soft', 'u_halo'].forEach((name, unit) => { if (uniforms[name]) gl.uniform1i(uniforms[name], unit); });
+    return { program, uniforms };
+  }
+
+  // A canvas with its Water program, and its Fire program, made the first time Fire is needed. A uniform
+  // the program in use does not have is simply skipped (WebGL ignores a null location).
+  function makeRenderer(canvas, waterSource, fireSource) {
+    const gl = makeContext(canvas);
+    if (!gl) return null;
+    const water = makeProgram(gl, waterSource);
+    if (!water) return null;
+    const r = { gl, water, fire: null, uniforms: water.uniforms, burning: false };
+    r.use = (fire) => {
+      if (fire && r.fire === null) r.fire = makeProgram(gl, fireSource) || false;   // false: Fire could not start here, so it keeps the water
+      const chosen = fire && r.fire ? r.fire : water;
+      gl.useProgram(chosen.program);
+      r.uniforms = chosen.uniforms;
+      r.burning = chosen !== water;
+    };
+    return r;
   }
 
   const snakeCanvas = document.createElement('canvas');
   snakeCanvas.className = 'ouro-water';
   snakeCanvas.setAttribute('aria-hidden', 'true');
-  const RING_UNIFORMS = ['u_ringAmp', 'u_ringGlint', 'u_ringSpeed', 'u_ringLife'];
-  const snake = makeRenderer(snakeCanvas, SNAKE_FRAGMENT,
-    ['u_time', 'u_ripples', 'u_tex', 'u_caustic', 'u_swellAmp', 'u_swellTime', 'u_shimmer', 'u_haze', 'u_cScale', 'u_cLine', 'u_causticTime', 'u_absorb', 'u_body', 'u_vein', ...RING_UNIFORMS]);
+  const snake = makeRenderer(snakeCanvas, SNAKE_FRAGMENT, FIRE_SNAKE_FRAGMENT);
   if (!snake) { plainSnake(); return; }
-  snake.gl.uniform1i(snake.uniforms.u_tex, 0);
 
   // The page background is an extra, optional layer: if it cannot start, the snake still works
   const bgCanvas = document.createElement('canvas');
   bgCanvas.className = 'ouro-caustics';
   bgCanvas.setAttribute('aria-hidden', 'true');
-  const bg = makeRenderer(bgCanvas, BACKGROUND_FRAGMENT, ['u_time', 'u_ripples', 'u_size', 'u_caustic', 'u_cScale', 'u_cLine', 'u_causticTime', 'u_tint', 'u_tintHot', 'u_flicker', 'u_scroll', 'u_wave', ...RING_UNIFORMS]);
+  const bg = makeRenderer(bgCanvas, BACKGROUND_FRAGMENT, FIRE_BACKGROUND_FRAGMENT);
 
   // The logo is another optional layer: if it cannot start, the plain logo image stays as it is
   const logoImg = document.querySelector('img.logo');
   const logoCanvas = document.createElement('canvas');
   logoCanvas.className = 'ouro-logo-water';
   logoCanvas.setAttribute('aria-hidden', 'true');
-  const logo = logoImg && logoImg.offsetParent ? makeRenderer(logoCanvas, LOGO_FRAGMENT,
-    ['u_time', 'u_ripples', 'u_tex', 'u_soft', 'u_halo', 'u_origin', 'u_span', 'u_px', 'u_lift', 'u_shadowSet', 'u_light', 'u_glow',
-      'u_cScale', 'u_cLine', 'u_causticTime', 'u_swellAmp', 'u_swellTime', 'u_shimmer', 'u_haze', 'u_flicker', 'u_canvasPx', 'u_center', 'u_turn', 'u_live',
-      'u_hoverFall', 'u_absorb', 'u_letters', 'u_haloColor', 'u_hi', 'u_shade', ...RING_UNIFORMS]) : null;
-  if (logo) {
-    logo.gl.uniform1i(logo.uniforms.u_tex, 0);
-    logo.gl.uniform1i(logo.uniforms.u_soft, 1);
-    logo.gl.uniform1i(logo.uniforms.u_halo, 2);
-  }
+  // Fire's logo is the same picture without the water: the same source with FIRE defined
+  const FIRE_LOGO_FRAGMENT = '#define FIRE\n' + LOGO_FRAGMENT.replace('varying vec2 v_uv;', NOISE + '\n    varying vec2 v_uv;');
+  const logo = logoImg && logoImg.offsetParent ? makeRenderer(logoCanvas, LOGO_FRAGMENT, FIRE_LOGO_FRAGMENT) : null;
   const logoTextures = logo ? [0, 1, 2].map(() => logo.gl.createTexture()) : [];
   const logoBox = { padX: LOGO_PAD, padTop: LOGO_PAD, padBottom: LOGO_PAD, center: [0.5, 0.5], left: 0, top: 0, width: 0, height: 0, built: 0, builtAt: 0, ready: false };
   const canSpin = document.body.classList.contains('home');   // the half turn is for the home page
@@ -426,7 +641,7 @@
   let logoHover = 0;          // 0..1, eased
   let logoHoverGoal = 0;
 
-  const texture = snake.gl.createTexture();
+  const textures = [0, 1, 2].map(() => snake.gl.createTexture());
   const ripplesSnake = new Float32Array(MAX_RIPPLES * 4);   // x, y (0..1 across the canvas), start (wrapped), strength
   const ripplesBg = new Float32Array(MAX_RIPPLES * 4);      // x, y (pixels / 1000), start (wrapped), strength
   const rippleStart = new Float64Array(MAX_RIPPLES);        // unwrapped start times, for expiry
@@ -443,7 +658,7 @@
   // The snake canvas is a little bigger than the layer so the glow is not cut off at the edges
   function sizeFor() {
     const css = layer.offsetWidth * (1 + 2 * PAD);
-    const dpr = Math.min(window.devicePixelRatio || 1, MAX_DPR);
+    const dpr = Math.min(window.devicePixelRatio || 1, snake.burning ? FIRE_SNAKE.maxDpr : MAX_DPR);   // the coal is busier to draw, and soft enough
     return Math.max(64, Math.min(MAX_TEXTURE, Math.round(css * dpr)));
   }
 
@@ -454,29 +669,49 @@
     const offset = (size - art) / 2;
     const scale = size / (layer.offsetWidth * (1 + 2 * PAD));   // canvas pixels per CSS pixel
 
-    const flat = document.createElement('canvas');
-    flat.width = flat.height = size;
-    const ctx = flat.getContext('2d');
-    ctx.shadowColor = palette.glow;
-    ctx.shadowBlur = GLOW_BLUR * scale;
-    ctx.drawImage(image, offset, offset, art, art);
+    // Water: one picture with the glow drawn in. Fire: the snake crisp, and two blurred silhouettes of
+    // it (how thick it is there, and its glow), which the shader turns into a coal and its light.
+    const make = (glow, blur) => {
+      const flat = document.createElement('canvas');
+      flat.width = flat.height = size;
+      const ctx = flat.getContext('2d');
+      if (glow) {
+        ctx.shadowColor = palette.glow;
+        ctx.shadowBlur = GLOW_BLUR * scale;
+        ctx.drawImage(image, offset, offset, art, art);
+      } else if (blur) {
+        // drawn far off to the side so only its blurred shadow lands on the canvas
+        ctx.shadowColor = '#000';
+        ctx.shadowBlur = blur * scale;
+        ctx.shadowOffsetX = size + 16;
+        ctx.drawImage(image, offset - size - 16, offset, art, art);
+      } else {
+        ctx.drawImage(image, offset, offset, art, art);
+      }
+      return flat;
+    };
+    const sources = snake.burning ? [make(false, 0), make(false, FIRE_SNAKE.inner), make(false, GLOW_BLUR)] : [make(true, 0)];
 
     snakeCanvas.width = snakeCanvas.height = size;
     gl.viewport(0, 0, size, size);
-    gl.activeTexture(gl.TEXTURE0);
-    gl.bindTexture(gl.TEXTURE_2D, texture);
     gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, true);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, flat);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    sources.forEach((source, i) => {
+      gl.activeTexture(gl.TEXTURE0 + i);
+      gl.bindTexture(gl.TEXTURE_2D, textures[i]);
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, source);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    });
+    gl.activeTexture(gl.TEXTURE0);
   }
 
   // Caustics are soft, so the background is drawn small and stretched by the browser
   function sizeBackground() {
     if (!bg) return;
-    const w = Math.max(32, Math.min(BG_MAX_WIDTH, Math.round(window.innerWidth * BG_SCALE)));
+    const scale = bg.burning ? FIRE_BG.scale : BG_SCALE;   // flames need a little more detail than the soft light
+    const w = Math.max(32, Math.min(bg.burning ? FIRE_BG.maxWidth : BG_MAX_WIDTH, Math.round(window.innerWidth * scale)));
     const h = Math.max(32, Math.round(w * window.innerHeight / window.innerWidth));
     bgCanvas.width = w;
     bgCanvas.height = h;
@@ -817,6 +1052,13 @@
     gl.uniform1f(snake.uniforms.u_ringSpeed, fx.ringSpeed);
     gl.uniform1f(snake.uniforms.u_ringLife, level.ringLife);
     gl.uniform4fv(snake.uniforms.u_ripples, ripplesSnake);
+    // Fire's own dials (Water's program has none of these, so they are skipped there)
+    const burn = FIRE_BG.start + (1 - FIRE_BG.start) * slideDepth;
+    gl.uniform1f(snake.uniforms.u_flames, FIRE_SNAKE.flames * (0.6 + 0.4 * burn));
+    gl.uniform1f(snake.uniforms.u_glow, FIRE_SNAKE.glow);
+    gl.uniform1f(snake.uniforms.u_crust, FIRE_SNAKE.crust);
+    gl.uniform1f(snake.uniforms.u_flicker, fx.flick);
+    if (snake.burning) gl.uniform1f(snake.uniforms.u_haze, FIRE_SNAKE.haze);
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
 
     // The page behind it (skipped entirely when it is switched off)
@@ -840,6 +1082,9 @@
         g.uniform1f(bg.uniforms.u_ringSpeed, fx.ringSpeed);
         g.uniform1f(bg.uniforms.u_ringLife, level.ringLife);
         g.uniform4fv(bg.uniforms.u_ripples, ripplesBg);
+        g.uniform1f(bg.uniforms.u_flameH, FIRE_BG.flameH[0] + (FIRE_BG.flameH[1] - FIRE_BG.flameH[0]) * burn);
+        g.uniform1f(bg.uniforms.u_bright, burn);
+        g.uniform1f(bg.uniforms.u_smoke, FIRE_BG.smoke);
         g.drawArrays(g.TRIANGLE_STRIP, 0, 4);
       }
     }
@@ -925,6 +1170,7 @@
     window.removeEventListener('resize', onResize);
     window.removeEventListener('themechange', onTheme);
     layer.classList.remove('water-on');
+    document.documentElement.classList.remove('fire-drawn');
     plainSnake();
     snakeCanvas.remove();
     bgCanvas.remove();
@@ -967,11 +1213,23 @@
   // The theme changed (assets/theme.js): new colours, and the snake's halo is drawn into its picture
   function onTheme(event) {
     palette = THEMES[event.detail && event.detail.theme] || THEMES.water;
+    usePrograms();
     if (started) {
       buildTexture();
+      sizeBackground();
       draw(performance.now() / 1000);
     }
   }
+  // Each picture draws with the theme's own program
+  function usePrograms() {
+    const fire = palette === THEMES.fire;
+    snake.use(fire);
+    if (bg) bg.use(fire);
+    if (logo) logo.use(fire);
+    // the flames take over from the plain CSS firelight (style.css: .ember-glow, .depth-veil)
+    document.documentElement.classList.toggle('fire-drawn', !!(bg && bg.burning));
+  }
+  usePrograms();
   // Listen from the start: a switch made while the snake picture is still loading must not be missed
   window.addEventListener('themechange', onTheme);
 
