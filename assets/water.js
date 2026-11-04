@@ -345,7 +345,7 @@
       // Fire: no water to cast a shadow on. The air above the flames ripples the letters as it rises,
       // and they are lit from below, hottest at the bottom.
       col = vec4(u_haloColor * g, g);
-      vec2 rise = vec2(noise(vec2(v_uv.x * 7.0, v_uv.y * 9.0 + u_time * 2.6)), noise(vec2(v_uv.x * 9.0 + 4.1, v_uv.y * 7.0 + u_time * 2.1))) - 0.5;
+      vec2 rise = vec2(noise(vec2(v_uv.x * 7.0, v_uv.y * 9.0 + u_flameTime * 2.6)), noise(vec2(v_uv.x * 9.0 + 4.1, v_uv.y * 7.0 + u_flameTime * 2.1))) - 0.5;
       vec4 L = texture2D(u_tex, turned(v_uv + rise * vec2(0.006, 0.003) * u_haze + vec2(0.0, lift * u_px.y)));
       if (L.a > 0.004) {
         float below = smoothstep(u_live.x, u_live.y, v_uv.y);
@@ -418,22 +418,16 @@
     uniform float u_flames;     // how tall the flames off it are (0 = none)
     uniform float u_flicker;    // firelight: 1 is steady
     uniform float u_glow;       // how strongly it lights the dark round it
+    uniform float u_flameTime;  // the fire's clock, which follows the real clock
+    uniform vec2 u_seam;        // near the end of the clock's loop: the same moment one loop back, and how far to fade to it
 
-    void main() {
-      vec2 p = v_uv;
-      float t = u_time;
-      vec2 disp = vec2(0.0);
-      float light = 0.0;
-      rings(p, disp, light);
-
+    // The snake burning at time t
+    vec4 burn(vec2 p, float t, vec2 disp, float light) {
       // Hot air rising in front of it bends it a little
       vec2 air = vec2(noise(vec2(p.x * 22.0, p.y * 16.0 + t * 3.0)), noise(vec2(p.x * 16.0 + 5.0, p.y * 22.0 + t * 2.4))) - 0.5;
       vec2 s = p + air * 0.006 * u_haze + disp;
       float halo = texture2D(u_halo, s).a;
-      if (halo < 0.003) {                 // far from the snake: nothing to draw (most of the canvas)
-        gl_FragColor = vec4(0.0);
-        return;
-      }
+      if (halo < 0.003) return vec4(0.0);   // far from the snake: nothing to draw (most of the canvas)
       float body = texture2D(u_tex, s).a;
       float inner = texture2D(u_soft, s).a;
       vec3 coal = vec3(0.0);
@@ -487,7 +481,17 @@
       float ga = halo * u_glow * u_flicker;
       vec4 col = vec4(vec3(1.0, 0.36, 0.06) * ga, ga);
       col = vec4(heatColor(0.35 + 0.6 * flame) * fa, fa) + col * (1.0 - fa);
-      gl_FragColor = vec4(coal * body, body) + col * (1.0 - body);
+      return vec4(coal * body, body) + col * (1.0 - body);
+    }
+
+    void main() {
+      vec2 disp = vec2(0.0);
+      float light = 0.0;
+      rings(v_uv, disp, light);
+      vec4 col = burn(v_uv, u_flameTime, disp, light);
+      // The clock goes round every few minutes; just before it does, fade to where it starts again
+      if (u_seam.y > 0.0) col = mix(col, burn(v_uv, u_seam.x, disp, light), u_seam.y);
+      gl_FragColor = col;
     }`;
 
   const FIRE_BACKGROUND_FRAGMENT = `${COMMON}${NOISE}
@@ -499,16 +503,13 @@
     uniform float u_tall;      // how tall the fire is (screen heights)
     uniform float u_smoke;     // how much smoke rises off it
     uniform float u_flicker;   // firelight: 1 is steady
-    uniform float u_flameTime; // the flames' own clock: they burn faster the deeper you are
+    uniform float u_flameTime; // the flames' own clock: it follows the real clock, and runs faster the deeper you are
+    uniform vec2 u_seam;       // near the end of the clock's loop: the same moment one loop back, and how far to fade to it
     uniform vec4 u_wave;       // a slide change: start time and strength in z and w (a gust)
 
-    void main() {
-      vec2 px = v_uv * u_size / 1000.0;            // same pixel scale on every screen
+    // The fire at time t
+    vec4 burn(vec2 px, float t, vec2 disp, float light) {
       float screen = u_size.y / 1000.0;            // the screen's height, in the same units
-      float t = u_flameTime;
-      vec2 disp = vec2(0.0);
-      float light = 0.0;
-      rings(px, disp, light);
 
       // The screen is a window into one tall fire. At the top of the page it shows only the tips of the
       // flames; going down the page lowers it into the fire, so the brighter, hotter part comes into
@@ -523,10 +524,7 @@
       float tall = u_tall * (1.0 + 0.45 * side * side) * (1.0 + 0.25 * gust) * (0.8 + 0.4 * noise(vec2(q.x * 1.6 + 0.07 * t, 0.25 * t)));
       float rise = w / tall;
       // Above the smoke there is nothing to draw
-      if (rise > 2.3 && light <= 0.0) {
-        gl_FragColor = vec4(0.0);
-        return;
-      }
+      if (rise > 2.3 && light <= 0.0) return vec4(0.0);
 
       // Turbulence that rises: the pattern is read further down as time goes on, so it moves up. It is
       // finer across than up, which makes tongues, and a second, slower turbulence twists them. Solid
@@ -549,7 +547,18 @@
         smoke = mix(vec3(0.62, 0.30, 0.14), vec3(0.34, 0.32, 0.31), smoothstep(0.9, 1.5, rise));
       }
 
-      gl_FragColor = vec4(flame * fa + smoke * sa * (1.0 - fa), fa + sa * (1.0 - fa));
+      return vec4(flame * fa + smoke * sa * (1.0 - fa), fa + sa * (1.0 - fa));
+    }
+
+    void main() {
+      vec2 px = v_uv * u_size / 1000.0;            // same pixel scale on every screen
+      vec2 disp = vec2(0.0);
+      float light = 0.0;
+      rings(px, disp, light);
+      vec4 col = burn(px, u_flameTime, disp, light);
+      // The clock goes round every few minutes; just before it does, fade to where it starts again
+      if (u_seam.y > 0.0) col = mix(col, burn(px, u_seam.x, disp, light), u_seam.y);
+      gl_FragColor = col;
     }`;
 
   // ---------------------------------------------------------------------------------------------
@@ -641,7 +650,7 @@
   logoCanvas.className = 'ouro-logo-water';
   logoCanvas.setAttribute('aria-hidden', 'true');
   // Fire's logo is the same picture without the water: the same source with FIRE defined
-  const FIRE_LOGO_FRAGMENT = '#define FIRE\n' + LOGO_FRAGMENT.replace('varying vec2 v_uv;', NOISE + '\n    varying vec2 v_uv;');
+  const FIRE_LOGO_FRAGMENT = '#define FIRE\n' + LOGO_FRAGMENT.replace('varying vec2 v_uv;', NOISE + '\n    varying vec2 v_uv;\n    uniform float u_flameTime;');
   const logo = logoImg && logoImg.offsetParent ? makeRenderer(logoCanvas, LOGO_FRAGMENT, FIRE_LOGO_FRAGMENT) : null;
   const logoTextures = logo ? [0, 1, 2].map(() => logo.gl.createTexture()) : [];
   const logoBox = { padX: LOGO_PAD, padTop: LOGO_PAD, padBottom: LOGO_PAD, center: [0.5, 0.5], left: 0, top: 0, width: 0, height: 0, built: 0, builtAt: 0, ready: false };
@@ -867,6 +876,7 @@
     const u = logo.uniforms;
     g.clear(g.COLOR_BUFFER_BIT);
     g.uniform1f(u.u_time, wrapped);
+    g.uniform1f(u.u_flameTime, snakeFireClock);
     g.uniform2f(u.u_origin, (left - snakeRect.left) / snakeRect.width, (top - snakeRect.top) / snakeRect.height);
     g.uniform2f(u.u_span, logoBox.width / snakeRect.width, logoBox.height / snakeRect.height);
     g.uniform2f(u.u_px, 1 / logoBox.width, 1 / logoBox.height);
@@ -995,6 +1005,7 @@
   let bgCausticClock = 0;
   let fireClock = 0;
   let fireDepth = 0;
+  let snakeFireClock = 0;
 
   // The water follows the real clock, so a refresh or another page picks the pattern up where it was
   // instead of starting over. Every wave speed is a whole multiple of 2*pi/TIME_WRAP (in clock units),
@@ -1003,6 +1014,23 @@
   // start from zero.
   let followClock = true;
   const wallSeconds = () => (Date.now() + spin.shift) / 1000;
+
+  // Fire follows the real clock too. Its flames are noise, which does not come round on its own, so for
+  // the last FIRE_SEAM seconds of each loop the shaders fade to the start of the next one (where the clock
+  // is about to jump to). The background burns faster deeper down, which puts it ahead of the real clock:
+  // that lead is kept between visits so a refresh carries on from the same flames.
+  const FIRE_SEAM = 4;
+  const BOOST_KEY = 'luzian-fire-lead';
+  let fireLead = 0;
+  try { fireLead = (Number(localStorage.getItem(BOOST_KEY)) || 0) % TIME_WRAP; } catch (e) { /* not remembered */ }
+  const keepLead = () => { try { localStorage.setItem(BOOST_KEY, fireLead.toFixed(3)); } catch (e) { /* not remembered */ } };
+  window.addEventListener('pagehide', keepLead);
+  document.addEventListener('visibilitychange', () => { if (document.hidden) keepLead(); });
+  const seam = (clock) => {
+    const into = (clock - (TIME_WRAP - FIRE_SEAM)) / FIRE_SEAM;
+    if (into <= 0) return [0, 0];
+    return [clock - TIME_WRAP, into * into * (3 - 2 * into)];
+  };
 
   // An irregular wobble between about -1 and 1: several sines that never line up, some of them
   // switching each other on and off, so the light seems to gust rather than pulse
@@ -1072,10 +1100,20 @@
     // and the flames' clock, which runs faster down there
     const depthGoal = Math.min(1, Math.max(0, window.scrollY / (FIRE_BG.deepAt * window.innerHeight)));
     fireDepth = gap > 2 ? depthGoal : fireDepth + (depthGoal - fireDepth) * Math.min(1, dt * 2.5);
-    fireClock = (fireClock + dt * (1 + FIRE_BG.speedUp * fireDepth)) % TIME_WRAP;
+    fireLead = (fireLead + dt * FIRE_BG.speedUp * fireDepth) % TIME_WRAP;
+    if (followClock) {
+      const wall = wallSeconds();
+      snakeFireClock = wall % TIME_WRAP;
+      fireClock = (wall + fireLead) % TIME_WRAP;
+    } else {
+      snakeFireClock = (snakeFireClock + dt) % TIME_WRAP;
+      fireClock = (fireClock + dt * (1 + FIRE_BG.speedUp * fireDepth)) % TIME_WRAP;
+    }
     gl.uniform1f(snake.uniforms.u_flames, FIRE_SNAKE.flames);
     gl.uniform1f(snake.uniforms.u_glow, FIRE_SNAKE.glow);
     gl.uniform1f(snake.uniforms.u_flicker, fx.flick);
+    gl.uniform1f(snake.uniforms.u_flameTime, snakeFireClock);
+    gl.uniform2fv(snake.uniforms.u_seam, seam(snakeFireClock));
     if (snake.burning) gl.uniform1f(snake.uniforms.u_haze, FIRE_SNAKE.haze);
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
 
@@ -1106,6 +1144,7 @@
         g.uniform1f(bg.uniforms.u_tall, FIRE_BG.tall);
         g.uniform1f(bg.uniforms.u_smoke, FIRE_BG.smoke);
         g.uniform1f(bg.uniforms.u_flameTime, fireClock);
+        g.uniform2fv(bg.uniforms.u_seam, seam(fireClock));
         g.drawArrays(g.TRIANGLE_STRIP, 0, 4);
       }
     }
@@ -1329,7 +1368,7 @@
         return (performance.now() - t) / frames;
       },
       // stop following the real clock, forget the clocks and rings, so tests can compare two versions from the same starting point
-      reset: () => { followClock = false; swellClock = 0; swellLast = null; snakeCausticClock = 0; bgCausticClock = 0; fireClock = 0; ripplesSnake.fill(0); ripplesBg.fill(0); },
+      reset: () => { followClock = false; swellClock = 0; swellLast = null; snakeCausticClock = 0; bgCausticClock = 0; fireClock = 0; snakeFireClock = 0; fireLead = 0; ripplesSnake.fill(0); ripplesBg.fill(0); },
       backgroundChecksum: (seconds) => {
         if (!bg) return 0;
         draw(seconds);
