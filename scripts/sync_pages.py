@@ -212,7 +212,7 @@ TAG = re.compile(r'\?v=([0-9]{8}[a-z]+)')
 
 def all_html():
     return sorted(p for p in ROOT.rglob('*.html')
-                  if not ({'wedding', 'water-lab', '.git', 'node_modules'} & set(p.relative_to(ROOT).parts)))
+                  if not ({'water-lab', '.git', 'node_modules'} & set(p.relative_to(ROOT).parts)))
 
 
 def current_tag():

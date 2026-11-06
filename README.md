@@ -14,7 +14,7 @@ Pages are plain hand-written HTML, English in the top folders and Spanish under 
 
 Two checks run on every pull request (workflow "Site checks"):
 
-- `python3 scripts/check_site.py` (Python 3 only, a second): an old `?v=` tag, a broken link, a page missing its Spanish twin, a wrong canonical address, shared parts or the sitemap out of step, a missing `<h1>` or skip-link target, the wedding page without `noindex`, hard-coded theme colours, leftover test code.
+- `python3 scripts/check_site.py` (Python 3 only, a second): an old `?v=` tag, a broken link, a page missing its Spanish twin, a wrong canonical address, shared parts or the sitemap out of step, a missing `<h1>` or skip-link target, hard-coded theme colours, leftover test code.
 - `python3 scripts/smoke_test.py` (needs `pip install playwright` and `playwright install chromium`; about a minute): opens every page in a real browser in both themes at desktop and phone width and fails on script errors, console warnings, failed requests or sideways overflow; then tries the theme switch, `?calm`, the pop-ups' keyboard focus, the skip link, the Spanish 404 and the copyright year.
 
 Test pages used to tune the look go in `water-lab/` (git ignores it and the checker complains if one is left behind).

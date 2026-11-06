@@ -11,11 +11,10 @@ What it checks
   - canonical and og:url match the page's own address; og:image exists
   - Spanish pages do not link to English pages (and the other way round), except the language switch
   - the shared parts of every page (head, menu, footer, scripts) and sitemap.xml are in step with scripts/sync_pages.py
-  - every page has exactly one <h1> and a <main id="main"> for the skip link; the wedding archive has noindex
+  - every page has exactly one <h1> and a <main id="main"> for the skip link
   - pages with the ouroboros background load water.js, and every page loads theme.js (Water / Fire)
   - the stylesheet has no hard-coded theme colours left (they must be CSS variables, so Fire gets them too)
   - no leftover test pages or temporary hooks
-The wedding/ folder is an archive and is left alone.
 """
 import re
 import sys
@@ -28,7 +27,7 @@ import sync_pages  # noqa: E402  (the list of pages and their shared parts)
 
 ROOT = Path(__file__).resolve().parent.parent
 SITE = 'https://luzian.net'
-SKIP_DIRS = {'wedding', 'water-lab', '.git', '.github', 'scripts', 'node_modules'}   # water-lab: reported on its own below
+SKIP_DIRS = {'water-lab', '.git', '.github', 'scripts', 'node_modules'}   # water-lab: reported on its own below
 # Pages that are only a redirect or have no Spanish twin on purpose
 NO_TWIN = {'404.html', 'home/index.html'}
 NO_THEME = {'home/index.html'}   # only a redirect
@@ -153,7 +152,7 @@ def main():
                 site_path = urlparse(value).path
                 if name == '404.html':
                     continue
-                if in_spanish and not site_path.startswith(('/es/', '/assets/', '/wedding/')) and site_path != '/es':
+                if in_spanish and not site_path.startswith(('/es/', '/assets/')) and site_path != '/es':
                     error(name, f'Spanish page links to the English page {value}')
                 if not in_spanish and site_path.startswith('/es/'):
                     error(name, f'English page links to the Spanish page {value}')
@@ -222,10 +221,7 @@ def main():
     for problem in sync_pages.check():
         error('shared parts', problem)
 
-    # 6d. The wedding archive stays out of search results
-    wedding = ROOT / 'wedding' / 'index.html'
-    if wedding.exists() and not re.search(r'<meta[^>]+name="robots"[^>]+noindex', wedding.read_text(encoding='utf-8')):
-        error('wedding/index.html', 'needs <meta name="robots" content="noindex, nofollow">')
+    # 6d. robots.txt is there
     if not (ROOT / 'robots.txt').exists():
         error('robots.txt', 'is missing')
 
