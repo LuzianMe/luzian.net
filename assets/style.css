@@ -962,13 +962,6 @@ header .career-name {
   box-sizing: border-box;
 }
 
-/* Grids placed directly in <main> (e.g. 404 page) get the same side gutters as .message-box */
-main > .grid {
-  width: 90%;
-  max-width: 900px;
-  margin: 0 auto;
-}
-
 .grid-item {
   display: flex;
   align-items: center;
@@ -1373,27 +1366,37 @@ a[href*="contact.vcf"]:hover .grid-icon {
 }
 
 /* ==========================================================================
-   404 Page Styles
+   404 Page Styles: the title and the home page's "where to next" tiles, in the middle of the screen
    ========================================================================== */
-.message-box {
-  background: rgb(var(--surface-3) / 0.65);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  border: 1px solid rgb(var(--accent-soft) / 0.22);
-  color: rgb(var(--text));
-  padding: 1.5rem;
-  margin: 2rem auto;
-  max-width: 600px;
+main.lost {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
   width: 90%;
+  max-width: 860px;
+  margin: 0 auto;
+  padding-top: 5.25rem;
   box-sizing: border-box;
-  border-radius: 14px;
-  text-align: center;
-  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.45);
 }
 
-.message-box p {
-  margin: 0;
-  font-size: var(--fs-body);
+main.lost header {
+  padding: 0 0 2rem;
+}
+
+main.lost h1 {
+  font-size: clamp(1.7rem, 3.6vw, 2.6rem);
+}
+
+/* the line under it sits on the brightest part of the snake: a dark halo keeps it readable */
+main.lost header p {
+  color: rgb(var(--text));
+  text-shadow: 0 0 8px rgb(var(--surface-00)), 0 0 18px rgb(var(--surface-00)), 0 0 32px rgb(var(--surface-00));
+}
+
+@media (min-width: 768px) {
+  main.lost header {
+    padding-bottom: 2.5rem;
+  }
 }
 
 /* ==========================================================================
@@ -2078,8 +2081,7 @@ main:focus {
     -webkit-backdrop-filter: none;
   }
 
-  .setup-card,
-  .message-box {
+  .setup-card {
     background: rgb(var(--surface-2) / 0.84);
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
