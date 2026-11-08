@@ -29,7 +29,7 @@ import sys
 import threading
 from pathlib import Path
 
-from playwright.sync_api import sync_playwright
+from playwright.sync_api import TimeoutError as PlaywrightTimeout, sync_playwright
 
 ROOT = Path(__file__).resolve().parent.parent
 # Software WebGL, so the water effect also runs on a computer without a graphics card (such as GitHub's)
@@ -399,6 +399,15 @@ def stats_readout(browser, base):
     context.close()
 
 
+def wait_until(page, condition, ms):
+    """True once the page condition holds, False if it never does within ms (scaled like other waits)"""
+    try:
+        page.wait_for_function(condition, timeout=patient(ms))
+        return True
+    except PlaywrightTimeout:
+        return False
+
+
 def rows_in_cards(browser, base):
     """Contact and Payment are rows inside cards, like Setup (and keep their working parts)"""
     # --- Contact and Payment are rows inside cards, like Setup (and keep their working parts)
@@ -420,11 +429,10 @@ def rows_in_cards(browser, base):
             if page.evaluate("document.querySelectorAll('.pay-btn[data-copy] svg').length") != 4:
                 fail(f'rows {path}', 'the copy buttons should hold an icon')
             page.click('.pay-btn[data-copy]')
-            page.wait_for_timeout(400)
-            if page.evaluate("document.querySelector('.pay-btn[data-copy] svg path').getAttribute('d')") != 'M5 12.5l4.5 4.5L19 7.5':
+            # wait for the change rather than a fixed time: on a busy CI machine the copy can take longer
+            if not wait_until(page, "document.querySelector('.pay-btn[data-copy] svg path')?.getAttribute('d') === 'M5 12.5l4.5 4.5L19 7.5'", 3000):
                 fail(f'rows {path}', 'no check mark after copying')
-            page.wait_for_timeout(2300)
-            if page.evaluate("document.querySelector('.pay-btn[data-copy] svg rect') === null"):
+            if not wait_until(page, "document.querySelector('.pay-btn[data-copy] svg rect') !== null", 4000):
                 fail(f'rows {path}', 'the copy icon did not come back')
             if page.evaluate("document.getElementById('live-status') && document.getElementById('live-status').textContent === ''"):
                 fail(f'rows {path}', 'the copy was not announced')
@@ -456,11 +464,10 @@ def rows_in_cards(browser, base):
             if not page.evaluate("!!document.querySelector('#copyEmail .row-pill svg')"):
                 fail(f'rows {path}', 'the email copy pill should be an icon')
             page.click('#copyEmail')
-            page.wait_for_timeout(400)
-            if page.evaluate("document.querySelector('#copyEmail .row-pill svg path').getAttribute('d')") != 'M5 12.5l4.5 4.5L19 7.5':
+            # wait for the change rather than a fixed time: on a busy CI machine the copy can take longer
+            if not wait_until(page, "document.querySelector('#copyEmail .row-pill svg path')?.getAttribute('d') === 'M5 12.5l4.5 4.5L19 7.5'", 3000):
                 fail(f'rows {path}', 'no check mark after copying the email')
-            page.wait_for_timeout(2300)
-            if page.evaluate("document.querySelector('#copyEmail .row-pill svg rect') === null"):
+            if not wait_until(page, "document.querySelector('#copyEmail .row-pill svg rect') !== null", 4000):
                 fail(f'rows {path}', 'the email copy icon did not come back')
         for p in problems:
             if 'prompt' not in p:
