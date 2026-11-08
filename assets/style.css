@@ -1513,7 +1513,7 @@ html.slides footer {
     grid-template-columns: repeat(3, 1fr);
   }
 
-  /* Setup: Headset | FBT side by side, Locomotion and PC full width */
+  /* Setup: Headset | Tracking side by side, PC full width */
   .setup-grid {
     grid-template-columns: repeat(2, 1fr);
   }
@@ -2675,8 +2675,8 @@ html.slides .slide-timeline .gear-list li:first-child::after {
     padding: 1.5rem 1.15rem;
   }
 
-  html.slides #about .slide-art.art-orbit svg {
-    max-height: 13vh;
+  html.slides #about .slide-art:is(.art-orbit, .art-home) svg {
+    max-height: 10vh;
     margin-top: 0.75rem;
   }
 
@@ -3178,51 +3178,9 @@ html.slides .slide-art svg {
   to { transform: rotate(360deg); }
 }
 
-/* Setup, Locomotion: a treadmill seen from the side. The band runs, and two feet walk on it: each one
-   lands at the front, rides back with the band (at the band's own speed), then lifts and swings forward,
-   half a step apart. */
-.art-belt {
-  fill: none;
-  stroke: rgb(var(--accent));
-  stroke-width: 2;
-  stroke-dasharray: 16 8;
-  filter: drop-shadow(0 0 4px rgb(var(--accent) / 0.6));
-}
-
-.art-step {
-  fill: rgb(var(--accent-light));
-  filter: drop-shadow(0 0 6px rgb(var(--accent)));
-  transform: translate(60px, 0);
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  /* the band's top runs backwards at 200 units a second: the same as a planted foot */
-  .art-belt {
-    animation: belt-run 1.2s linear infinite;
-  }
-
-  .art-step {
-    animation: foot-step 1.2s linear infinite;
-  }
-
-  .art-step-2 {
-    animation-delay: -0.6s;
-  }
-}
-
-@keyframes belt-run {
-  to { stroke-dashoffset: 240; }
-}
-
-@keyframes foot-step {
-  0% { transform: translate(60px, 0); }
-  50% { transform: translate(-60px, 0); animation-timing-function: ease-out; }
-  75% { transform: translate(0, -30px); animation-timing-function: ease-in; }
-  100% { transform: translate(60px, 0); }
-}
-
-/* Career, Projects: a homelab rack, each unit's second light blinking on its own beat.
-   Career, Talks & Panels: a panel of three, the middle one speaking (rings spreading out). */
+/* Career, Projects: a homelab rack, one unit per project, each unit's second light blinking on its own beat.
+   Career, Talks & Panels: a panel of three, the middle one speaking (rings spreading out).
+   Career, Current focus: a sight with a headset in the middle, its rings spreading out. */
 .art-wave {
   fill: none;
   stroke: rgb(var(--accent) / 0.7);
@@ -3255,6 +3213,30 @@ html.slides .slide-art svg {
   100% { opacity: 0; transform: scale(2.6); }
 }
 
+/* A second, smaller heading inside a card (Setup: Locomotion under the trackers) */
+.setup-card .card-sub {
+  margin: 1.75rem 0 0.75rem;
+  font-size: 1.15rem;
+}
+
+/* Phones: a shared slide whose cards are short (Languages, Community) stays one slide, the cards stacked */
+@media (max-width: 767px) {
+  html.slides .slide.split.phone-whole {
+    display: flex;
+  }
+
+  html.slides .slide.split.phone-whole > .slide-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    width: 100%;
+  }
+
+  html.slides .slide.split.phone-whole .sub-slide {
+    display: contents;
+  }
+}
+
 /* the drawing goes under the card of its own part of a shared slide */
 html.slides .sub-slide > .slide-art {
   order: 2;
@@ -3265,19 +3247,20 @@ html.slides .sub-slide > .slide-art svg {
   max-height: 22vh;
 }
 
+/* Career, Projects: the cards are long, so the drawings under them stay small */
+html.slides .sub-slide > .slide-art:is(.art-rack, .art-site) svg {
+  max-height: 15vh;
+}
+
 /* with less motion the moving points stay home (the drawing still says it all) */
 @media (prefers-reduced-motion: reduce) {
   .art-flow {
     display: none;
   }
-
-  .art-step-2 {
-    transform: translate(-40px, 0);
-  }
 }
 
-/* Home: the orbit sits small at the top of its card */
-html.slides #about .art-orbit svg {
+/* Home: the orbit (and the house, on About Me) sits small at the top of its card */
+html.slides #about :is(.art-orbit, .art-home) svg {
   max-width: 300px;
   max-height: 16vh;
   margin-bottom: 0.5rem;
@@ -3376,6 +3359,19 @@ html.slides .slide.has-art .setup-card {
 
   html.slides .art-pipeline svg {
     max-height: 40vh;
+  }
+
+  /* long lists beside these drawings: on a phone they stay small */
+  html.slides .art-focus svg {
+    max-height: 15vh;
+  }
+
+  html.slides .art-body svg {
+    max-height: 18vh;
+  }
+
+  html.slides .setup-card .card-sub {
+    margin-top: 1.25rem;
   }
 
 
