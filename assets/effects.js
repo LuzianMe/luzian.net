@@ -13,6 +13,14 @@ if (location.pathname.endsWith('/index.html')) {
 // The copyright year in the footer (pages are written with a fixed year; this keeps it current)
 document.querySelectorAll('.current-year').forEach((el) => { el.textContent = new Date().getFullYear(); });
 
+// A dated label that turns into its date once the day has passed ("Upcoming" -> "Nov 2026"), so it never goes stale
+document.querySelectorAll('[data-past]').forEach((el) => {
+  if (new Date() >= new Date(el.dataset.past + 'T00:00')) {
+    el.textContent = el.dataset.pastText;
+    el.classList.replace('status-main', 'status-backup');
+  }
+});
+
 /* ==========================================================================
    Antigravity Visual Effects Engine: luzian.net
    - Spotlight Cursor Glow
