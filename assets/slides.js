@@ -20,6 +20,9 @@
 
   if (!reduceMotion.matches) root.classList.add('slides-anim');
 
+  // the walking body on Setup holds still for visitors who asked for less motion
+  if (reduceMotion.matches) document.querySelectorAll('.art-body svg').forEach((svg) => svg.pauseAnimations());
+
   // A dimmer between the water and the page, darker the deeper you go (style.css: .depth-veil)
   const veil = document.createElement('div');
   veil.className = 'depth-veil';

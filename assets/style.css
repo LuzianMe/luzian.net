@@ -3178,6 +3178,28 @@ html.slides .slide-art svg {
   to { transform: rotate(360deg); }
 }
 
+/* Setup, Tracking & Locomotion: the tracked body, seen from the side, walks on a treadmill. Each foot
+   lands at the front, rides back with the band (at the band's own speed: 100 units in 0.6s), then lifts
+   and swings forward, half a step apart; the arms swing against the legs. The limbs move by SVG
+   animations in the page (slides.js stops them for visitors who asked for less motion). */
+.art-belt {
+  fill: none;
+  stroke: rgb(var(--accent));
+  stroke-width: 2;
+  stroke-dasharray: 16 9;   /* 25 units: the 200-unit run below is a whole number of dashes, so the loop does not jump */
+  filter: drop-shadow(0 0 4px rgb(var(--accent) / 0.6));
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .art-belt {
+    animation: belt-run 1.2s linear infinite;
+  }
+}
+
+@keyframes belt-run {
+  to { stroke-dashoffset: 200; }
+}
+
 /* Career, Projects: a homelab rack, one unit per project, each unit's second light blinking on its own beat.
    Career, Talks & Panels: a panel of three, the middle one speaking (rings spreading out).
    Career, Current focus: a sight with a headset in the middle, its rings spreading out. */
