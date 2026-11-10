@@ -554,7 +554,7 @@ def search_files(browser, base):
 
 
 SLIDE_COUNTS = {'/': (4, 4), '/es/': (4, 4), '/career/': (11, 12), '/es/career/': (11, 12),
-              '/contact/': (2, 3), '/es/contact/': (2, 3), '/setup/': (4, 4), '/es/setup/': (4, 4)}   # slides at desktop, phone width
+              '/contact/': (2, 3), '/es/contact/': (2, 3), '/setup/': (5, 5), '/es/setup/': (5, 5)}   # slides at desktop, phone width
 
 
 def behaviours(base):

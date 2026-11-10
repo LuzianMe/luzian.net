@@ -200,4 +200,29 @@
   let resizeTimer = 0;
   window.addEventListener('resize', () => { clearTimeout(resizeTimer); resizeTimer = setTimeout(setUp, 150); });
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(setUp);
+
+  // A link to a slide (/setup/#homelab, from Home): the browser jumps there before the slides are laid
+  // out, and the snapping can pull the page back to the top, so once the layout has settled, go again
+  function goToLinked() {
+    const id = decodeURIComponent(location.hash.slice(1));
+    const target = id && document.getElementById(id);
+    const unit = target && units.find((u) => u === target || u.contains(target) || target.contains(u));
+    // instant: a smooth scroll down through every slide can be cut short on the way
+    if (unit && Math.abs(unit.getBoundingClientRect().top) > 2) unit.scrollIntoView({ behavior: 'instant', block: 'start' });
+  }
+  // (tried again once the page has loaded, as long as the visitor has not started moving it themselves)
+  if (location.hash) {
+    let touched = false;
+    const mine = () => { touched = true; };
+    ['wheel', 'touchstart', 'keydown', 'pointerdown'].forEach((type) => window.addEventListener(type, mine, { once: true, passive: true }));
+    const go = () => { if (!touched) goToLinked(); };
+    const settled = document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve();
+    settled.then(() => requestAnimationFrame(go));
+    const later = () => setTimeout(go, 400);
+    if (document.readyState === 'complete') later(); else window.addEventListener('load', later, { once: true });
+    // the browser repeats its own jump (to the card, not its slide) late in loading: put it right again
+    const until = Date.now() + 4000;
+    window.addEventListener('scrollend', () => { if (Date.now() < until) go(); });
+  }
+  window.addEventListener('hashchange', goToLinked);
 })();
