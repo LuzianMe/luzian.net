@@ -498,6 +498,20 @@ document.querySelectorAll('[data-past]').forEach((el) => {
     update();
   }
 
+  // Short silent loops (the notes graph on Setup): they play only while on screen, and never with reduced
+  // motion or data saver on; the still picture under each one is what everyone else sees
+  function initLoopVideos() {
+    const videos = document.querySelectorAll('video.loop-video');
+    if (!videos.length || reduceMotion || (navigator.connection && navigator.connection.saveData) || !('IntersectionObserver' in window)) return;
+    const watch = new IntersectionObserver((entries) => {
+      entries.forEach(({ target, isIntersecting }) => {
+        if (isIntersecting) target.play().then(() => target.classList.add('playing')).catch(() => {});
+        else target.pause();
+      });
+    }, { threshold: 0.3 });
+    videos.forEach((video) => watch.observe(video));
+  }
+
   // Initialize once DOM is ready
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
@@ -505,11 +519,13 @@ document.querySelectorAll('[data-past]').forEach((el) => {
       initParticleCanvas();
       initCalmMode();
       initBackToTop();
+      initLoopVideos();
     });
   } else {
     initCardTilt();
     initParticleCanvas();
     initCalmMode();
     initBackToTop();
+    initLoopVideos();
   }
 })();

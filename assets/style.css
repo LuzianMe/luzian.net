@@ -706,10 +706,11 @@ html {
   box-shadow: 0 0 18px rgb(var(--accent) / 0.55);
 }
 
+/* the same size as the other tags (the glow says it is a link), so the tags wrap as they did */
 .tags li.tag-link a {
   display: block;
-  padding: 0.25rem 0.85rem;
-  font-weight: 600;
+  padding: 0.25rem 0.75rem;
+  font-weight: 500;
   color: rgb(var(--white));
   text-decoration: none;
 }
@@ -2713,6 +2714,15 @@ html.slides .slide-timeline .gear-list li:first-child::after {
     font-size: 0.75rem;
   }
 
+  /* a tag that is a link: the padding is the link's, so it is no bigger than the others */
+  html.slides #about .tags li.tag-link {
+    padding: 0;
+  }
+
+  html.slides #about .tags li.tag-link a {
+    padding: 0.1rem 0.6rem;
+  }
+
   /* where to next: compact rows, the arrow at the end */
   .next-tile {
     display: grid;
@@ -3457,4 +3467,60 @@ html.slides .slide.has-art .setup-card {
 @keyframes art-grow {
   from { opacity: 0; transform: scaleY(0); }
   to { opacity: 1; transform: none; }
+}
+
+/* ---- Setup, Homelab: the notes graph ---------------------------------------------------------
+   A still of the graph of the homelab's notes, and over it a short loop of the graph growing (played by
+   effects.js only while on screen, never with reduced motion or data saver). Both are dark pictures, so
+   they are lightened onto the page (screen) and their edges fade out: no box, just the glowing graph,
+   in Water and in Fire alike. */
+.homelab-graph {
+  position: relative;
+  width: 100%;
+  max-width: 460px;
+  margin: 0 auto;
+  align-self: center;
+  aspect-ratio: 1;
+  mix-blend-mode: screen;
+  -webkit-mask-image: radial-gradient(closest-side, #000 62%, transparent 100%);
+  mask-image: radial-gradient(closest-side, #000 62%, transparent 100%);
+}
+
+.homelab-graph img,
+.homelab-graph video {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.homelab-graph video {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 0.8s ease;
+}
+
+.homelab-graph video.playing {
+  opacity: 1;
+}
+
+.homelab-text {
+  margin: 0.75rem 0 0;
+}
+
+/* a link to it (Home's Homelab tag) stops clear of the menu bar */
+#homelab {
+  scroll-margin-top: 6rem;
+}
+
+/* on a phone the graph sits above the card and leaves it the room */
+@media (max-width: 767px) {
+  .homelab-graph {
+    max-width: min(80vw, 34vh);
+  }
+
+  html.slides .homelab-graph {
+    max-width: min(62vw, 23vh);
+    order: -1;
+  }
 }
