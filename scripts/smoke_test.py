@@ -28,6 +28,7 @@ import os
 import sys
 import threading
 from pathlib import Path
+from urllib.parse import urlparse
 
 from playwright.sync_api import TimeoutError as PlaywrightTimeout, sync_playwright
 
@@ -121,7 +122,9 @@ def check_page(browser, base, width, theme, path):
     page.goto(base + path + ('' if path in WATER_PAGES else '?water=off'), wait_until='networkidle')
     page.wait_for_timeout(700)
     if path in ('/pay/', '/home/'):
-        # redirect pages: they must have sent the visitor on (to the payments or contact page)
+        # redirect pages: they must have sent the visitor on (to the payments or contact page). Leaving
+        # can cancel the redirect page's own load, which the browser reports as a failed request: not a fault
+        problems = [p for p in problems if not (p.startswith('request failed: ') and urlparse(p.split(': ', 1)[1]).path == path)]
         destination = page.url.split(base)[-1]
         if destination.split('?')[0].strip('/') in ('pay', 'home'):
             problems.append(f'the redirect did not happen (still at {destination})')
@@ -434,7 +437,8 @@ def rows_in_cards(browser, base):
                 fail(f'rows {path}', 'no check mark after copying')
             if not wait_until(page, "document.querySelector('.pay-btn[data-copy] svg rect') !== null", 4000):
                 fail(f'rows {path}', 'the copy icon did not come back')
-            if page.evaluate("document.getElementById('live-status') && document.getElementById('live-status').textContent === ''"):
+            # waited for too: the announcement is written a moment after the click
+            if not wait_until(page, "!!document.getElementById('live-status') && document.getElementById('live-status').textContent !== ''", 3000):
                 fail(f'rows {path}', 'the copy was not announced')
             # the card is not wider than it needs to be, and not taller than its rows
             page.set_viewport_size({'width': 1280, 'height': 900})
