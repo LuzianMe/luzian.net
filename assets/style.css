@@ -3470,10 +3470,10 @@ html.slides .slide.has-art .setup-card {
 }
 
 /* ---- Setup, Homelab: the notes graph ---------------------------------------------------------
-   A still of the graph of the homelab's notes, and over it a short loop of the graph growing (played by
-   effects.js only while on screen, never with reduced motion or data saver). Both are dark pictures, so
-   they are lightened onto the page (screen) and their edges fade out: no box, just the glowing graph,
-   in Water and in Fire alike. */
+   The graph of the homelab's notes, live (assets/notes-graph.js puts notes-graph/graph.html in an iframe
+   over the still once it comes near, and fades it in when the graph says it is drawn). The graph's page is
+   transparent, the stills are dark pictures: both are lightened onto the page (screen) and their edges fade
+   out, so there is no box, just the glowing graph. Each theme has its own still (Deep sea, Amber terminal). */
 .homelab-graph {
   position: relative;
   width: 100%;
@@ -3482,30 +3482,54 @@ html.slides .slide.has-art .setup-card {
   align-self: center;
   aspect-ratio: 1;
   mix-blend-mode: screen;
-  -webkit-mask-image: radial-gradient(closest-side, #000 62%, transparent 100%);
-  mask-image: radial-gradient(closest-side, #000 62%, transparent 100%);
+  -webkit-mask-image: radial-gradient(closest-side, #000 70%, transparent 100%);
+  mask-image: radial-gradient(closest-side, #000 70%, transparent 100%);
 }
 
-.homelab-graph img,
-.homelab-graph video {
+.homelab-graph img {
   display: block;
   width: 100%;
   height: 100%;
 }
 
-.homelab-graph video {
+[data-notes-graph] img {
+  transition: opacity 0.8s ease;
+}
+
+html[data-theme="fire"] [data-notes-graph] .still-water,
+html:not([data-theme="fire"]) [data-notes-graph] .still-fire {
+  display: none;
+}
+
+.notes-graph-frame {
   position: absolute;
   inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  color-scheme: normal;   /* keeps the graph's page see-through in a dark browser */
   opacity: 0;
   transition: opacity 0.8s ease;
 }
 
-.homelab-graph video.playing {
+.homelab-graph .notes-graph-frame {
+  pointer-events: none;   /* a preview: the slide keeps its scrolling and swiping */
+}
+
+.live > .notes-graph-frame {
   opacity: 1;
+}
+
+[data-notes-graph].live img {
+  opacity: 0;
 }
 
 .homelab-text {
   margin: 0.75rem 0 0;
+}
+
+.homelab-text a {
+  color: rgb(var(--accent));
 }
 
 /* a link to it (Home's Homelab tag) stops clear of the menu bar */
@@ -3523,4 +3547,57 @@ html.slides .slide.has-art .setup-card {
     max-width: min(62vw, 23vh);
     order: -1;
   }
+}
+
+/* ---- Homelab notes graph, its own page (/setup/homelab/) ---------------------------------------
+   The graph fills most of the screen under a short heading, to turn and zoom; the water shows through it. */
+.graph-page {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  padding-bottom: 0.5rem;
+}
+
+.graph-page header {
+  padding-top: 0.5rem;
+}
+
+.graph-page .graph-links a {
+  color: rgb(var(--accent));
+}
+
+.graph-stage {
+  position: relative;
+  width: 100%;
+  height: max(360px, calc(100svh - 15rem));
+  margin-top: 0.5rem;
+}
+
+/* a dark pool under the graph, so its fine lines and names stay readable over the logo and the flames */
+.graph-stage::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(closest-side, rgb(var(--surface-00) / 0.9) 55%, transparent 100%);
+  pointer-events: none;
+}
+
+/* the still, until the graph is drawn (and without JavaScript) */
+.graph-stage picture {
+  display: block;
+  height: 100%;
+}
+
+.graph-stage img {
+  display: block;
+  height: 100%;
+  max-width: 100%;
+  margin: 0 auto;
+  object-fit: contain;
+  mix-blend-mode: screen;
+}
+
+.graph-stage noscript p {
+  margin: 0;
+  color: rgb(var(--muted));
 }

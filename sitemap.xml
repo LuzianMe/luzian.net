@@ -38,6 +38,18 @@
     <xhtml:link rel="alternate" hreflang="x-default" href="https://luzian.net/setup/"/>
   </url>
   <url>
+    <loc>https://luzian.net/setup/homelab/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://luzian.net/setup/homelab/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://luzian.net/es/setup/homelab/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://luzian.net/setup/homelab/"/>
+  </url>
+  <url>
+    <loc>https://luzian.net/es/setup/homelab/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://luzian.net/setup/homelab/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://luzian.net/es/setup/homelab/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://luzian.net/setup/homelab/"/>
+  </url>
+  <url>
     <loc>https://luzian.net/contact/</loc>
     <xhtml:link rel="alternate" hreflang="en" href="https://luzian.net/contact/"/>
     <xhtml:link rel="alternate" hreflang="es" href="https://luzian.net/es/contact/"/>

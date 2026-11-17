@@ -1,115 +1,178 @@
 #!/usr/bin/env python3
-"""Refresh the notes graph on the Setup page's Homelab slide.
+"""Refresh the graph of my homelab notes on the site (Setup's Homelab slide and /setup/homelab/).
 
-Films the graph view of the homelab notes (http://home.lan/notes/myco/graph.html, only reachable at
-home) as it replays its history, and writes the three files the slide uses:
+Run it at home before publishing; the graph is a copy of the notes, so it goes stale as they grow:
 
-  assets/homelab-graph.webp        the finished graph, 960 px square (the still everyone sees first)
-  assets/homelab-graph-phone.webp  the same, 600 px, for phones
-  assets/homelab-graph.mp4         about 8 s of the graph growing, silent, faded in and out so it loops
-
-Needs Playwright with Chromium and ffmpeg:
   ~/.venvs/playwright/bin/python scripts/homelab_graph.py
 
-Node names are left out (they name devices at home) and so are the graph page's panels. The film runs on
-a controlled clock, so every frame is a full screenshot exactly 1/30 s apart, whatever the machine.
-Afterwards update the numbers in the slide's text (notes, links, changes) if they moved, and run
-python3 scripts/sync_pages.py --bump.
+It does four things, and stops at the first problem without touching the site:
+  1. builds the public graph with Myco Notes (only the labels approved in ~/homelab/myco-notes/public-labels.json,
+     no note names, paths, titles or commit subjects), into a temporary folder;
+  2. checks it: nothing from the notes may be in it but the approved labels (see check() below);
+  3. moves it to notes-graph/graph.html and films a still of it in each theme (Deep sea for Water, Amber
+     terminal for Fire): assets/homelab-graph-{water,fire}.webp (960 px) and -phone.webp (600 px), shown
+     until the live graph is drawn, and for good with reduced motion, data saver or no JavaScript;
+  4. writes the new counts (notes, links, changes) into the Setup pages and the graph pages, both languages.
+
+Never add labels here: the approved list is kept with the notes, and changes to it are mine to make.
+Needs Playwright with Chromium, and Pillow.
 """
-import shutil
+import json
+import re
 import subprocess
 import sys
 import tempfile
 from pathlib import Path
 
-from playwright.sync_api import sync_playwright
-
-URL = 'http://home.lan/notes/myco/graph.html?theme=dark'
 ROOT = Path(__file__).resolve().parent.parent
-FPS = 30
-SPEED = '0.28'        # the graph's own replay speed that makes the growth last about 6 s here
-HOLD_S = 1.8          # then the finished graph, before the loop starts again
-MAX_S = 20
-BG = '0x0a0f0d'       # the graph page's background, for the padding and the fades
+HOME = Path.home() / 'homelab'
+KIT = HOME / 'myco-notes'
+LABELS = KIT / 'public-labels.json'
+OUT = ROOT / 'notes-graph' / 'graph.html'
+TITLE = 'Homelab'
+PAGES = ['setup/index.html', 'es/setup/index.html', 'setup/homelab/index.html', 'es/setup/homelab/index.html']
+THEMES = {'water': 'deepsea', 'fire': 'amber'}
 
-NO_LABELS = """
-(() => {
-  const P = CanvasRenderingContext2D.prototype, f = P.fillText, s = P.strokeText;
-  const skip = c => /12px system-ui/.test(c.font);
-  P.fillText = function () { if (!skip(this)) return f.apply(this, arguments); };
-  P.strokeText = function () { if (!skip(this)) return s.apply(this, arguments); };
-})();
-"""
-HIDE_UI = '#left, #tools, #panel, #empty { display: none !important; }'
+# Words that must never be in the public graph (addresses, providers, places, people)
+FORBIDDEN = ['.lan', '192.168', 'duckdns', 'proton', 'vpn', 'nord', 'wireguard', 'tailscale', 'mexic', 'parents', 'luzian']
+IP = re.compile(r'\b\d{1,3}(?:\.\d{1,3}){3}\b')
+NODE_KEYS = {'id', 'g', 'hub', 'hist', 'in', 'out', 'b', 'l', 'name'}
+COMMIT_KEYS = {'t', 'n', 'a'}
+GROUP_ID = re.compile(r'^(start|plans|logs|archive|docs|inbox|sources|verify|g\d+)$')
 
 
-def film(frames):
-    with sync_playwright() as pw:
+def run(*args, cwd=None):
+    return subprocess.run(args, cwd=cwd, capture_output=True, text=True, check=True).stdout
+
+
+def data_of(page):
+    return json.loads(re.search(r'<script id="data" type="application/json">(.*?)</script>', page, re.S).group(1))
+
+
+def approved():
+    raw = json.loads(LABELS.read_text(encoding='utf-8'))
+    values = raw.values() if isinstance(raw, dict) else raw
+    return {v for v in values if isinstance(v, str)}
+
+
+def private_strings():
+    """Everything from the notes that must not appear: file names, paths, titles, the last 50 commit subjects."""
+    found = set()
+    for rel in run('git', '-C', str(HOME), 'ls-files', '*.md').split():
+        path = Path(rel)
+        found |= {rel, path.name, path.stem}
+        text = (HOME / rel).read_text(encoding='utf-8', errors='ignore')
+        m = re.search(r'^title:\s*(.+)$', text, re.M) or re.search(r'^#\s+(.+)$', text, re.M)
+        if m:
+            found.add(m.group(1).strip().strip('"'))
+    found |= set(re.findall(r'`([^`]+\.md)`', run(str(KIT / 'tools' / 'index'), cwd=HOME)))
+    found |= {s for s in run('git', '-C', str(HOME), 'log', '--format=%s', '-50').splitlines() if s.strip()}
+    return {s for s in found if len(s) >= 4}
+
+
+def check(page):
+    """The problems with a built graph (an empty list when it is safe to publish)."""
+    problems = []
+    low = page.lower()
+    data = data_of(page)
+    labels = approved()
+    allowed = {x.lower() for x in labels | {TITLE}}
+    data_text = json.dumps(data).lower()
+    for s in private_strings():
+        sl = s.lower()
+        if sl in allowed:
+            continue   # an approved label that happens to equal a note's name ("Runbook")
+        # short plain words ("network") also turn up in the page's own code: those count only inside the data
+        if any(c in sl for c in '-/ .') or len(sl) > 12:
+            if sl in low:
+                problems.append(f'contains a note name, path, title or commit subject: {s!r}')
+        elif f'"{sl}"' in data_text:
+            problems.append(f'the data contains {s!r}')
+    for word in FORBIDDEN:
+        if word in low:
+            problems.append(f'contains {word!r}')
+    problems += [f'contains an address: {m}' for m in IP.findall(page)]
+    if data.get('title') != TITLE:
+        problems.append(f'title is {data.get("title")!r}')
+    names = {n['name'] for n in data['nodes'] if n.get('name')}
+    problems += [f'label not in the approved list: {n!r}' for n in sorted(names - labels)]
+    keys = {k for n in data['nodes'] for k in n} - NODE_KEYS
+    if keys:
+        problems.append(f'notes carry more than they should: {sorted(keys)}')
+    keys = {k for c in data['commits'] for k in c} - COMMIT_KEYS
+    if keys:
+        problems.append(f'commits carry more than they should: {sorted(keys)}')
+    problems += [f'group id {g.get("id")!r} is not a generic one' for g in data['groups'] if not GROUP_ID.match(str(g.get('id')))]
+    problems += [f'group carries {sorted(set(g) - {"id"})}' for g in data['groups'] if set(g) - {'id'}]
+    return problems
+
+
+def build():
+    with tempfile.TemporaryDirectory() as tmp:
+        report = run(sys.executable, str(KIT / 'tools' / 'build-notes-map.py'), '--root', str(HOME), '--public',
+                     '--labels', str(LABELS), '--title', TITLE, '--out', tmp).strip()
+        print(report)
+        m = re.search(r'(\d+) notes \((\d+) labelled\), (\d+) links, (\d+) commits', report)
+        if not m:
+            sys.exit('could not read the counts from the build')
+        page = (Path(tmp) / 'graph.html').read_text(encoding='utf-8')
+    problems = check(page)
+    if problems:
+        print('\nNOT published, the graph is not safe:')
+        for p in problems:
+            print(' -', p)
+        sys.exit(1)
+    OUT.parent.mkdir(exist_ok=True)
+    OUT.write_text(page, encoding='utf-8')
+    return {'notes': m.group(1), 'labelled': m.group(2), 'links': m.group(3), 'changes': m.group(4)}
+
+
+def film():
+    """A still of the graph in each theme, on black (the site lightens it onto the page), cropped square around the network."""
+    from PIL import Image
+    from playwright.sync_api import sync_playwright
+    with tempfile.TemporaryDirectory() as tmp, sync_playwright() as pw:
         browser = pw.chromium.launch(args=['--use-gl=swiftshader', '--enable-unsafe-swiftshader'])
-        context = browser.new_context(viewport={'width': 1200, 'height': 900})
-        context.add_init_script(NO_LABELS)
-        page = context.new_page()
-        page.clock.install()
-        page.goto(URL, wait_until='networkidle')
-        page.add_style_tag(content=HIDE_UI)
-        page.clock.run_for(4000)
-        page.evaluate("s => { const sel = document.getElementById('speed'); sel.add(new Option(s + 'x', s)); sel.value = s; }", SPEED)
-        page.evaluate("document.getElementById('play').click()")
-        n, done_at = 0, None
-        while n < MAX_S * FPS:
-            page.clock.run_for(1000 / FPS)
-            page.screenshot(path=str(frames / f'{n:04d}.png'))
-            n += 1
-            if done_at is None and n > FPS and page.inner_text('#play').strip() == 'Replay':
-                done_at = n
-            if done_at is not None and n - done_at >= HOLD_S * FPS:
-                break
+        for theme, graph_theme in THEMES.items():
+            page = browser.new_page(viewport={'width': 1100, 'height': 1100})
+            page.emulate_media(reduced_motion='no-preference')
+            page.goto(f'{OUT.as_uri()}?theme={graph_theme}&interactive=0')
+            page.add_style_tag(content='html, body { background: #000 !important; }')
+            page.wait_for_timeout(7000)   # settled, and a few labels showing
+            shot = Path(tmp) / f'{theme}.png'
+            page.screenshot(path=str(shot))
+            page.close()
+            img = Image.open(shot).convert('RGB')
+            box = img.convert('L').point(lambda v: 255 if v > 40 else 0).getbbox()
+            left, top, right, bottom = box
+            side = min(max(right - left, bottom - top) + 80, img.width, img.height)
+            x = min(max((left + right) // 2 - side // 2, 0), img.width - side)
+            y = min(max((top + bottom) // 2 - side // 2, 0), img.height - side)
+            square = img.crop((x, y, x + side, y + side))
+            for suffix, size, quality in (('', 960, 82), ('-phone', 600, 80)):
+                out = ROOT / 'assets' / f'homelab-graph-{theme}{suffix}.webp'
+                square.resize((size, size), Image.LANCZOS).save(out, 'WEBP', quality=quality, method=6)
+                print(f'{out.relative_to(ROOT)}: {out.stat().st_size // 1024} KB')
         browser.close()
-    return n
 
 
-def crop_box(frames):
-    """A square around everything the graph covers in any frame (it moves as it grows)"""
-    from PIL import Image, ImageChops
-    files = sorted(frames.glob('*.png'))
-    seen = None
-    for f in files[::5] + [files[-1]]:
-        lit = Image.open(f).convert('L').point(lambda v: 255 if v > 60 else 0)
-        seen = lit if seen is None else ImageChops.lighter(seen, lit)
-    left, top, right, bottom = seen.getbbox()
-    width, height = Image.open(files[0]).size
-    side = min(max(right - left, bottom - top) + 40, width, height)
-    x = min(max((left + right) // 2 - side // 2, 0), width - side)
-    y = min(max((top + bottom) // 2 - side // 2, 0), height - side)
-    return side, x, y
-
-
-def ffmpeg(*args):
-    subprocess.run(['ffmpeg', '-v', 'error', '-y', *args], check=True)
+def write_counts(counts):
+    for rel in PAGES:
+        path = ROOT / rel
+        text = path.read_text(encoding='utf-8')
+        new = re.sub(r'(<span data-graph-count="(\w+)">)\d+(</span>)', lambda m: m.group(1) + counts[m.group(2)] + m.group(3), text)
+        if new != text:
+            path.write_text(new, encoding='utf-8')
+            print(f'updated the counts in {rel}')
 
 
 def main():
-    if not shutil.which('ffmpeg'):
-        sys.exit('ffmpeg is needed')
-    with tempfile.TemporaryDirectory() as tmp:
-        frames = Path(tmp)
-        count = film(frames)
-        side, x, y = crop_box(frames)
-        pad = side * 80 // 900
-        square = f'crop={side}:{side}:{x}:{y},pad={side + 2 * pad}:{side + 2 * pad}:{pad}:{pad}:color={BG}'
-        last = frames / f'{count - 1:04d}.png'
-        ffmpeg('-i', str(last), '-vf', f'{square},scale=960:960:flags=lanczos', '-c:v', 'libwebp', '-quality', '82',
-               str(ROOT / 'assets/homelab-graph.webp'))
-        ffmpeg('-i', str(last), '-vf', f'{square},scale=600:600:flags=lanczos', '-c:v', 'libwebp', '-quality', '80',
-               str(ROOT / 'assets/homelab-graph-phone.webp'))
-        seconds = count / FPS
-        fades = f'fade=t=in:st=0:d=0.35:color={BG},fade=t=out:st={seconds - 0.42:.2f}:d=0.4:color={BG}'
-        ffmpeg('-framerate', str(FPS), '-i', str(frames / '%04d.png'),
-               '-vf', f'{square},scale=720:720:flags=lanczos,{fades},format=yuv420p',
-               '-c:v', 'libx264', '-crf', '26', '-preset', 'slow', '-profile:v', 'high', '-movflags', '+faststart', '-an',
-               str(ROOT / 'assets/homelab-graph.mp4'))
-    for name in ('homelab-graph.webp', 'homelab-graph-phone.webp', 'homelab-graph.mp4'):
-        print(f'{name}: {(ROOT / "assets" / name).stat().st_size // 1024} KB')
+    if not LABELS.exists():
+        sys.exit(f'{LABELS} not found: this only runs at home, next to the notes')
+    counts = build()
+    film()
+    write_counts(counts)
+    print(f'\nnotes-graph/graph.html: {OUT.stat().st_size // 1024} KB, checked. Look at it, then commit and publish.')
 
 
 if __name__ == '__main__':
