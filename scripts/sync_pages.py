@@ -31,18 +31,20 @@ PAGES = {
     'index.html': ('en', 'home'),
     'career/index.html': ('en', 'career'),
     'setup/index.html': ('en', 'setup'),
+    'setup/homelab/index.html': ('en', 'setup/homelab'),
     'contact/index.html': ('en', 'contact'),
     'payment/index.html': ('en', 'payment'),
     '404.html': ('en', '404'),
     'es/index.html': ('es', 'home'),
     'es/career/index.html': ('es', 'career'),
     'es/setup/index.html': ('es', 'setup'),
+    'es/setup/homelab/index.html': ('es', 'setup/homelab'),
     'es/contact/index.html': ('es', 'contact'),
     'es/payment/index.html': ('es', 'payment'),
 }
 
 # Pages listed in sitemap.xml (each with its twin in the other language)
-SITEMAP = ['index.html', 'career/index.html', 'setup/index.html', 'contact/index.html', 'payment/index.html']
+SITEMAP = ['index.html', 'career/index.html', 'setup/index.html', 'setup/homelab/index.html', 'contact/index.html', 'payment/index.html']
 
 TEXT = {
     'en': {
@@ -212,7 +214,7 @@ TAG = re.compile(r'\?v=([0-9]{8}[a-z]+)')
 
 def all_html():
     return sorted(p for p in ROOT.rglob('*.html')
-                  if not ({'water-lab', '.git', 'node_modules'} & set(p.relative_to(ROOT).parts)))
+                  if not ({'water-lab', '.git', 'node_modules', 'notes-graph'} & set(p.relative_to(ROOT).parts)))
 
 
 def current_tag():

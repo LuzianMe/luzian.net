@@ -25,9 +25,9 @@
   <link rel="preload" href="/assets/fonts/saira-400-600.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="/assets/fonts/orbitron-500-700.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="/assets/fonts/chakra-petch-600.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="/assets/style.css?v=20261110h">
-  <script src="/assets/theme.js?v=20261110h"></script>
-  <script src="/assets/swipe.js?v=20261110h"></script>
+  <link rel="stylesheet" href="/assets/style.css?v=20261117a">
+  <script src="/assets/theme.js?v=20261117a"></script>
+  <script src="/assets/swipe.js?v=20261117a"></script>
   <!-- /shared:head -->
   <meta name="description" content="Mi equipo de VR y PC: Quest Pro, seguimiento de cuerpo completo de 11 puntos, seguimiento facial y una PC con Ryzen 7 9800X3D y RX 7900 XTX.">
   <meta property="og:title" content="Mi equipo - Luzian">
@@ -219,15 +219,18 @@
       <section class="setup-card" id="homelab">
         <h2>Homelab</h2>
         <p class="setup-card-intro">El equipo que no se ve: mi nube en casa, una PC con GPU para IA local y los asistentes de voz de la casa.</p>
-        <p class="homelab-text">Lleva sus propias notas: 60, con 229 enlaces, escritas con Myco Notes, mi método para notas que personas y agentes de IA mantienen fieles. El grafo las muestra creciendo en 151 cambios.</p>
-        <a class="cta" href="https://github.com/LuzianMe/myco-notes" target="_blank" rel="noopener noreferrer">Myco Notes en GitHub &rarr;</a>
+        <p class="homelab-text">Lleva sus propias notas: <span data-graph-count="notes">95</span>, con <span data-graph-count="links">553</span> enlaces en <span data-graph-count="changes">326</span> cambios, escritas con <a href="https://github.com/LuzianMe/myco-notes" target="_blank" rel="noopener noreferrer">Myco Notes</a>, mi método para notas que personas y agentes de IA mantienen fieles.</p>
+        <a class="cta" href="/es/setup/homelab/">Explorar el grafo &rarr;</a>
       </section>
-          <figure class="homelab-graph">
-            <picture>
-              <source media="(max-width: 767px)" srcset="/assets/homelab-graph-phone.webp" width="600" height="600">
-              <img src="/assets/homelab-graph.webp" width="960" height="960" loading="lazy" decoding="async" alt="Un grafo de las notas de mi homelab: 60 puntos brillantes, de colores según el tipo de nota, unidos por líneas finas.">
+          <figure class="homelab-graph" data-notes-graph="preview">
+            <picture class="still-water">
+              <source media="(max-width: 767px)" srcset="/assets/homelab-graph-water-phone.webp" width="600" height="600">
+              <img src="/assets/homelab-graph-water.webp" width="960" height="960" loading="lazy" decoding="async" alt="Un grafo de las notas de mi homelab: puntos brillantes, de colores según el tipo de nota, unidos por líneas finas, algunos con nombre.">
             </picture>
-            <video class="loop-video" src="/assets/homelab-graph.mp4" width="720" height="720" muted loop playsinline preload="none" aria-hidden="true" tabindex="-1"></video>
+            <picture class="still-fire">
+              <source media="(max-width: 767px)" srcset="/assets/homelab-graph-fire-phone.webp" width="600" height="600">
+              <img src="/assets/homelab-graph-fire.webp" width="960" height="960" loading="lazy" decoding="async" alt="Un grafo de las notas de mi homelab: puntos brillantes, de colores según el tipo de nota, unidos por líneas finas, algunos con nombre.">
+            </picture>
           </figure>
         </div>
       </section>
@@ -239,11 +242,12 @@
       <p>&copy; <span class="current-year">2026</span> Luzian. Todos los derechos reservados. <span class="footer-links"><span class="footer-sep" aria-hidden="true">&middot;</span> <a href="/es/payment/">Pagos</a> <span class="footer-sep" aria-hidden="true">&middot;</span> <a href="/es/?calm">Modo tranquilo</a></span></p>
     </footer>
     <!-- /shared:footer -->
+    <script src="/assets/notes-graph.js?v=20261117a"></script>
     <!-- shared:scripts -->
-    <script src="/assets/effects.js?v=20261110h"></script>
-    <script src="/assets/water.js?v=20261110h"></script>
-    <script src="/assets/slides.js?v=20261110h"></script>
-    <script src="/assets/lang.js?v=20261110h"></script>
+    <script src="/assets/effects.js?v=20261117a"></script>
+    <script src="/assets/water.js?v=20261117a"></script>
+    <script src="/assets/slides.js?v=20261117a"></script>
+    <script src="/assets/lang.js?v=20261117a"></script>
     <!-- /shared:scripts -->
   </div>
 </body>

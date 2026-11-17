@@ -51,8 +51,8 @@ def patient(ms):
 
 
 HEAVY = {'theme switch', 'calm view', 'reveal ring', 'water clock', 'plain snake', 'stats readout'}
-PAGES = ['/', '/career/', '/setup/', '/contact/', '/payment/', '/es/', '/es/career/', '/es/setup/',
-         '/es/contact/', '/es/payment/', '/404.html', '/pay/', '/home/']
+PAGES = ['/', '/career/', '/setup/', '/setup/homelab/', '/contact/', '/payment/', '/es/', '/es/career/', '/es/setup/',
+         '/es/setup/homelab/', '/es/contact/', '/es/payment/', '/404.html', '/pay/', '/home/']
 failures = []
 
 
@@ -557,6 +557,64 @@ def search_files(browser, base):
         context.close()
 
 
+def graph_theme(page):
+    """The theme the notes graph inside the page is showing (it is on this site, so its page can be read)"""
+    frame = next((f for f in page.frames if f.url.split('?')[0].endswith('/notes-graph/graph.html')), None)
+    return frame.evaluate("document.documentElement.getAttribute('data-theme')") if frame else None
+
+
+def notes_graph(browser, base):
+    """The homelab notes graph: drawn on its page and on Setup's Homelab slide, in the theme's colours, and following the switch"""
+    problems = []
+    context, page = new_page(browser, base, 1024, 'water', problems)
+    # its own page: the whole graph, to turn and zoom
+    page.goto(base + '/setup/homelab/?water=off', wait_until='networkidle')
+    if not wait_until(page, "!!document.querySelector('.graph-stage.live')", 15000):
+        fail('notes graph', 'the graph on /setup/homelab/ never said it was drawn')
+    src = page.evaluate("(document.querySelector('.graph-stage iframe') || {}).src || ''")
+    if 'theme=deepsea' not in src or 'interactive=0' in src:
+        fail('notes graph', f'/setup/homelab/ asks for the wrong graph: {src}')
+    if graph_theme(page) != 'deepsea':
+        fail('notes graph', f'the graph shows {graph_theme(page)} in Water, not deepsea')
+    page.click('[data-theme-set="fire"]')
+    wait_for_theme_animation(page, 'water')
+    if not _eventually(lambda: graph_theme(page) == 'amber'):
+        fail('notes graph', f'the graph did not follow the switch to Fire (shows {graph_theme(page)})')
+    # the slide: a preview that only turns
+    page.goto(base + '/setup/?slides=off&water=off', wait_until='networkidle')
+    page.evaluate("document.getElementById('homelab').scrollIntoView()")
+    if not wait_until(page, "!!document.querySelector('.homelab-graph.live')", 15000):
+        fail('notes graph', 'the preview on the Homelab slide never said it was drawn')
+    src = page.evaluate("(document.querySelector('.homelab-graph iframe') || {}).src || ''")
+    if 'theme=amber' not in src or 'interactive=0' not in src:
+        fail('notes graph', f'the slide asks for the wrong graph: {src}')
+    if page.evaluate("getComputedStyle(document.querySelector('.homelab-graph iframe')).pointerEvents") != 'none':
+        fail('notes graph', 'the preview takes touches (the slide would stop scrolling)')
+    for p in problems:
+        fail('notes graph', p)
+    context.close()
+    # with reduced motion: the still only
+    context = browser.new_context(viewport={'width': 1024, 'height': 800}, reduced_motion='reduce')
+    page = context.new_page()
+    page.goto(base + '/setup/?slides=off&water=off', wait_until='networkidle')
+    page.evaluate("document.getElementById('homelab').scrollIntoView()")
+    page.wait_for_timeout(800)
+    if page.query_selector('.homelab-graph iframe'):
+        fail('notes graph', 'with reduced motion the slide still loads the moving graph')
+    if not page.evaluate("[...document.querySelectorAll('.homelab-graph img')].some(i => i.offsetWidth > 0 && i.complete && i.naturalWidth > 0)"):
+        fail('notes graph', 'with reduced motion the still is not shown')
+    context.close()
+
+
+def _eventually(test, tries=30, pause=0.2):
+    import time
+    for _ in range(tries * PATIENCE):
+        if test():
+            return True
+        time.sleep(pause)
+    return False
+
+
 SLIDE_COUNTS = {'/': (4, 4), '/es/': (4, 4), '/career/': (11, 12), '/es/career/': (11, 12),
               '/contact/': (2, 3), '/es/contact/': (2, 3), '/setup/': (5, 5), '/es/setup/': (5, 5)}   # slides at desktop, phone width
 
@@ -576,6 +634,7 @@ def behaviours(base):
         ('skip link and year', lambda browser, f=skip_link_and_year: f(browser, base)),
         ('not found pages', lambda browser, f=not_found_pages: f(browser, base)),
         ('search files', lambda browser, f=search_files: f(browser, base)),
+        ('notes graph', lambda browser, f=notes_graph: f(browser, base)),
     ]
 
 

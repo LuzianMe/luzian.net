@@ -16,6 +16,7 @@ What it checks
   - the stylesheet has no hard-coded theme colours left (they must be CSS variables, so Fire gets them too)
   - no leftover test pages or temporary hooks
 """
+import json
 import re
 import sys
 from html.parser import HTMLParser
@@ -27,7 +28,7 @@ import sync_pages  # noqa: E402  (the list of pages and their shared parts)
 
 ROOT = Path(__file__).resolve().parent.parent
 SITE = 'https://luzian.net'
-SKIP_DIRS = {'water-lab', '.git', '.github', 'scripts', 'node_modules'}   # water-lab: reported on its own below
+SKIP_DIRS = {'water-lab', '.git', '.github', 'scripts', 'node_modules', 'notes-graph'}   # water-lab: reported on its own below; notes-graph: built by Myco Notes, checked on its own below
 # Pages that are only a redirect or have no Spanish twin on purpose
 NO_TWIN = {'404.html', 'home/index.html'}
 NO_THEME = {'home/index.html'}   # only a redirect
@@ -224,6 +225,27 @@ def main():
     # 6d. robots.txt is there
     if not (ROOT / 'robots.txt').exists():
         error('robots.txt', 'is missing')
+
+    # 6e. The public notes graph (built at home by scripts/homelab_graph.py, which checks it against the notes
+    #     themselves): here, without the notes, at least that it is the public kind and names no note
+    graph = ROOT / 'notes-graph' / 'graph.html'
+    if not graph.exists():
+        error('notes-graph/graph.html', 'is missing (scripts/homelab_graph.py builds it)')
+    else:
+        text = graph.read_text(encoding='utf-8')
+        m = re.search(r'<script id="data" type="application/json">(.*?)</script>', text, re.S)
+        data = json.loads(m.group(1)) if m else {}
+        if not data.get('public'):
+            error('notes-graph/graph.html', 'is not a public build (--public)')
+        extra = {k for n in data.get('nodes', []) for k in n} - {'id', 'g', 'hub', 'hist', 'in', 'out', 'b', 'l', 'name'}
+        extra |= {k for c in data.get('commits', []) for k in c} - {'t', 'n', 'a'}
+        if extra:
+            error('notes-graph/graph.html', f'carries more than the public graph should: {sorted(extra)}')
+        for found in sorted(set(re.findall(r'[\w./-]+\.md\b', m.group(1) if m else ''))):
+            error('notes-graph/graph.html', f'names a note file: {found}')
+        for word in ('.lan', '192.168', 'duckdns', 'wireguard', 'tailscale'):
+            if word in text.lower():
+                error('notes-graph/graph.html', f'contains {word!r}')
 
     # 7. Stylesheets and scripts: files they name exist
     for path in sorted((ROOT / 'assets').rglob('*')):
