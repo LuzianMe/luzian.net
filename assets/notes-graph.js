@@ -52,6 +52,17 @@
 
   boxes.forEach((box) => {
     if (box.dataset.notesGraph === 'full') {
+      // the stage runs from the top of the heading (which sits over it) to the bottom of the screen: the
+      // graph keeps a margin of its own for its fading edges, and that margin goes behind the heading
+      const head = box.parentElement.querySelector('header');
+      const fit = () => {
+        const top = (head || box).getBoundingClientRect().top + window.scrollY;
+        box.style.setProperty('--stage-top', `${Math.round(top)}px`);
+        box.style.setProperty('--head-h', `${head ? Math.round(head.offsetHeight) : 0}px`);
+      };
+      fit();
+      window.addEventListener('resize', fit);
+      if (document.fonts && document.fonts.ready) document.fonts.ready.then(fit);
       start(box);
       return;
     }
