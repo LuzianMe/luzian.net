@@ -38,7 +38,7 @@ FORBIDDEN = ['.lan', '192.168', 'duckdns', 'proton', 'vpn', 'nord', 'wireguard',
 IP = re.compile(r'\b\d{1,3}(?:\.\d{1,3}){3}\b')
 NODE_KEYS = {'id', 'g', 'hub', 'hist', 'in', 'out', 'b', 'l', 'name'}
 COMMIT_KEYS = {'t', 'n', 'a'}
-GROUP_ID = re.compile(r'^(start|plans|logs|archive|docs|inbox|sources|verify|g\d+)$')
+GROUP_ID = re.compile(r'^(start|plans|reviews|logs|archive|docs|inbox|sources|verify|g\d+)$')
 
 
 def run(*args, cwd=None):
